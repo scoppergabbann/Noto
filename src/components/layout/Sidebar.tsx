@@ -13,7 +13,10 @@ export function Sidebar() {
         <div className="serif grid h-9 w-9 place-items-center rounded-[10px] bg-gradient-to-br from-amber to-amber-deep text-[19px] font-bold text-white shadow-[0_6px_16px_rgba(240,125,16,.35)]">
           L
         </div>
-        <div className="serif text-xl font-semibold tracking-tight">Lumen</div>
+        <div className="leading-tight">
+          <div className="serif text-xl font-semibold tracking-tight">Noto</div>
+          <div className="text-[10.5px] text-ink-faint">Noto urip, noto finansial.</div>
+        </div>
       </div>
 
       <div className="px-3 pb-1.5 pt-3 text-[11px] font-semibold uppercase tracking-[.10em] text-ink-faint">

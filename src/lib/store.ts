@@ -14,6 +14,6 @@ export const useThemeStore = create<ThemeState>()(
       toggle: () => set((s) => ({ isDark: !s.isDark })),
       setDark: (v) => set({ isDark: v }),
     }),
-    { name: "lumen-theme" }
+    { name: "noto-theme" }
   )
 );

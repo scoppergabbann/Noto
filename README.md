@@ -1,4 +1,4 @@
-# Lumen — Financial Planner & Personal Wealth Tracker
+# Noto — Financial Planner & Personal Wealth Tracker
 
 Personal financial dashboard untuk anak muda: cashflow, aset, utang, dan financial goals dalam satu tempat. Dibangun dengan Next.js (App Router) + TypeScript + TailwindCSS, siap dikembangkan jadi SaaS.
 
