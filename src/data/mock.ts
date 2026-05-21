@@ -1,17 +1,67 @@
 import type {
-  Goal, CreditCard, SpendingCategory, SummaryRow,
-  NetWorthPoint, CashFlowPoint,
+  Goal,
+  CreditCard,
+  SpendingCategory,
+  SummaryRow,
+  NetWorthPoint,
+  CashFlowPoint,
 } from "@/types";
 
 export const goals: Goal[] = [
-  { id: "g1", item: "Dana Darurat", instrument: "Bank Jago", targetAmount: 30_000_000, usedAmount: 18_500_000, deadline: "Des 2026", durationMonths: 10, color: "#1f9e6f", emoji: "🛡️" },
-  { id: "g2", item: "Liburan Jepang", instrument: "Reksadana", targetAmount: 25_000_000, usedAmount: 9_000_000, deadline: "Okt 2026", durationMonths: 8, color: "#6b6ff0", emoji: "🗾" },
-  { id: "g3", item: "DP Motor", instrument: "Deposito", targetAmount: 15_000_000, usedAmount: 13_200_000, deadline: "Jun 2026", durationMonths: 3, color: "#ff9d2e", emoji: "🛵" },
+  {
+    id: "g1",
+    item: "Dana Darurat",
+    instrument: "Bank Jago",
+    targetAmount: 30_000_000,
+    usedAmount: 18_500_000,
+    deadline: "Des 2026",
+    durationMonths: 10,
+    color: "#1f9e6f",
+    emoji: "🛡️",
+  },
+  {
+    id: "g2",
+    item: "Liburan Jepang",
+    instrument: "Reksadana",
+    targetAmount: 25_000_000,
+    usedAmount: 9_000_000,
+    deadline: "Okt 2026",
+    durationMonths: 8,
+    color: "#6b6ff0",
+    emoji: "🗾",
+  },
+  {
+    id: "g3",
+    item: "DP Motor",
+    instrument: "Deposito",
+    targetAmount: 15_000_000,
+    usedAmount: 13_200_000,
+    deadline: "Jun 2026",
+    durationMonths: 3,
+    color: "#ff9d2e",
+    emoji: "🛵",
+  },
 ];
 
 export const creditCards: CreditCard[] = [
-  { id: "c1", name: "BCA Mastercard", limit: 25_000_000, spent: 19_400_000, paid: 6_000_000, gradient: "linear-gradient(135deg,#3a3f8f,#6b6ff0)", last4: "4821" },
-  { id: "c2", name: "Jenius Visa", limit: 15_000_000, spent: 4_200_000, paid: 4_200_000, gradient: "linear-gradient(135deg,#0d6e4f,#1f9e6f)", last4: "9034" },
+  {
+    id: "c1",
+    name: "BCA Mastercard",
+    limit: 25_000_000,
+    spent: 19_400_000,
+    paid: 6_000_000,
+    gradient: "linear-gradient(135deg,#3a3f8f,#6b6ff0)",
+    last4: "4821",
+  },
+  {
+    id: "c2",
+    name: "Jenius Visa",
+    limit: 15_000_000,
+    spent: 4_200_000,
+    paid: 4_200_000,
+    gradient: "linear-gradient(135deg,#0d6e4f,#1f9e6f)",
+    last4: "9034",
+  },
 ];
 
 export const spending: SpendingCategory[] = [
@@ -58,4 +108,73 @@ export const assetComposition = [
   { name: "Emas", value: 24, color: "#1f9e6f" },
   { name: "Investasi", value: 21, color: "#ff9d2e" },
   { name: "Lainnya", value: 14, color: "#9a9ea9" },
+];
+
+// ---- Phase 4 data ----
+import type { Receivable, Debt, GoldAsset, OtherAsset } from "@/types";
+
+export const receivables: Receivable[] = [
+  { id: "r1", item: "Pinjaman ke Andi", total: 5_000_000, paid: 2_000_000 },
+  { id: "r2", item: "Patungan trip Bali", total: 2_400_000, paid: 2_400_000 },
+  { id: "r3", item: "Talangan Rina", total: 1_500_000, paid: 0 },
+];
+
+export const debts: Debt[] = [
+  { id: "d1", item: "KPR Apartemen", total: 320_000_000, paid: 95_000_000, dueDate: "tgl 5" },
+  { id: "d2", item: "Cicilan Laptop", total: 18_000_000, paid: 12_000_000, dueDate: "tgl 20" },
+  { id: "d3", item: "Paylater Tokopedia", total: 3_200_000, paid: 1_100_000, dueDate: "tgl 28" },
+];
+
+export const goldAssets: GoldAsset[] = [
+  {
+    id: "au1",
+    item: "Emas Antam",
+    category: "investment",
+    boughtGrams: 15,
+    soldGrams: 2,
+    buyValue: 16_500_000,
+    usedValue: 2_400_000,
+    currentPricePerGram: 1_350_000,
+    notes: "Beli bertahap 2024–2025",
+  },
+  {
+    id: "au2",
+    item: "Tabungan Emas Pegadaian",
+    category: "savings",
+    boughtGrams: 8.5,
+    soldGrams: 0,
+    buyValue: 9_200_000,
+    usedValue: 0,
+    currentPricePerGram: 1_350_000,
+    notes: "Nabung rutin bulanan",
+  },
+];
+
+export const goldValueSeries = [
+  { month: "Sep", value: 13.1 },
+  { month: "Okt", value: 13.6 },
+  { month: "Nov", value: 14.2 },
+  { month: "Des", value: 14.0 },
+  { month: "Jan", value: 15.1 },
+  { month: "Feb", value: 16.3 },
+];
+
+export const otherAssets: OtherAsset[] = [
+  {
+    id: "o1",
+    item: "Motor Vario",
+    unit: "unit",
+    quantity: 1,
+    currentValue: 18_000_000,
+    emoji: "🛵",
+  },
+  { id: "o2", item: "iPhone 14", unit: "unit", quantity: 1, currentValue: 9_000_000, emoji: "📱" },
+  {
+    id: "o3",
+    item: "Saham (portofolio)",
+    unit: "lot",
+    quantity: 42,
+    currentValue: 21_000_000,
+    emoji: "📈",
+  },
 ];

@@ -12,7 +12,11 @@ export default function SummaryPage() {
     <>
       <PageHeader
         eyebrow="Financial Summary · Februari 2026"
-        title={<>Ke mana <em className="italic text-amber-deep">uangmu</em> pergi bulan ini.</>}
+        title={
+          <>
+            Ke mana <em className="italic text-amber-deep">uangmu</em> pergi bulan ini.
+          </>
+        }
         action={
           <button className="inline-flex items-center gap-2 rounded-xl border border-black/[.08] bg-white px-4 py-2.5 text-sm font-semibold transition hover:shadow-soft dark:border-white/10 dark:bg-white/5">
             Ekspor PDF
@@ -21,10 +25,36 @@ export default function SummaryPage() {
       />
 
       <div className="stagger mb-[18px] grid grid-cols-2 gap-[18px] lg:grid-cols-4">
-        <Card hoverable><div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">Pemasukan</div><div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight text-brand-green sm:text-[30px]">Rp17,2jt</div></Card>
-        <Card hoverable><div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">Pengeluaran</div><div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight text-brand-red sm:text-[30px]">Rp9,8jt</div></Card>
-        <Card hoverable><div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">Ditabung</div><div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">Rp4,2jt</div></Card>
-        <Card hoverable><div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">Sisa Uang</div><div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">Rp3,2jt</div></Card>
+        <Card hoverable>
+          <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
+            Pemasukan
+          </div>
+          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight text-brand-green sm:text-[30px]">
+            Rp17,2jt
+          </div>
+        </Card>
+        <Card hoverable>
+          <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
+            Pengeluaran
+          </div>
+          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight text-brand-red sm:text-[30px]">
+            Rp9,8jt
+          </div>
+        </Card>
+        <Card hoverable>
+          <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">Ditabung</div>
+          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
+            Rp4,2jt
+          </div>
+        </Card>
+        <Card hoverable>
+          <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
+            Sisa Uang
+          </div>
+          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
+            Rp3,2jt
+          </div>
+        </Card>
       </div>
 
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-[1fr_1.5fr]">
@@ -45,7 +75,9 @@ export default function SummaryPage() {
         </Card>
         <Card>
           <div className="serif mb-1 text-[19px] font-semibold">Arus Kas Bulanan</div>
-          <div className="mb-[18px] text-[13.5px] text-ink-dim dark:text-slate-400">Pemasukan vs pengeluaran, 6 bulan</div>
+          <div className="mb-[18px] text-[13.5px] text-ink-dim dark:text-slate-400">
+            Pemasukan vs pengeluaran, 6 bulan
+          </div>
           <CashFlowChart />
         </Card>
       </div>
@@ -53,9 +85,14 @@ export default function SummaryPage() {
       <Card>
         <div className="serif mb-3.5 text-[19px] font-semibold">Rincian Bulan Ini</div>
         {summaryRows.map((r) => (
-          <div key={r.label} className="flex items-center border-b border-black/5 py-3 last:border-0 dark:border-white/5">
+          <div
+            key={r.label}
+            className="flex items-center border-b border-black/5 py-3 last:border-0 dark:border-white/5"
+          >
             <div className="flex-1 text-[14px] text-ink-dim dark:text-slate-400">{r.label}</div>
-            <div className={`text-[14.5px] font-semibold tabular-nums ${r.tone === "green" ? "text-brand-green" : r.tone === "red" ? "text-brand-red" : ""}`}>
+            <div
+              className={`text-[14.5px] font-semibold tabular-nums ${r.tone === "green" ? "text-brand-green" : r.tone === "red" ? "text-brand-red" : ""}`}
+            >
               {r.value}
             </div>
           </div>

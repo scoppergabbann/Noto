@@ -11,7 +11,15 @@ export function HealthGauge({ score }: { score: number }) {
     <div className="relative h-[120px] w-[120px] shrink-0">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Pie data={data} dataKey="value" innerRadius={42} outerRadius={56} startAngle={90} endAngle={-270} stroke="none">
+          <Pie
+            data={data}
+            dataKey="value"
+            innerRadius={42}
+            outerRadius={56}
+            startAngle={90}
+            endAngle={-270}
+            stroke="none"
+          >
             {data.map((d, i) => (
               <Cell key={i} fill={d.color} />
             ))}

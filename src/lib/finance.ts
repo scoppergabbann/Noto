@@ -43,3 +43,51 @@ export function healthScore(assets: number, liabilities: number): number {
   const score = Math.round((1 - Math.min(debtRatio, 1)) * 100);
   return Math.max(0, Math.min(100, score));
 }
+
+// ---- Gold / investment calculations ----
+
+/** Sisa emas tersimpan (gram). */
+export function remainingGrams(bought: number, sold: number): number {
+  return Math.max(0, bought - sold);
+}
+
+/** Estimasi nilai emas tersimpan saat ini (Rp). */
+export function currentGoldValue(bought: number, sold: number, pricePerGram: number): number {
+  return remainingGrams(bought, sold) * pricePerGram;
+}
+
+/** Harga beli rata-rata per gram (Rp/gram). */
+export function avgBuyPricePerGram(buyValue: number, boughtGrams: number): number {
+  if (boughtGrams <= 0) return 0;
+  return buyValue / boughtGrams;
+}
+
+/**
+ * Profit/loss emas (Rp): nilai kini emas tersisa
+ * dibanding modal yang masih "nyangkut" di emas tersisa.
+ */
+export function goldProfitLoss(
+  buyValue: number,
+  usedValue: number,
+  bought: number,
+  sold: number,
+  pricePerGram: number
+): number {
+  const costRemaining = buyValue - usedValue; // modal yang masih menempel di emas tersisa
+  const valueNow = currentGoldValue(bought, sold, pricePerGram);
+  return valueNow - costRemaining;
+}
+
+/** Persentase keuntungan emas (%). */
+export function goldProfitPct(
+  buyValue: number,
+  usedValue: number,
+  bought: number,
+  sold: number,
+  pricePerGram: number
+): number {
+  const costRemaining = buyValue - usedValue;
+  if (costRemaining <= 0) return 0;
+  const pl = goldProfitLoss(buyValue, usedValue, bought, sold, pricePerGram);
+  return Math.round((pl / costRemaining) * 100);
+}

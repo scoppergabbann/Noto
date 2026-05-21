@@ -1,26 +1,25 @@
 "use client";
 
 import {
+  AreaChart,
   Area,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-  ComposedChart,
 } from "recharts";
-import { netWorthSeries } from "@/data/mock";
+import { goldValueSeries } from "@/data/mock";
 
-export function NetWorthChart() {
+export function GoldValueChart() {
   return (
-    <div className="h-[230px] w-full">
+    <div className="h-[200px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={netWorthSeries} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
+        <AreaChart data={goldValueSeries} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
           <defs>
-            <linearGradient id="assetFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1f9e6f" stopOpacity={0.28} />
-              <stop offset="100%" stopColor="#1f9e6f" stopOpacity={0} />
+            <linearGradient id="goldFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff9d2e" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#ff9d2e" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid stroke="rgba(128,128,140,.12)" vertical={false} />
@@ -43,25 +42,17 @@ export function NetWorthChart() {
               boxShadow: "0 8px 24px rgba(0,0,0,.12)",
               fontSize: 13,
             }}
-            formatter={(v: number, n) => [`Rp${v}jt`, n === "asset" ? "Aset" : "Utang"]}
+            formatter={(v: number) => [`Rp${v}jt`, "Nilai"]}
           />
           <Area
             type="monotone"
-            dataKey="asset"
-            stroke="#1f9e6f"
+            dataKey="value"
+            stroke="#f07d10"
             strokeWidth={2.5}
-            fill="url(#assetFill)"
+            fill="url(#goldFill)"
             dot={false}
           />
-          <Line
-            type="monotone"
-            dataKey="liability"
-            stroke="#e0524a"
-            strokeWidth={2}
-            strokeDasharray="5 4"
-            dot={false}
-          />
-        </ComposedChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

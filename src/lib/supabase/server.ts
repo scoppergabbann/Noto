@@ -19,9 +19,7 @@ export async function createClient() {
       },
       setAll(cookiesToSet: CookieToSet[]) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
           // dipanggil dari Server Component — aman diabaikan jika ada middleware refresh.
         }

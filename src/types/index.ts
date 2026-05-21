@@ -61,3 +61,25 @@ export interface CashFlowPoint {
   income: number;
   spend: number;
 }
+
+export interface GoldAsset {
+  id: string;
+  item: string;
+  category: "savings" | "investment";
+  boughtGrams: number;
+  soldGrams: number;
+  buyValue: number; // total nilai saat dibeli (Rp)
+  usedValue: number; // nilai terpakai/terjual (Rp)
+  currentPricePerGram: number; // estimasi harga kini per gram (Rp)
+  notes?: string;
+}
+
+export interface OtherAsset {
+  id: string;
+  item: string;
+  unit: string;
+  quantity: number;
+  currentValue: number;
+  emoji: string;
+  notes?: string;
+}

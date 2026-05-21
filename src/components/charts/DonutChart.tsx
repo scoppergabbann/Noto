@@ -14,13 +14,25 @@ export function DonutChart({
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie data={data} dataKey="value" innerRadius={innerRadius} outerRadius="100%" paddingAngle={2} stroke="none">
+        <Pie
+          data={data}
+          dataKey="value"
+          innerRadius={innerRadius}
+          outerRadius="100%"
+          paddingAngle={2}
+          stroke="none"
+        >
           {data.map((d) => (
             <Cell key={d.name} fill={d.color} />
           ))}
         </Pie>
         <Tooltip
-          contentStyle={{ borderRadius: 10, border: "none", boxShadow: "0 8px 24px rgba(0,0,0,.12)", fontSize: 13 }}
+          contentStyle={{
+            borderRadius: 10,
+            border: "none",
+            boxShadow: "0 8px 24px rgba(0,0,0,.12)",
+            fontSize: 13,
+          }}
           formatter={(v: number, n) => [formatValue ? formatValue(v) : `${v}`, n]}
         />
       </PieChart>

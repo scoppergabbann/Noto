@@ -8,7 +8,7 @@ import { navItems, comingSoon } from "./nav-config";
 export function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-1.5 border-r border-black/5 p-6 lg:flex dark:border-white/5">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-1.5 border-r border-black/5 p-6 dark:border-white/5 lg:flex">
       <div className="flex items-center gap-3 px-2.5 pb-5 pt-1">
         <div className="serif grid h-9 w-9 place-items-center rounded-[10px] bg-gradient-to-br from-amber to-amber-deep text-[19px] font-bold text-white shadow-[0_6px_16px_rgba(240,125,16,.35)]">
           L
@@ -22,7 +22,7 @@ export function Sidebar() {
       <div className="px-3 pb-1.5 pt-3 text-[11px] font-semibold uppercase tracking-[.10em] text-ink-faint">
         Ringkasan
       </div>
-      <nav className="flex flex-col gap-1.5">
+      <nav className="flex flex-col gap-1.5 overflow-y-auto">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
@@ -46,18 +46,22 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-3 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-[.10em] text-ink-faint">
-        Segera Hadir
-      </div>
-      {comingSoon.map(({ label, icon: Icon }) => (
-        <div
-          key={label}
-          className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] font-medium text-ink-dim opacity-50"
-        >
-          <Icon size={19} />
-          {label}
-        </div>
-      ))}
+      {comingSoon.length > 0 && (
+        <>
+          <div className="px-3 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-[.10em] text-ink-faint">
+            Segera Hadir
+          </div>
+          {comingSoon.map(({ label, icon: Icon }) => (
+            <div
+              key={label}
+              className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] font-medium text-ink-dim opacity-50"
+            >
+              <Icon size={19} />
+              {label}
+            </div>
+          ))}
+        </>
+      )}
 
       <div className="mt-auto">
         <div className="flex items-center gap-3 rounded-2xl border border-black/[.08] bg-white p-3 dark:border-white/10 dark:bg-white/5">

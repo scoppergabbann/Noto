@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { navItems } from "./nav-config";
+import { mobileNavItems } from "./nav-config";
 
 export function MobileNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around border-t border-black/[.08] bg-white/90 px-1.5 pb-3 pt-2.5 backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-[#16171c]/90">
-      {navItems.map(({ href, short, icon: Icon }) => {
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around border-t border-black/[.08] bg-white/90 px-1.5 pb-3 pt-2.5 backdrop-blur-xl dark:border-white/10 dark:bg-[#16171c]/90 lg:hidden">
+      {mobileNavItems.map(({ href, short, icon: Icon }) => {
         const active = pathname === href;
         return (
           <Link

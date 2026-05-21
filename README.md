@@ -81,4 +81,4 @@ supabase/schema.sql         # skema DB + RLS, jalankan di Supabase SQL Editor
 
 ## Roadmap (4 layar berikutnya)
 
-Piutang, Utang & Cicilan, Emas/Investasi, Asset Lainnya — ikuti pola halaman yang sudah ada: tambah tipe di `types/`, data di `data/mock.ts`, lalu page baru di `app/(dashboard)/<nama>/`. Tabelnya sudah ada di `schema.sql`.
+Phase 4 (Piutang, Utang & Cicilan, Emas/Investasi, Asset Lainnya) sudah selesai — semua 8 layar aktif. Lanjutan: lihat `noto-roadmap.md`.
