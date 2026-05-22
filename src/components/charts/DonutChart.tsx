@@ -2,6 +2,28 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
+interface TooltipProps {
+  active?: boolean;
+  payload?: { name: string; value: number; payload: { color: string } }[];
+  formatValue?: (v: number) => string;
+}
+
+function DonutTooltip({ active, payload, formatValue }: TooltipProps) {
+  if (!active || !payload?.length) return null;
+  const p = payload[0];
+  return (
+    <div className="rounded-xl border border-black/[.06] bg-white/95 px-3 py-2 shadow-softlg backdrop-blur dark:border-white/10 dark:bg-night-raised2/95">
+      <div className="flex items-center gap-2 text-[12.5px]">
+        <span className="h-2 w-2 rounded-full" style={{ background: p.payload.color }} />
+        <span className="text-muted font-medium">{p.name}</span>
+        <span className="text-heading ml-auto font-semibold tabular-nums">
+          {formatValue ? formatValue(p.value) : p.value}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function DonutChart({
   data,
   formatValue,
@@ -19,22 +41,15 @@ export function DonutChart({
           dataKey="value"
           innerRadius={innerRadius}
           outerRadius="100%"
-          paddingAngle={2}
+          paddingAngle={3}
           stroke="none"
+          cornerRadius={5}
         >
           {data.map((d) => (
             <Cell key={d.name} fill={d.color} />
           ))}
         </Pie>
-        <Tooltip
-          contentStyle={{
-            borderRadius: 10,
-            border: "none",
-            boxShadow: "0 8px 24px rgba(0,0,0,.12)",
-            fontSize: 13,
-          }}
-          formatter={(v: number, n) => [formatValue ? formatValue(v) : `${v}`, n]}
-        />
+        <Tooltip content={<DonutTooltip formatValue={formatValue} />} />
       </PieChart>
     </ResponsiveContainer>
   );

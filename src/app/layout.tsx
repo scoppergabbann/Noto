@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Fraunces, Geist } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-geist",
+  variable: "--font-jakarta",
   display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const fraunces = Fraunces({
@@ -20,13 +21,10 @@ export const metadata: Metadata = {
   description: "Noto urip, noto finansial. Personal wealth tracker & financial planner.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={`${geist.variable} ${fraunces.variable} font-sans`}>
-        {/* Set tema sebelum paint untuk hindari flash */}
+      <body className={`${jakarta.variable} ${fraunces.variable} font-sans`}>
         <script
           dangerouslySetInnerHTML={{
             __html: `try{var s=JSON.parse(localStorage.getItem('noto-theme')||'{}');if(s&&s.state&&s.state.isDark){document.documentElement.classList.add('dark')}}catch(e){}`,

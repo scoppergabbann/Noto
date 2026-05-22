@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Settings } from "lucide-react";
 import { navItems, comingSoon } from "./nav-config";
 
 export function Sidebar() {
@@ -63,14 +64,32 @@ export function Sidebar() {
         </>
       )}
 
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col gap-1.5">
+        <Link
+          href="/settings"
+          className={cn(
+            "flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-[14.5px] font-medium transition",
+            pathname === "/settings"
+              ? "bg-white text-ink shadow-soft dark:bg-white/5 dark:text-slate-100"
+              : "text-ink-dim hover:bg-white dark:text-slate-400 dark:hover:bg-white/5"
+          )}
+        >
+          <Settings
+            size={19}
+            className={cn(
+              "transition",
+              pathname === "/settings" ? "text-amber-deep" : "text-ink-faint"
+            )}
+          />
+          Pengaturan
+        </Link>
         <div className="flex items-center gap-3 rounded-2xl border border-black/[.08] bg-white p-3 dark:border-white/10 dark:bg-white/5">
           <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-semibold text-white">
             RA
           </div>
           <div className="min-w-0">
             <div className="truncate text-[13.5px] font-semibold">Rangga A.</div>
-            <div className="text-[11.5px] text-ink-faint">Free plan</div>
+            <div className="text-[11.5px] text-ink-faint">Penyimpanan lokal</div>
           </div>
         </div>
       </div>

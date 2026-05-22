@@ -29,7 +29,7 @@ export default function SummaryPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Pemasukan
           </div>
-          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight text-brand-green sm:text-[30px]">
+          <div className="serif text-brand-green mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
             Rp17,2jt
           </div>
         </Card>
@@ -37,7 +37,7 @@ export default function SummaryPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Pengeluaran
           </div>
-          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight text-brand-red sm:text-[30px]">
+          <div className="serif text-brand-red mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
             Rp9,8jt
           </div>
         </Card>

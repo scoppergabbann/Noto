@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { Plus, TrendingUp, TrendingDown } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { RowActions } from "@/components/ui/RowActions";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { GoldValueChart } from "@/components/charts/GoldValueChart";
-import { goldAssets } from "@/data/mock";
+import { GoldForm, type GoldDraft } from "./GoldForm";
+import { useGoldStore } from "@/lib/stores";
 import {
   remainingGrams,
   currentGoldValue,
@@ -15,20 +19,38 @@ import {
   avgBuyPricePerGram,
 } from "@/lib/finance";
 import { rpShort, rpFull } from "@/lib/format";
+import type { GoldAsset } from "@/types";
 
 export default function GoldPage() {
-  const totalGrams = goldAssets.reduce((s, g) => s + remainingGrams(g.boughtGrams, g.soldGrams), 0);
-  const totalNow = goldAssets.reduce(
+  const { items, add, update, remove } = useGoldStore();
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<GoldAsset | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const totalGrams = items.reduce((s, g) => s + remainingGrams(g.boughtGrams, g.soldGrams), 0);
+  const totalNow = items.reduce(
     (s, g) => s + currentGoldValue(g.boughtGrams, g.soldGrams, g.currentPricePerGram),
     0
   );
-  const totalPL = goldAssets.reduce(
+  const totalPL = items.reduce(
     (s, g) =>
       s +
       goldProfitLoss(g.buyValue, g.usedValue, g.boughtGrams, g.soldGrams, g.currentPricePerGram),
     0
   );
   const profit = totalPL >= 0;
+
+  function openNew() {
+    setEditing(null);
+    setFormOpen(true);
+  }
+  function openEdit(g: GoldAsset) {
+    setEditing(g);
+    setFormOpen(true);
+  }
+  function handleSubmit(d: GoldDraft) {
+    editing ? update(editing.id, d) : add(d);
+  }
 
   return (
     <>
@@ -40,7 +62,7 @@ export default function GoldPage() {
           </>
         }
         action={
-          <Button>
+          <Button onClick={openNew}>
             <Plus size={17} strokeWidth={2.4} /> Catat emas
           </Button>
         }
@@ -64,7 +86,7 @@ export default function GoldPage() {
             {rpShort(totalNow)}
           </div>
         </Card>
-        <Card hoverable className={profit ? "" : ""}>
+        <Card hoverable>
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Profit / Loss
           </div>
@@ -83,68 +105,98 @@ export default function GoldPage() {
         </Card>
       </div>
 
-      <Card className="mb-[18px]">
-        <div className="serif mb-1 text-[19px] font-semibold">Pertumbuhan Nilai Emas</div>
-        <div className="mb-2 text-[13.5px] text-ink-dim dark:text-slate-400">
-          Estimasi nilai total, 6 bulan terakhir
-        </div>
-        <GoldValueChart />
-      </Card>
+      {items.length === 0 ? (
+        <Card className="py-16 text-center">
+          <div className="mb-3 text-[40px]">🪙</div>
+          <div className="serif mb-1 text-[19px] font-semibold">Belum ada catatan emas</div>
+          <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
+            Catat pembelian emasmu untuk memantau profit/loss otomatis.
+          </div>
+          <Button onClick={openNew} className="mx-auto">
+            <Plus size={17} strokeWidth={2.4} /> Catat emas
+          </Button>
+        </Card>
+      ) : (
+        <>
+          <Card className="mb-[18px]">
+            <div className="serif mb-1 text-[19px] font-semibold">Pertumbuhan Nilai Emas</div>
+            <div className="mb-2 text-[13.5px] text-ink-dim dark:text-slate-400">
+              Estimasi nilai total, 6 bulan terakhir
+            </div>
+            <GoldValueChart />
+          </Card>
 
-      <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-2">
-        {goldAssets.map((g) => {
-          const grams = remainingGrams(g.boughtGrams, g.soldGrams);
-          const now = currentGoldValue(g.boughtGrams, g.soldGrams, g.currentPricePerGram);
-          const pl = goldProfitLoss(
-            g.buyValue,
-            g.usedValue,
-            g.boughtGrams,
-            g.soldGrams,
-            g.currentPricePerGram
-          );
-          const plPct = goldProfitPct(
-            g.buyValue,
-            g.usedValue,
-            g.boughtGrams,
-            g.soldGrams,
-            g.currentPricePerGram
-          );
-          const avg = avgBuyPricePerGram(g.buyValue, g.boughtGrams);
-          const up = pl >= 0;
-          return (
-            <Card key={g.id} hoverable>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-xl bg-amber/15 text-[22px]">
-                  🪙
-                </div>
-                <div className="flex-1">
-                  <div className="text-base font-semibold">{g.item}</div>
-                  <Badge tone={g.category === "investment" ? "indigo" : "green"}>
-                    {g.category === "investment" ? "Investment" : "Savings"}
-                  </Badge>
-                </div>
-                <div className={`text-right ${up ? "text-brand-green" : "text-brand-red"}`}>
-                  <div className="serif text-[20px] font-semibold">
-                    {up ? "+" : ""}
-                    {plPct}%
+          <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-2">
+            {items.map((g) => {
+              const grams = remainingGrams(g.boughtGrams, g.soldGrams);
+              const now = currentGoldValue(g.boughtGrams, g.soldGrams, g.currentPricePerGram);
+              const pl = goldProfitLoss(
+                g.buyValue,
+                g.usedValue,
+                g.boughtGrams,
+                g.soldGrams,
+                g.currentPricePerGram
+              );
+              const plPct = goldProfitPct(
+                g.buyValue,
+                g.usedValue,
+                g.boughtGrams,
+                g.soldGrams,
+                g.currentPricePerGram
+              );
+              const avg = avgBuyPricePerGram(g.buyValue, g.boughtGrams);
+              const up = pl >= 0;
+              return (
+                <Card key={g.id} hoverable>
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-xl bg-amber/15 text-[22px]">
+                      🪙
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-base font-semibold">{g.item}</div>
+                      <Badge tone={g.category === "investment" ? "indigo" : "green"}>
+                        {g.category === "investment" ? "Investment" : "Savings"}
+                      </Badge>
+                    </div>
+                    <div className={`text-right ${up ? "text-brand-green" : "text-brand-red"}`}>
+                      <div className="serif text-[20px] font-semibold">
+                        {up ? "+" : ""}
+                        {plPct}%
+                      </div>
+                      <div className="text-[12px]">
+                        {up ? "+" : ""}
+                        {rpShort(pl)}
+                      </div>
+                    </div>
+                    <RowActions onEdit={() => openEdit(g)} onDelete={() => setDeleteId(g.id)} />
                   </div>
-                  <div className="text-[12px]">
-                    {up ? "+" : ""}
-                    {rpShort(pl)}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/5 pt-4 text-[13px] dark:border-white/5">
+                    <Row label="Tersimpan" value={`${grams.toFixed(2)} gr`} />
+                    <Row label="Estimasi kini" value={rpShort(now)} />
+                    <Row label="Harga beli rata2" value={`${rpFull(avg)}/gr`} />
+                    <Row label="Harga kini" value={`${rpFull(g.currentPricePerGram)}/gr`} />
                   </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/5 pt-4 text-[13px] dark:border-white/5">
-                <Row label="Tersimpan" value={`${grams.toFixed(2)} gr`} />
-                <Row label="Estimasi kini" value={rpShort(now)} />
-                <Row label="Harga beli rata2" value={`${rpFull(avg)}/gr`} />
-                <Row label="Harga kini" value={`${rpFull(g.currentPricePerGram)}/gr`} />
-              </div>
-              {g.notes && <div className="mt-3 text-[12.5px] text-ink-faint">📝 {g.notes}</div>}
-            </Card>
-          );
-        })}
-      </div>
+                  {g.notes && <div className="mt-3 text-[12.5px] text-ink-faint">📝 {g.notes}</div>}
+                </Card>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      <GoldForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSubmit={handleSubmit}
+        initial={editing}
+      />
+      <ConfirmDialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => deleteId && remove(deleteId)}
+        title="Hapus catatan emas?"
+        message="Catatan emas ini akan dihapus permanen."
+      />
     </>
   );
 }
