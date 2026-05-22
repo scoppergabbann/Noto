@@ -22,6 +22,21 @@ npm run dev
 
 Buka http://localhost:3000 — otomatis redirect ke `/dashboard`.
 
+
+## Testing
+
+Engine finansial & analytics ditutup unit test (Vitest) dengan **coverage 100%**.
+
+```bash
+npm test          # jalankan semua test sekali
+npm run test:watch  # mode watch saat development
+npm run test:cov    # dengan laporan coverage
+```
+
+Test ada di `src/lib/*.test.ts` — mencakup perhitungan net worth, progress goal,
+utilisasi kartu, profit/loss emas, savings rate, komparasi bulanan, dan format Rupiah,
+termasuk edge case (bagi nol, over-target, nilai negatif).
+
 ## Struktur folder
 
 ```

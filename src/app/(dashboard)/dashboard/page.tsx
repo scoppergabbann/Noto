@@ -10,7 +10,15 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { HealthGauge } from "@/components/charts/HealthGauge";
-import { useGoalsStore, useDebtsStore, useGoldStore, useAssetsStore } from "@/lib/stores";
+import { useState } from "react";
+import {
+  useGoalsStore,
+  useDebtsStore,
+  useGoldStore,
+  useAssetsStore,
+  useTransactionsStore,
+} from "@/lib/stores";
+import { TransactionForm, type TxDraft } from "@/components/forms/TransactionForm";
 import { progressPct, healthScore, remainingGrams, currentGoldValue } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 
@@ -19,6 +27,9 @@ export default function DashboardPage() {
   const debts = useDebtsStore((s) => s.items);
   const gold = useGoldStore((s) => s.items);
   const assets = useAssetsStore((s) => s.items);
+  const txs = useTransactionsStore((s) => s.items);
+  const addTx = useTransactionsStore((s) => s.add);
+  const [txOpen, setTxOpen] = useState(false);
 
   // ---- Aggregations from real store data ----
   const cashTotal = goals.reduce((s, g) => s + g.usedAmount, 0);
@@ -63,7 +74,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-2.5">
           <ThemeToggle />
-          <Button className="shadow-glow">
+          <Button className="shadow-glow" onClick={() => setTxOpen(true)}>
             <Plus size={17} strokeWidth={2.5} />
             <span className="hidden sm:inline">Catat transaksi</span>
             <span className="sm:hidden">Catat</span>
@@ -237,6 +248,12 @@ export default function DashboardPage() {
           </ul>
         </Card>
       </section>
+
+      <TransactionForm
+        open={txOpen}
+        onClose={() => setTxOpen(false)}
+        onSubmit={(d: TxDraft) => addTx(d)}
+      />
     </>
   );
 }

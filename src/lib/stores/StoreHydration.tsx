@@ -8,6 +8,7 @@ import {
   useCardsStore,
   useGoldStore,
   useAssetsStore,
+  useTransactionsStore,
 } from "./index";
 
 /**
@@ -23,6 +24,7 @@ export function StoreHydration() {
     useCardsStore.persist.rehydrate();
     useGoldStore.persist.rehydrate();
     useAssetsStore.persist.rehydrate();
+    useTransactionsStore.persist.rehydrate();
   }, []);
   return null;
 }

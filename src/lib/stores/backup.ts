@@ -5,6 +5,7 @@ import {
   useCardsStore,
   useGoldStore,
   useAssetsStore,
+  useTransactionsStore,
 } from "./index";
 
 const STORES = {
@@ -14,6 +15,7 @@ const STORES = {
   cards: useCardsStore,
   gold: useGoldStore,
   assets: useAssetsStore,
+  transactions: useTransactionsStore,
 } as const;
 
 /** Kumpulkan semua data jadi satu objek JSON. */

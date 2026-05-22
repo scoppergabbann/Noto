@@ -83,3 +83,12 @@ export interface OtherAsset {
   emoji: string;
   notes?: string;
 }
+
+export interface Transaction {
+  id: string;
+  type: "income" | "expense";
+  category: string;
+  amount: number;
+  date: string; // ISO "YYYY-MM-DD"
+  note?: string;
+}

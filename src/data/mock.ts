@@ -178,3 +178,84 @@ export const otherAssets: OtherAsset[] = [
     emoji: "📈",
   },
 ];
+
+// ---- Phase 9: transactions ----
+import type { Transaction } from "@/types";
+
+export const expenseCategories = [
+  { name: "Makan & Minum", color: "#6366f1", emoji: "🍜" },
+  { name: "Transport", color: "#0ea5e9", emoji: "🚌" },
+  { name: "Tagihan", color: "#f59425", emoji: "🧾" },
+  { name: "Hiburan", color: "#0f9d6b", emoji: "🎬" },
+  { name: "Belanja", color: "#d83a3a", emoji: "🛍️" },
+  { name: "Kesehatan", color: "#a855f7", emoji: "💊" },
+  { name: "Lainnya", color: "#64748b", emoji: "📦" },
+];
+
+export const incomeCategories = [
+  { name: "Gaji", color: "#0f9d6b", emoji: "💼" },
+  { name: "Bonus", color: "#f59425", emoji: "🎁" },
+  { name: "Freelance", color: "#6366f1", emoji: "💻" },
+  { name: "Investasi", color: "#0ea5e9", emoji: "📈" },
+  { name: "Lainnya", color: "#64748b", emoji: "💰" },
+];
+
+// Seed: beberapa bulan transaksi agar analytics terasa hidup
+export const transactions: Transaction[] = [
+  // Februari 2026
+  {
+    id: "t1",
+    type: "income",
+    category: "Gaji",
+    amount: 15_000_000,
+    date: "2026-02-01",
+    note: "Gaji bulanan",
+  },
+  {
+    id: "t2",
+    type: "income",
+    category: "Freelance",
+    amount: 2_200_000,
+    date: "2026-02-14",
+    note: "Proyek desain",
+  },
+  { id: "t3", type: "expense", category: "Makan & Minum", amount: 3_200_000, date: "2026-02-05" },
+  {
+    id: "t4",
+    type: "expense",
+    category: "Tagihan",
+    amount: 2_400_000,
+    date: "2026-02-05",
+    note: "Listrik, internet, air",
+  },
+  { id: "t5", type: "expense", category: "Belanja", amount: 1_800_000, date: "2026-02-12" },
+  { id: "t6", type: "expense", category: "Hiburan", amount: 1_300_000, date: "2026-02-18" },
+  { id: "t7", type: "expense", category: "Transport", amount: 1_100_000, date: "2026-02-20" },
+  // Januari 2026
+  { id: "t8", type: "income", category: "Gaji", amount: 15_000_000, date: "2026-01-01" },
+  { id: "t9", type: "expense", category: "Makan & Minum", amount: 2_900_000, date: "2026-01-06" },
+  { id: "t10", type: "expense", category: "Tagihan", amount: 2_300_000, date: "2026-01-05" },
+  { id: "t11", type: "expense", category: "Belanja", amount: 2_400_000, date: "2026-01-15" },
+  { id: "t12", type: "expense", category: "Transport", amount: 1_300_000, date: "2026-01-22" },
+  // Desember 2025
+  { id: "t13", type: "income", category: "Gaji", amount: 15_000_000, date: "2025-12-01" },
+  {
+    id: "t14",
+    type: "income",
+    category: "Bonus",
+    amount: 3_000_000,
+    date: "2025-12-20",
+    note: "THR akhir tahun",
+  },
+  {
+    id: "t15",
+    type: "expense",
+    category: "Belanja",
+    amount: 4_200_000,
+    date: "2025-12-24",
+    note: "Liburan & hadiah",
+  },
+  { id: "t16", type: "expense", category: "Makan & Minum", amount: 3_600_000, date: "2025-12-15" },
+  { id: "t17", type: "expense", category: "Tagihan", amount: 2_400_000, date: "2025-12-05" },
+  { id: "t18", type: "expense", category: "Hiburan", amount: 2_400_000, date: "2025-12-28" },
+];
