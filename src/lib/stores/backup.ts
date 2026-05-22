@@ -18,11 +18,10 @@ const STORES = {
   transactions: useTransactionsStore,
 } as const;
 
-/** Kumpulkan semua data jadi satu objek JSON. */
 export function exportData(): string {
   const data: Record<string, unknown> = {
     _app: "noto",
-    _version: 1,
+    _version: 2,
     exportedAt: new Date().toISOString(),
   };
   (Object.keys(STORES) as (keyof typeof STORES)[]).forEach((k) => {
@@ -31,7 +30,6 @@ export function exportData(): string {
   return JSON.stringify(data, null, 2);
 }
 
-/** Picu download file backup .json. */
 export function downloadBackup() {
   const blob = new Blob([exportData()], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -42,23 +40,23 @@ export function downloadBackup() {
   URL.revokeObjectURL(url);
 }
 
-/** Impor dari teks JSON. Mengembalikan {ok, message}. */
 export function importData(json: string): { ok: boolean; message: string } {
   try {
     const data = JSON.parse(json);
     if (data._app !== "noto") return { ok: false, message: "File ini bukan backup Noto." };
     (Object.keys(STORES) as (keyof typeof STORES)[]).forEach((k) => {
-      if (Array.isArray(data[k])) {
-        STORES[k].getState().replaceAll(data[k]);
-      }
+      if (Array.isArray(data[k])) STORES[k].getState().replaceAll(data[k]);
     });
-    return { ok: true, message: "Data berhasil dipulihkan." };
+    return {
+      ok: true,
+      message:
+        "Data dipulihkan ke tampilan. Simpan ulang dari halaman masing-masing untuk sync ke Supabase.",
+    };
   } catch {
     return { ok: false, message: "File tidak valid atau rusak." };
   }
 }
 
-/** Kembalikan semua data ke contoh awal (seed). */
 export function resetAll() {
   (Object.keys(STORES) as (keyof typeof STORES)[]).forEach((k) => STORES[k].getState().reset());
 }

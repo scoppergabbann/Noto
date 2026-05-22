@@ -14,9 +14,10 @@ import { useDebtsStore } from "@/lib/stores";
 import { progressPct, healthScore } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 import type { Debt } from "@/types";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 
 export default function DebtsPage() {
-  const { items, add, update, remove } = useDebtsStore();
+  const { items, loading, error, fetch, add, update, remove } = useDebtsStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Debt | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -37,6 +38,9 @@ export default function DebtsPage() {
   function handleSubmit(d: DebtDraft) {
     editing ? update(editing.id, d) : add(d);
   }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
     <>

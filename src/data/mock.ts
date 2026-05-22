@@ -47,7 +47,7 @@ export const creditCards: CreditCard[] = [
   {
     id: "c1",
     name: "BCA Mastercard",
-    limit: 25_000_000,
+    creditLimit: 25_000_000,
     spent: 19_400_000,
     paid: 6_000_000,
     gradient: "linear-gradient(135deg,#3a3f8f,#6b6ff0)",
@@ -56,7 +56,7 @@ export const creditCards: CreditCard[] = [
   {
     id: "c2",
     name: "Jenius Visa",
-    limit: 15_000_000,
+    creditLimit: 15_000_000,
     spent: 4_200_000,
     paid: 4_200_000,
     gradient: "linear-gradient(135deg,#0d6e4f,#1f9e6f)",
@@ -114,15 +114,63 @@ export const assetComposition = [
 import type { Receivable, Debt, GoldAsset, OtherAsset } from "@/types";
 
 export const receivables: Receivable[] = [
-  { id: "r1", item: "Pinjaman ke Andi", total: 5_000_000, paid: 2_000_000 },
-  { id: "r2", item: "Patungan trip Bali", total: 2_400_000, paid: 2_400_000 },
-  { id: "r3", item: "Talangan Rina", total: 1_500_000, paid: 0 },
+  {
+    id: "r1",
+    item: "Pinjaman ke Andi",
+    debtor: "Andi",
+    total: 5_000_000,
+    paid: 2_000_000,
+    dueDate: "",
+    notes: "",
+  },
+  {
+    id: "r2",
+    item: "Patungan trip Bali",
+    debtor: "Tim",
+    total: 2_400_000,
+    paid: 2_400_000,
+    dueDate: "",
+    notes: "",
+  },
+  {
+    id: "r3",
+    item: "Talangan Rina",
+    debtor: "Rina",
+    total: 1_500_000,
+    paid: 0,
+    dueDate: "",
+    notes: "",
+  },
 ];
 
 export const debts: Debt[] = [
-  { id: "d1", item: "KPR Apartemen", total: 320_000_000, paid: 95_000_000, dueDate: "tgl 5" },
-  { id: "d2", item: "Cicilan Laptop", total: 18_000_000, paid: 12_000_000, dueDate: "tgl 20" },
-  { id: "d3", item: "Paylater Tokopedia", total: 3_200_000, paid: 1_100_000, dueDate: "tgl 28" },
+  {
+    id: "d1",
+    item: "KPR Apartemen",
+    creditor: "Bank BCA",
+    total: 320_000_000,
+    paid: 95_000_000,
+    dueDate: "tgl 5",
+    notes: "",
+  },
+  {
+    id: "d2",
+    item: "Cicilan Laptop",
+    creditor: "Akulaku",
+    total: 18_000_000,
+    paid: 12_000_000,
+    dueDate: "tgl 20",
+    notes: "",
+  },
+  {
+    id: "d3",
+    item: "Paylater Tokopedia",
+    creditor: "Tokopedia",
+    total: 3_200_000,
+    paid: 1_100_000,
+    dueDate: "tgl 28",
+    notes: "",
+  },
 ];
 
 export const goldAssets: GoldAsset[] = [

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import type { Receivable } from "@/types";
 
 export type ReceivableDraft = Omit<Receivable, "id">;
-const empty: ReceivableDraft = { item: "", total: 0, paid: 0 };
+const empty: ReceivableDraft = { item: "", debtor: "", total: 0, paid: 0, dueDate: "", notes: "" };
 
 export function ReceivableForm({
   open,
@@ -56,12 +56,18 @@ export function ReceivableForm({
     >
       <div className="flex flex-col gap-3.5">
         <Input
-          label="Siapa & untuk apa"
+          label="Nama piutang / keperluan"
           placeholder="mis. Pinjaman ke Andi"
           value={d.item}
           onChange={(e) => setD({ ...d, item: e.target.value })}
         />
         <div className="grid grid-cols-2 gap-3">
+          <Input
+            label="Nama orang/pihak yang berhutang (opsional)"
+            placeholder="Nama peminjam"
+            value={d.debtor}
+            onChange={(e) => setD({ ...d, debtor: e.target.value })}
+          />
           <Input
             label="Total (Rp)"
             type="number"
@@ -77,6 +83,17 @@ export function ReceivableForm({
             onChange={(e) => setD({ ...d, paid: Number(e.target.value) })}
           />
         </div>
+        <Input
+          label="Jatuh tempo (opsional)"
+          type="date"
+          value={d.dueDate}
+          onChange={(e) => setD({ ...d, dueDate: e.target.value })}
+        />
+        <Input
+          label="Catatan (opsional)"
+          value={d.notes ?? ""}
+          onChange={(e) => setD({ ...d, notes: e.target.value })}
+        />
         {err && (
           <div className="rounded-lg bg-brand-red/10 px-3 py-2 text-[13px] font-medium text-brand-red">
             {err}

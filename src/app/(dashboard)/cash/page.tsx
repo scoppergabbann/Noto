@@ -13,9 +13,10 @@ import { useGoalsStore } from "@/lib/stores";
 import { progressPct, remaining, monthlyTarget } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 import type { Goal } from "@/types";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 
 export default function CashPage() {
-  const { items, add, update, remove } = useGoalsStore();
+  const { items, loading, error, fetch, add, update, remove } = useGoalsStore();
   const goals = items;
 
   const [formOpen, setFormOpen] = useState(false);
@@ -42,6 +43,9 @@ export default function CashPage() {
     if (editing) update(editing.id, draft);
     else add(draft);
   }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
     <>

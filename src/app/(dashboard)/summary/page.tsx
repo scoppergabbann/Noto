@@ -12,6 +12,7 @@ import { DonutChart } from "@/components/charts/DonutChart";
 import { CashFlowChart } from "@/components/charts/CashFlowChart";
 import { TransactionForm, type TxDraft } from "@/components/forms/TransactionForm";
 import { useTransactionsStore } from "@/lib/stores";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 import { expenseCategories } from "@/data/mock";
 import {
   availableMonths,
@@ -30,7 +31,7 @@ const catColor = (name: string) =>
 const catEmoji = (name: string) => expenseCategories.find((c) => c.name === name)?.emoji ?? "📦";
 
 export default function SummaryPage() {
-  const { items, add, update, remove } = useTransactionsStore();
+  const { items, loading, error, fetch, add, update, remove } = useTransactionsStore();
 
   const months = useMemo(() => availableMonths(items), [items]);
   const [month, setMonth] = useState<string>("");
@@ -63,6 +64,9 @@ export default function SummaryPage() {
   function handleSubmit(d: TxDraft) {
     editing ? update(editing.id, d) : add(d);
   }
+
+  if (loading) return <LoadingState label="Memuat transaksi…" />;
+  if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
     <>

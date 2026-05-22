@@ -11,9 +11,10 @@ import { AssetForm, type AssetDraft } from "./AssetForm";
 import { useAssetsStore } from "@/lib/stores";
 import { rpShort } from "@/lib/format";
 import type { OtherAsset } from "@/types";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 
 export default function AssetsPage() {
-  const { items, add, update, remove } = useAssetsStore();
+  const { items, loading, error, fetch, add, update, remove } = useAssetsStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<OtherAsset | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -31,6 +32,9 @@ export default function AssetsPage() {
   function handleSubmit(d: AssetDraft) {
     editing ? update(editing.id, d) : add(d);
   }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
     <>

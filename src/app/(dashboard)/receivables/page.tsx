@@ -14,9 +14,10 @@ import { useReceivablesStore } from "@/lib/stores";
 import { progressPct } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 import type { Receivable } from "@/types";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 
 export default function ReceivablesPage() {
-  const { items, add, update, remove } = useReceivablesStore();
+  const { items, loading, error, fetch, add, update, remove } = useReceivablesStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Receivable | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -36,6 +37,9 @@ export default function ReceivablesPage() {
   function handleSubmit(d: ReceivableDraft) {
     editing ? update(editing.id, d) : add(d);
   }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
     <>

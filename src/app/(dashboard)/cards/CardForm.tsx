@@ -15,7 +15,7 @@ const GRADIENTS = [
 ];
 const empty: CardDraft = {
   name: "",
-  limit: 0,
+  creditLimit: 0,
   spent: 0,
   paid: 0,
   gradient: GRADIENTS[0],
@@ -47,8 +47,8 @@ export function CardForm({
 
   function submit() {
     if (!d.name.trim()) return setErr("Nama kartu wajib diisi.");
-    if (d.limit <= 0) return setErr("Limit harus lebih dari 0.");
-    if (d.spent > d.limit) return setErr("Pemakaian tidak boleh melebihi limit.");
+    if (d.creditLimit <= 0) return setErr("Limit harus lebih dari 0.");
+    if (d.spent > d.creditLimit) return setErr("Pemakaian tidak boleh melebihi creditLimit.");
     onSubmit(d);
     onClose();
   }
@@ -86,8 +86,8 @@ export function CardForm({
             label="Limit (Rp)"
             type="number"
             inputMode="numeric"
-            value={d.limit || ""}
-            onChange={(e) => setD({ ...d, limit: Number(e.target.value) })}
+            value={d.creditLimit || ""}
+            onChange={(e) => setD({ ...d, creditLimit: Number(e.target.value) })}
           />
           <Input
             label="Pemakaian"

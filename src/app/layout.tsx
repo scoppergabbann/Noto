@@ -18,7 +18,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: "Noto · Financial Planner",
-  description: "Noto urip, noto finansial. Personal wealth tracker & financial planner.",
+  description: "Noto urip, noto finansial.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

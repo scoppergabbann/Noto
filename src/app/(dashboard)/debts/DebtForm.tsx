@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import type { Debt } from "@/types";
 
 export type DebtDraft = Omit<Debt, "id">;
-const empty: DebtDraft = { item: "", total: 0, paid: 0, dueDate: "" };
+const empty: DebtDraft = { item: "", creditor: "", total: 0, paid: 0, dueDate: "", notes: "" };
 
 export function DebtForm({
   open,
@@ -61,6 +61,12 @@ export function DebtForm({
           value={d.item}
           onChange={(e) => setD({ ...d, item: e.target.value })}
         />
+        <Input
+          label="Kepada siapa (opsional)"
+          placeholder="Bank, teman, dll."
+          value={d.creditor}
+          onChange={(e) => setD({ ...d, creditor: e.target.value })}
+        />
         <div className="grid grid-cols-2 gap-3">
           <Input
             label="Total (Rp)"
@@ -82,6 +88,11 @@ export function DebtForm({
           placeholder="mis. tgl 20"
           value={d.dueDate}
           onChange={(e) => setD({ ...d, dueDate: e.target.value })}
+        />
+        <Input
+          label="Catatan (opsional)"
+          value={d.notes ?? ""}
+          onChange={(e) => setD({ ...d, notes: e.target.value })}
         />
         {err && (
           <div className="rounded-lg bg-brand-red/10 px-3 py-2 text-[13px] font-medium text-brand-red">

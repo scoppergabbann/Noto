@@ -13,9 +13,10 @@ import { useCardsStore } from "@/lib/stores";
 import { utilization, isHighUtilization } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 import type { CreditCard } from "@/types";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 
 export default function CardsPage() {
-  const { items, add, update, remove } = useCardsStore();
+  const { items, loading, error, fetch, add, update, remove } = useCardsStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CreditCard | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -31,6 +32,9 @@ export default function CardsPage() {
   function handleSubmit(d: CardDraft) {
     editing ? update(editing.id, d) : add(d);
   }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
     <>
@@ -62,10 +66,10 @@ export default function CardsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {items.map((c) => {
-            const util = utilization(c.spent, c.limit);
+            const util = utilization(c.spent, c.creditLimit);
             const bill = c.spent - c.paid;
-            const warn = isHighUtilization(c.spent, c.limit);
-            const suggested = (c.spent - c.limit * 0.3) / 1e6;
+            const warn = isHighUtilization(c.spent, c.creditLimit);
+            const suggested = (c.spent - c.creditLimit * 0.3) / 1e6;
             return (
               <div key={c.id}>
                 <div
@@ -92,7 +96,7 @@ export default function CardsPage() {
                       <div className="text-[10.5px] uppercase tracking-[.1em] opacity-65">
                         Limit
                       </div>
-                      <div className="text-[15px] font-semibold">{rpShort(c.limit)}</div>
+                      <div className="text-[15px] font-semibold">{rpShort(c.creditLimit)}</div>
                     </div>
                   </div>
                 </div>
@@ -124,7 +128,9 @@ export default function CardsPage() {
                     </div>
                     <div>
                       <div className="text-[11.5px] text-ink-dim dark:text-slate-400">Tersedia</div>
-                      <div className="text-[14px] font-semibold">{rpShort(c.limit - c.spent)}</div>
+                      <div className="text-[14px] font-semibold">
+                        {rpShort(c.creditLimit - c.spent)}
+                      </div>
                     </div>
                   </div>
                   {warn && (

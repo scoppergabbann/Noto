@@ -20,9 +20,10 @@ import {
 } from "@/lib/finance";
 import { rpShort, rpFull } from "@/lib/format";
 import type { GoldAsset } from "@/types";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 
 export default function GoldPage() {
-  const { items, add, update, remove } = useGoldStore();
+  const { items, loading, error, fetch, add, update, remove } = useGoldStore();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<GoldAsset | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -51,6 +52,9 @@ export default function GoldPage() {
   function handleSubmit(d: GoldDraft) {
     editing ? update(editing.id, d) : add(d);
   }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
     <>
