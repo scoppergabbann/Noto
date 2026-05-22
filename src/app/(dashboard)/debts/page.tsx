@@ -16,6 +16,36 @@ import { rpShort } from "@/lib/format";
 import type { Debt } from "@/types";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 
+function daysUntil(dateStr: string): number | null {
+  if (!dateStr) return null;
+  const diff = new Date(dateStr).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0);
+  return Math.ceil(diff / 86_400_000);
+}
+
+function DueBadge({ dueDate }: { dueDate: string }) {
+  const days = daysUntil(dueDate);
+  if (days === null) return null;
+  const overdue = days < 0;
+  const urgent = days >= 0 && days <= 7;
+  const tone = overdue
+    ? "bg-neg-soft text-neg-strong dark:bg-neg/15 dark:text-neg-dark"
+    : urgent
+      ? "bg-amber-soft text-amber-text dark:bg-amber/15 dark:text-amber"
+      : "bg-surface-sunken text-subtle dark:bg-white/5";
+  const label = overdue
+    ? `Lewat ${Math.abs(days)} hari`
+    : days === 0
+      ? "Jatuh tempo hari ini!"
+      : `${days} hari lagi`;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[12px] font-bold ${tone}`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function DebtsPage() {
   const { items, loading, error, fetch, add, update, remove } = useDebtsStore();
   const [formOpen, setFormOpen] = useState(false);
@@ -121,11 +151,7 @@ export default function DebtsPage() {
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="min-w-0 truncate text-base font-semibold">{d.item}</div>
                   <div className="flex shrink-0 items-center gap-1">
-                    {d.dueDate && (
-                      <Badge tone="neutral">
-                        <Clock size={12} /> {d.dueDate}
-                      </Badge>
-                    )}
+                    {d.dueDate && <DueBadge dueDate={d.dueDate} />}
                     <RowActions onEdit={() => openEdit(d)} onDelete={() => setDeleteId(d.id)} />
                   </div>
                 </div>
@@ -152,7 +178,13 @@ export default function DebtsPage() {
                     <div className="text-[11.5px] text-ink-dim dark:text-slate-400">
                       Jatuh tempo
                     </div>
-                    <div className="text-[14px] font-semibold">{d.dueDate || "—"}</div>
+                    <div className="text-[14px] font-semibold">
+                      {d.dueDate ? (
+                        <DueBadge dueDate={d.dueDate} />
+                      ) : (
+                        <span className="text-subtle">—</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>

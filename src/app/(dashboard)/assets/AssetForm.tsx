@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import type { OtherAsset } from "@/types";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 export type AssetDraft = Omit<OtherAsset, "id">;
 const EMOJIS = ["🛵", "🚗", "📱", "💻", "📈", "🏠", "⌚", "🎸", "📦"];
@@ -83,12 +84,10 @@ export function AssetForm({
             onChange={(e) => setD({ ...d, unit: e.target.value })}
           />
         </div>
-        <Input
+        <CurrencyInput
           label="Nilai saat ini (Rp)"
-          type="number"
-          inputMode="numeric"
-          value={d.currentValue || ""}
-          onChange={(e) => setD({ ...d, currentValue: Number(e.target.value) })}
+          value={d.currentValue}
+          onChange={(val) => setD({ ...d, currentValue: val })}
         />
         <Input
           label="Catatan (opsional)"

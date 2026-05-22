@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import type { Debt } from "@/types";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 export type DebtDraft = Omit<Debt, "id">;
 const empty: DebtDraft = { item: "", creditor: "", total: 0, paid: 0, dueDate: "", notes: "" };
@@ -68,24 +69,20 @@ export function DebtForm({
           onChange={(e) => setD({ ...d, creditor: e.target.value })}
         />
         <div className="grid grid-cols-2 gap-3">
-          <Input
-            label="Total (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.total || ""}
-            onChange={(e) => setD({ ...d, total: Number(e.target.value) })}
+          <CurrencyInput
+            label="Total utang (Rp)"
+            value={d.total}
+            onChange={(val) => setD({ ...d, total: val })}
           />
-          <Input
+          <CurrencyInput
             label="Sudah dibayar (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.paid || ""}
-            onChange={(e) => setD({ ...d, paid: Number(e.target.value) })}
+            value={d.paid}
+            onChange={(val) => setD({ ...d, paid: val })}
           />
         </div>
         <Input
           label="Jatuh tempo"
-          placeholder="mis. tgl 20"
+          type="date"
           value={d.dueDate}
           onChange={(e) => setD({ ...d, dueDate: e.target.value })}
         />

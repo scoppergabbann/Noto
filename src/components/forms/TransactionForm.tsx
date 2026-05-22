@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { expenseCategories, incomeCategories } from "@/data/mock";
 import type { Transaction } from "@/types";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 export type TxDraft = Omit<Transaction, "id">;
 
@@ -93,12 +94,10 @@ export function TransactionForm({
             </button>
           ))}
         </div>
-        <Input
+        <CurrencyInput
           label="Nominal (Rp)"
-          type="number"
-          inputMode="numeric"
-          value={d.amount || ""}
-          onChange={(e) => setD({ ...d, amount: Number(e.target.value) })}
+          value={d.amount}
+          onChange={(val) => setD({ ...d, amount: val })}
         />
         <Select
           label="Kategori"

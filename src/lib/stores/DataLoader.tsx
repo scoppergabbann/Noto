@@ -10,11 +10,8 @@ import {
   useAssetsStore,
   useTransactionsStore,
 } from "./index";
+import { createClient } from "@/lib/supabase/client";
 
-/**
- * Dipasang di dashboard layout. Fetch semua data dari Supabase
- * sekali ketika user sudah login (user prop datang dari server).
- */
 export function DataLoader({ userId }: { userId: string }) {
   const fetchGoals = useGoalsStore((s) => s.fetch);
   const fetchReceivables = useReceivablesStore((s) => s.fetch);
@@ -26,16 +23,27 @@ export function DataLoader({ userId }: { userId: string }) {
 
   useEffect(() => {
     if (!userId) return;
-    // Fetch semua domain paralel
-    Promise.all([
-      fetchGoals(),
-      fetchReceivables(),
-      fetchDebts(),
-      fetchCards(),
-      fetchGold(),
-      fetchAssets(),
-      fetchTransactions(),
-    ]);
+
+    async function loadAll() {
+      // Fix #4 — JWT issued at future: refresh session dulu sebelum fetch data
+      // Ini terjadi saat clock device tidak sinkron dengan server Supabase
+      const sb = createClient();
+      const { error: sessionErr } = await sb.auth.getSession();
+      if (sessionErr) {
+        await sb.auth.refreshSession();
+      }
+      await Promise.all([
+        fetchGoals(),
+        fetchReceivables(),
+        fetchDebts(),
+        fetchCards(),
+        fetchGold(),
+        fetchAssets(),
+        fetchTransactions(),
+      ]);
+    }
+
+    loadAll();
   }, [
     userId,
     fetchGoals,

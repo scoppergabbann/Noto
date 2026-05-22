@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import type { Goal } from "@/types";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 const EMOJIS = ["🛡️", "🗾", "🛵", "🏠", "💍", "🎓", "✈️", "💻", "🚗", "🎯"];
 const COLORS = ["#1f9e6f", "#6b6ff0", "#ff9d2e", "#e0524a", "#0ea5e9"];
@@ -74,11 +75,10 @@ export function GoalForm({
       }
     >
       <div className="flex flex-col gap-3.5">
-        <Input
-          label="Nama target"
-          placeholder="mis. Dana Darurat"
-          value={d.item}
-          onChange={(e) => set("item", e.target.value)}
+        <CurrencyInput
+          label="Target tabungan (Rp)"
+          value={d.targetAmount}
+          onChange={(val) => set("targetAmount", val)}
         />
         <Input
           label="Instrumen"
@@ -87,19 +87,15 @@ export function GoalForm({
           onChange={(e) => set("instrument", e.target.value)}
         />
         <div className="grid grid-cols-2 gap-3">
-          <Input
-            label="Target (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.targetAmount || ""}
-            onChange={(e) => set("targetAmount", Number(e.target.value))}
+          <CurrencyInput
+            label="Target tabungan (Rp)"
+            value={d.targetAmount}
+            onChange={(val) => set("targetAmount", val)}
           />
-          <Input
-            label="Terkumpul (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.usedAmount || ""}
-            onChange={(e) => set("usedAmount", Number(e.target.value))}
+          <CurrencyInput
+            label="Sudah terkumpul (Rp)"
+            value={d.usedAmount}
+            onChange={(val) => set("usedAmount", val)}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">

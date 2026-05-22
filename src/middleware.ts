@@ -38,6 +38,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Anti-cache header untuk dashboard routes (mencegah stale JWT)
+  if (!isPublicRoute) {
+    supabaseResponse.headers.set("Cache-Control", "no-store, max-age=0");
+  }
+
   return supabaseResponse;
 }
 

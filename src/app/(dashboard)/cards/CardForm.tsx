@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import type { CreditCard } from "@/types";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 export type CardDraft = Omit<CreditCard, "id">;
 const GRADIENTS = [
@@ -82,26 +83,20 @@ export function CardForm({
           onChange={(e) => setD({ ...d, last4: e.target.value.replace(/\D/g, "") })}
         />
         <div className="grid grid-cols-3 gap-3">
-          <Input
-            label="Limit (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.creditLimit || ""}
-            onChange={(e) => setD({ ...d, creditLimit: Number(e.target.value) })}
+          <CurrencyInput
+            label="Limit kartu (Rp)"
+            value={d.creditLimit}
+            onChange={(val) => setD({ ...d, creditLimit: val })}
           />
-          <Input
-            label="Pemakaian"
-            type="number"
-            inputMode="numeric"
-            value={d.spent || ""}
-            onChange={(e) => setD({ ...d, spent: Number(e.target.value) })}
+          <CurrencyInput
+            label="Pemakaian bulan ini (Rp)"
+            value={d.spent}
+            onChange={(val) => setD({ ...d, spent: val })}
           />
-          <Input
-            label="Dibayar"
-            type="number"
-            inputMode="numeric"
-            value={d.paid || ""}
-            onChange={(e) => setD({ ...d, paid: Number(e.target.value) })}
+          <CurrencyInput
+            label="Sudah dibayar (Rp)"
+            value={d.paid}
+            onChange={(val) => setD({ ...d, paid: val })}
           />
         </div>
         <div>

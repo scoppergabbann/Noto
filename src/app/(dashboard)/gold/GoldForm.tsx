@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import type { GoldAsset } from "@/types";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 export type GoldDraft = Omit<GoldAsset, "id">;
 const empty: GoldDraft = {
@@ -97,27 +98,24 @@ export function GoldForm({
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Input
-            label="Nilai saat beli (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.buyValue || ""}
-            onChange={(e) => setD({ ...d, buyValue: Number(e.target.value) })}
+          <CurrencyInput
+            label="Nilai total pembelian (Rp)"
+            hint="Rp total saat beli"
+            value={d.buyValue}
+            onChange={(val) => setD({ ...d, buyValue: val })}
           />
-          <Input
-            label="Nilai terjual (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.usedValue || ""}
-            onChange={(e) => setD({ ...d, usedValue: Number(e.target.value) })}
+          <CurrencyInput
+            label="Nilai sudah dijual (Rp)"
+            hint="0 kalau belum pernah jual"
+            value={d.usedValue}
+            onChange={(val) => setD({ ...d, usedValue: val })}
           />
         </div>
-        <Input
-          label="Estimasi harga kini (Rp/gr)"
-          type="number"
-          inputMode="numeric"
-          value={d.currentPricePerGram || ""}
-          onChange={(e) => setD({ ...d, currentPricePerGram: Number(e.target.value) })}
+        <CurrencyInput
+          label="Harga kini per gram (Rp)"
+          hint="Estimasi harga emas saat ini"
+          value={d.currentPricePerGram}
+          onChange={(val) => setD({ ...d, currentPricePerGram: val })}
         />
         <Input
           label="Catatan (opsional)"

@@ -1,5 +1,20 @@
 import { createClient } from "@/lib/supabase/client";
 
+/** Kalau Supabase return JWT error, refresh token dan coba lagi sekali. */
+async function withAuthRetry<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (e) {
+    const msg = String(e);
+    if (msg.includes("JWT") || msg.includes("token")) {
+      const sb = createClient();
+      await sb.auth.refreshSession();
+      return await fn();
+    }
+    throw e;
+  }
+}
+
 export type Repo<T> = {
   getAll: () => Promise<T[]>;
   create: (data: Record<string, unknown>) => Promise<T>;

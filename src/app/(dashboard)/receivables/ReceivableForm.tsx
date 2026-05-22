@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import type { Receivable } from "@/types";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
 
 export type ReceivableDraft = Omit<Receivable, "id">;
 const empty: ReceivableDraft = { item: "", debtor: "", total: 0, paid: 0, dueDate: "", notes: "" };
@@ -68,19 +69,15 @@ export function ReceivableForm({
             value={d.debtor}
             onChange={(e) => setD({ ...d, debtor: e.target.value })}
           />
-          <Input
-            label="Total (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.total || ""}
-            onChange={(e) => setD({ ...d, total: Number(e.target.value) })}
+          <CurrencyInput
+            label="Total piutang (Rp)"
+            value={d.total}
+            onChange={(val) => setD({ ...d, total: val })}
           />
-          <Input
+          <CurrencyInput
             label="Sudah dibayar (Rp)"
-            type="number"
-            inputMode="numeric"
-            value={d.paid || ""}
-            onChange={(e) => setD({ ...d, paid: Number(e.target.value) })}
+            value={d.paid}
+            onChange={(val) => setD({ ...d, paid: val })}
           />
         </div>
         <Input

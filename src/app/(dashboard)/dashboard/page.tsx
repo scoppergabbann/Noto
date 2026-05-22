@@ -11,7 +11,8 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { HealthGauge } from "@/components/charts/HealthGauge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import {
   useGoalsStore,
   useDebtsStore,
@@ -24,6 +25,18 @@ import { progressPct, healthScore, remainingGrams, currentGoldValue } from "@/li
 import { rpShort } from "@/lib/format";
 
 export default function DashboardPage() {
+  const [userName, setUserName] = useState("...");
+
+  useEffect(() => {
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        const meta = data.user?.user_metadata;
+        const name = meta?.full_name ?? meta?.name ?? data.user?.email?.split("@")[0] ?? "kamu";
+        setUserName((name as string).split(" ")[0]);
+      });
+  }, []);
+
   const goalsLoading = useGoalsStore((s) => s.loading);
   const goals = useGoalsStore((s) => s.items);
   const debts = useDebtsStore((s) => s.items);
@@ -71,7 +84,7 @@ export default function DashboardPage() {
             Kamis, 21 Mei 2026
           </p>
           <h1 className="text-heading font-serif text-[28px] font-semibold leading-[1.08] tracking-tight sm:text-[36px]">
-            Halo Rangga,
+            Halo {userName},
             <br className="hidden sm:block" /> ini ringkasan{" "}
             <em className="italic text-amber-text dark:text-amber">finansialmu</em>.
           </h1>
