@@ -67,7 +67,7 @@ export function MetricCard({
             "grid h-9 w-9 place-items-center rounded-xl",
             hero
               ? "bg-white/10 text-white"
-              : "bg-amber-soft text-amber-deep dark:bg-amber/15 dark:text-amber"
+              : "bg-amber-soft text-amber-text dark:bg-amber/15 dark:text-amber"
           )}
         >
           <Icon size={18} strokeWidth={2.2} />

@@ -46,7 +46,7 @@ export function StatCard({
       </div>
       <div
         className={cn(
-          "serif text-[30px] font-semibold leading-none tracking-tight",
+          "font-serif text-[30px] font-semibold leading-none tracking-tight",
           dark && "text-white"
         )}
       >

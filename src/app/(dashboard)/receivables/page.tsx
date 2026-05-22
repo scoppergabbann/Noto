@@ -43,7 +43,7 @@ export default function ReceivablesPage() {
         eyebrow="Piutang Tracker"
         title={
           <>
-            Siapa yang <em className="italic text-amber-deep">berutang</em> padamu.
+            Siapa yang <em className="italic text-amber-text dark:text-amber">berutang</em> padamu.
           </>
         }
         action={
@@ -58,7 +58,7 @@ export default function ReceivablesPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Piutang Aktif
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight text-amber-deep">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-amber-text dark:text-amber">
             {rpShort(totalActive)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -69,7 +69,7 @@ export default function ReceivablesPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Total Piutang
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
             {rpShort(totalAll)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -80,7 +80,7 @@ export default function ReceivablesPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sudah Diterima
           </div>
-          <div className="serif text-brand-green mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-brand-green">
             {rpShort(totalPaid)}
           </div>
           <div className="mt-[11px] text-[13px]">
@@ -101,7 +101,7 @@ export default function ReceivablesPage() {
                 key={r.id}
                 className="flex items-center gap-3.5 border-b border-black/5 py-4 last:border-0 dark:border-white/5"
               >
-                <div className="bg-brand-indigo/10 grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl text-[17px]">
+                <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl bg-brand-indigo/10 text-[17px]">
                   🤝
                 </div>
                 <div className="min-w-0 flex-1">
@@ -148,7 +148,7 @@ function EmptyState({ onClick }: { onClick: () => void }) {
   return (
     <Card className="py-16 text-center">
       <div className="mb-3 text-[40px]">🤝</div>
-      <div className="serif mb-1 text-[19px] font-semibold">Belum ada piutang</div>
+      <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada piutang</div>
       <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
         Catat uang yang dipinjam orang lain agar tidak lupa ditagih.
       </div>

@@ -9,12 +9,19 @@
     --ink-body: #2c313a;
     --ink-muted: #525a67;
     --ink-subtle: #646b78;
+    /* Theme-adaptive semantic colors (AA on the active surface) */
+    --c-green: #0a7d54;
+    --c-red: #b82c2c;
+    --c-indigo: #4f46e5;
   }
   html.dark {
     --ink: #f4f6fa;
     --ink-body: #d3d8e0;
     --ink-muted: #a3acba; /* ~7:1 on night.raised — AA */
     --ink-subtle: #8b94a3; /* ~5.1:1 — AA */
+    --c-green: #34d399; /* brighter for dark surfaces — AA */
+    --c-red: #fb7185;
+    --c-indigo: #a5b4fc;
   }
 
   body {
@@ -45,6 +52,18 @@
 }
 
 @layer components {
+  /* Dark-mode brightening for legacy semantic text classes (keeps /10 bg tints intact).
+     Ensures text-brand-green / text-brand-red stay AA on dark surfaces. */
+  html.dark .text-brand-green {
+    color: #34d399;
+  }
+  html.dark .text-brand-red {
+    color: #fb7185;
+  }
+  html.dark .text-brand-indigo {
+    color: #a5b4fc;
+  }
+
   /* Ink scale helpers — theme-aware via CSS vars */
   .text-heading {
     color: var(--ink);

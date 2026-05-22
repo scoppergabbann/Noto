@@ -15,7 +15,7 @@ export function RowActions({ onEdit, onDelete }: { onEdit: () => void; onDelete:
       <button
         onClick={onDelete}
         aria-label="Hapus"
-        className="hover:bg-brand-red/10 hover:text-brand-red grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition"
+        className="grid h-8 w-8 place-items-center rounded-lg text-ink-faint transition hover:bg-brand-red/10 hover:text-brand-red"
       >
         <Trash2 size={15} />
       </button>

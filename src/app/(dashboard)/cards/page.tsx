@@ -38,7 +38,7 @@ export default function CardsPage() {
         eyebrow="Credit Card"
         title={
           <>
-            Kartu kreditmu, <em className="italic text-amber-deep">terpantau</em>.
+            Kartu kreditmu, <em className="italic text-amber-text dark:text-amber">terpantau</em>.
           </>
         }
         action={
@@ -51,7 +51,7 @@ export default function CardsPage() {
       {items.length === 0 ? (
         <Card className="py-16 text-center">
           <div className="mb-3 text-[40px]">💳</div>
-          <div className="serif mb-1 text-[19px] font-semibold">Belum ada kartu</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada kartu</div>
           <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
             Tambahkan kartu kredit untuk memantau utilisasi & tagihan.
           </div>
@@ -86,7 +86,7 @@ export default function CardsPage() {
                       <div className="text-[10.5px] uppercase tracking-[.1em] opacity-65">
                         Sisa Tagihan
                       </div>
-                      <div className="serif text-[21px] font-semibold">{rpShort(bill)}</div>
+                      <div className="font-serif text-[21px] font-semibold">{rpShort(bill)}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-[10.5px] uppercase tracking-[.1em] opacity-65">
@@ -118,7 +118,7 @@ export default function CardsPage() {
                     </div>
                     <div>
                       <div className="text-[11.5px] text-ink-dim dark:text-slate-400">Dibayar</div>
-                      <div className="text-brand-green text-[14px] font-semibold">
+                      <div className="text-[14px] font-semibold text-brand-green">
                         {rpShort(c.paid)}
                       </div>
                     </div>
@@ -128,7 +128,7 @@ export default function CardsPage() {
                     </div>
                   </div>
                   {warn && (
-                    <div className="bg-brand-red/10 text-brand-red mt-3.5 rounded-xl px-3.5 py-2.5 text-[12.5px] font-medium">
+                    <div className="mt-3.5 rounded-xl bg-brand-red/10 px-3.5 py-2.5 text-[12.5px] font-medium text-brand-red">
                       ⚠️ Pemakaian di atas 70%. Pertimbangkan bayar Rp
                       {suggested.toFixed(1).replace(".", ",")}jt untuk turun ke zona aman.
                     </div>

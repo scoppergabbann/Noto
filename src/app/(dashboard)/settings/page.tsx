@@ -31,14 +31,14 @@ export default function SettingsPage() {
         eyebrow="Pengaturan"
         title={
           <>
-            Kelola <em className="italic text-amber-deep">datamu</em>.
+            Kelola <em className="italic text-amber-text dark:text-amber">datamu</em>.
           </>
         }
       />
 
       <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-2">
         <Card>
-          <div className="serif mb-1 text-[19px] font-semibold">Backup & Pemulihan</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Backup & Pemulihan</div>
           <div className="mb-4 text-[13.5px] text-ink-dim dark:text-slate-400">
             Semua data Noto tersimpan di perangkat ini (browser). Ekspor berkala agar aman, atau
             pindahkan ke perangkat lain.
@@ -68,7 +68,7 @@ export default function SettingsPage() {
         </Card>
 
         <Card>
-          <div className="serif mb-1 text-[19px] font-semibold">Reset Data</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Reset Data</div>
           <div className="mb-4 text-[13.5px] text-ink-dim dark:text-slate-400">
             Kembalikan semua data ke contoh awal. Berguna untuk mencoba ulang dari nol.
           </div>
@@ -78,7 +78,7 @@ export default function SettingsPage() {
         </Card>
 
         <Card className="lg:col-span-2">
-          <div className="serif mb-1 text-[19px] font-semibold">Tentang penyimpanan</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Tentang penyimpanan</div>
           <p className="text-[13.5px] leading-relaxed text-ink-dim dark:text-slate-400">
             Saat ini Noto menyimpan data secara lokal di browser (localStorage) — tidak ada server,
             tidak ada akun. Artinya data hanya ada di perangkat & browser ini. Membersihkan data

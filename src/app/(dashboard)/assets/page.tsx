@@ -38,7 +38,7 @@ export default function AssetsPage() {
         eyebrow="Asset Lainnya"
         title={
           <>
-            Semua yang kamu <em className="italic text-amber-deep">miliki</em>.
+            Semua yang kamu <em className="italic text-amber-text dark:text-amber">miliki</em>.
           </>
         }
         action={
@@ -52,7 +52,7 @@ export default function AssetsPage() {
         <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
           Total Nilai Aset Lainnya
         </div>
-        <div className="serif mt-2 text-[34px] font-semibold leading-none tracking-tight">
+        <div className="mt-2 font-serif text-[34px] font-semibold leading-none tracking-tight">
           {rpShort(total)}
         </div>
         <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -63,7 +63,7 @@ export default function AssetsPage() {
       {items.length === 0 ? (
         <Card className="py-16 text-center">
           <div className="mb-3 text-[40px]">📦</div>
-          <div className="serif mb-1 text-[19px] font-semibold">Belum ada aset lain</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada aset lain</div>
           <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
             Catat properti, kendaraan, gadget, atau koleksi yang kamu punya.
           </div>
@@ -89,7 +89,9 @@ export default function AssetsPage() {
               </div>
               <div className="border-t border-black/5 pt-3.5 dark:border-white/5">
                 <div className="text-[11.5px] text-ink-dim dark:text-slate-400">Nilai saat ini</div>
-                <div className="serif text-[22px] font-semibold">{rpShort(a.currentValue)}</div>
+                <div className="font-serif text-[22px] font-semibold">
+                  {rpShort(a.currentValue)}
+                </div>
               </div>
               {a.notes && <div className="mt-3 text-[12.5px] text-ink-faint">📝 {a.notes}</div>}
             </Card>

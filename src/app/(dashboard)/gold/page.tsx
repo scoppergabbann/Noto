@@ -58,7 +58,7 @@ export default function GoldPage() {
         eyebrow="Emas & Investasi"
         title={
           <>
-            Emasmu, <em className="italic text-amber-deep">tumbuh perlahan</em>.
+            Emasmu, <em className="italic text-amber-text dark:text-amber">tumbuh perlahan</em>.
           </>
         }
         action={
@@ -73,7 +73,7 @@ export default function GoldPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Emas Tersimpan
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
             {totalGrams.toFixed(1)}
             <span className="text-[16px] text-ink-faint"> gr</span>
           </div>
@@ -82,7 +82,7 @@ export default function GoldPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Estimasi Nilai Kini
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
             {rpShort(totalNow)}
           </div>
         </Card>
@@ -108,7 +108,7 @@ export default function GoldPage() {
       {items.length === 0 ? (
         <Card className="py-16 text-center">
           <div className="mb-3 text-[40px]">🪙</div>
-          <div className="serif mb-1 text-[19px] font-semibold">Belum ada catatan emas</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada catatan emas</div>
           <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
             Catat pembelian emasmu untuk memantau profit/loss otomatis.
           </div>
@@ -119,7 +119,7 @@ export default function GoldPage() {
       ) : (
         <>
           <Card className="mb-[18px]">
-            <div className="serif mb-1 text-[19px] font-semibold">Pertumbuhan Nilai Emas</div>
+            <div className="mb-1 font-serif text-[19px] font-semibold">Pertumbuhan Nilai Emas</div>
             <div className="mb-2 text-[13.5px] text-ink-dim dark:text-slate-400">
               Estimasi nilai total, 6 bulan terakhir
             </div>
@@ -159,7 +159,7 @@ export default function GoldPage() {
                       </Badge>
                     </div>
                     <div className={`text-right ${up ? "text-brand-green" : "text-brand-red"}`}>
-                      <div className="serif text-[20px] font-semibold">
+                      <div className="font-serif text-[20px] font-semibold">
                         {up ? "+" : ""}
                         {plPct}%
                       </div>

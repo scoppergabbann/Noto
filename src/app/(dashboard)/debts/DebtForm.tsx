@@ -84,7 +84,7 @@ export function DebtForm({
           onChange={(e) => setD({ ...d, dueDate: e.target.value })}
         />
         {err && (
-          <div className="bg-brand-red/10 text-brand-red rounded-lg px-3 py-2 text-[13px] font-medium">
+          <div className="rounded-lg bg-brand-red/10 px-3 py-2 text-[13px] font-medium text-brand-red">
             {err}
           </div>
         )}

@@ -15,6 +15,12 @@ const config: Config = {
         // Semantic finance colors — tuned for AA contrast on both themes
         pos: { DEFAULT: "#0f9d6b", strong: "#0a7d54", soft: "#e6f6ef", dark: "#34d399" },
         neg: { DEFAULT: "#d83a3a", strong: "#b82c2c", soft: "#fdecec", dark: "#fb7185" },
+        // Backward-compatible aliases for older pages (→ accessible values)
+        brand: {
+          green: "#0a7d54", // text-safe green on light (AA)
+          red: "#b82c2c", // text-safe red on light (AA)
+          indigo: "#4f46e5", // text-safe indigo on light (AA)
+        },
         // Text scale — light theme (all >= 4.5:1 on light surfaces)
         ink: {
           DEFAULT: "#15181e", // headings — ~15:1

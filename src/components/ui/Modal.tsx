@@ -44,7 +44,7 @@ export function Modal({
         aria-modal="true"
       >
         <div className="mb-4 flex items-center justify-between">
-          {title && <h2 className="serif text-[19px] font-semibold">{title}</h2>}
+          {title && <h2 className="font-serif text-[19px] font-semibold">{title}</h2>}
           <button
             onClick={onClose}
             aria-label="Tutup"

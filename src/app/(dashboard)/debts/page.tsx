@@ -44,7 +44,8 @@ export default function DebtsPage() {
         eyebrow="Utang & Cicilan Tracker"
         title={
           <>
-            Lunasi <em className="italic text-amber-deep">selangkah demi selangkah</em>.
+            Lunasi{" "}
+            <em className="italic text-amber-text dark:text-amber">selangkah demi selangkah</em>.
           </>
         }
         action={
@@ -59,7 +60,7 @@ export default function DebtsPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sisa Utang
           </div>
-          <div className="serif text-brand-red mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-brand-red">
             {rpShort(totalLeft)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -70,7 +71,7 @@ export default function DebtsPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sudah Dibayar
           </div>
-          <div className="serif text-brand-green mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-brand-green">
             {rpShort(totalPaid)}
           </div>
           <div className="mt-[11px] text-[13px]">
@@ -81,7 +82,7 @@ export default function DebtsPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Debt Health
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
             {debtHealth}
             <span className="text-[16px] text-ink-faint">/100</span>
           </div>
@@ -98,7 +99,7 @@ export default function DebtsPage() {
       {items.length === 0 ? (
         <Card className="py-16 text-center">
           <div className="mb-3 text-[40px]">🏦</div>
-          <div className="serif mb-1 text-[19px] font-semibold">Belum ada utang tercatat</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada utang tercatat</div>
           <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
             Catat cicilan & utang untuk memantau progress pelunasan.
           </div>
@@ -126,20 +127,20 @@ export default function DebtsPage() {
                 </div>
                 <div className="mb-[9px] flex items-end justify-between">
                   <div>
-                    <div className="serif text-brand-red text-[24px] font-semibold">
+                    <div className="font-serif text-[24px] font-semibold text-brand-red">
                       {rpShort(left)}
                     </div>
                     <div className="text-[12.5px] text-ink-dim dark:text-slate-400">
                       sisa dari {rpShort(d.total)}
                     </div>
                   </div>
-                  <div className="text-brand-green text-[18px] font-bold">{p}%</div>
+                  <div className="text-[18px] font-bold text-brand-green">{p}%</div>
                 </div>
                 <ProgressBar value={p} color="#1f9e6f" height={10} />
                 <div className="mt-3.5 flex justify-between border-t border-black/5 pt-3.5 dark:border-white/5">
                   <div>
                     <div className="text-[11.5px] text-ink-dim dark:text-slate-400">Dibayar</div>
-                    <div className="text-brand-green text-[14px] font-semibold">
+                    <div className="text-[14px] font-semibold text-brand-green">
                       {rpShort(d.paid)}
                     </div>
                   </div>

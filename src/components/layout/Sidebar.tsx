@@ -11,11 +11,11 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-1.5 border-r border-black/5 p-6 dark:border-white/5 lg:flex">
       <div className="flex items-center gap-3 px-2.5 pb-5 pt-1">
-        <div className="serif grid h-9 w-9 place-items-center rounded-[10px] bg-gradient-to-br from-amber to-amber-deep text-[19px] font-bold text-white shadow-[0_6px_16px_rgba(240,125,16,.35)]">
+        <div className="grid h-9 w-9 place-items-center rounded-[10px] bg-gradient-to-br from-amber to-amber-deep font-serif text-[19px] font-bold text-white shadow-[0_6px_16px_rgba(240,125,16,.35)]">
           L
         </div>
         <div className="leading-tight">
-          <div className="serif text-xl font-semibold tracking-tight">Noto</div>
+          <div className="font-serif text-xl font-semibold tracking-tight">Noto</div>
           <div className="text-[10.5px] text-ink-faint">Noto urip, noto finansial.</div>
         </div>
       </div>

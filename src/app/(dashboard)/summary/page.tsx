@@ -14,7 +14,8 @@ export default function SummaryPage() {
         eyebrow="Financial Summary · Februari 2026"
         title={
           <>
-            Ke mana <em className="italic text-amber-deep">uangmu</em> pergi bulan ini.
+            Ke mana <em className="italic text-amber-text dark:text-amber">uangmu</em> pergi bulan
+            ini.
           </>
         }
         action={
@@ -29,7 +30,7 @@ export default function SummaryPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Pemasukan
           </div>
-          <div className="serif text-brand-green mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
+          <div className="mt-2 font-serif text-[24px] font-semibold leading-none tracking-tight text-brand-green sm:text-[30px]">
             Rp17,2jt
           </div>
         </Card>
@@ -37,13 +38,13 @@ export default function SummaryPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Pengeluaran
           </div>
-          <div className="serif text-brand-red mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
+          <div className="mt-2 font-serif text-[24px] font-semibold leading-none tracking-tight text-brand-red sm:text-[30px]">
             Rp9,8jt
           </div>
         </Card>
         <Card hoverable>
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">Ditabung</div>
-          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
+          <div className="mt-2 font-serif text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
             Rp4,2jt
           </div>
         </Card>
@@ -51,7 +52,7 @@ export default function SummaryPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sisa Uang
           </div>
-          <div className="serif mt-2 text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
+          <div className="mt-2 font-serif text-[24px] font-semibold leading-none tracking-tight sm:text-[30px]">
             Rp3,2jt
           </div>
         </Card>
@@ -59,7 +60,7 @@ export default function SummaryPage() {
 
       <div className="mb-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-[1fr_1.5fr]">
         <Card>
-          <div className="serif mb-1 text-[19px] font-semibold">Pengeluaran per Kategori</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Pengeluaran per Kategori</div>
           <div className="mb-2.5 text-[13.5px] text-ink-dim dark:text-slate-400">Total Rp9,8jt</div>
           <div className="mx-auto h-[200px] w-full max-w-[240px]">
             <DonutChart data={spending} formatValue={(v) => rpShort(v)} innerRadius={52} />
@@ -74,7 +75,7 @@ export default function SummaryPage() {
           </div>
         </Card>
         <Card>
-          <div className="serif mb-1 text-[19px] font-semibold">Arus Kas Bulanan</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Arus Kas Bulanan</div>
           <div className="mb-[18px] text-[13.5px] text-ink-dim dark:text-slate-400">
             Pemasukan vs pengeluaran, 6 bulan
           </div>
@@ -83,7 +84,7 @@ export default function SummaryPage() {
       </div>
 
       <Card>
-        <div className="serif mb-3.5 text-[19px] font-semibold">Rincian Bulan Ini</div>
+        <div className="mb-3.5 font-serif text-[19px] font-semibold">Rincian Bulan Ini</div>
         {summaryRows.map((r) => (
           <div
             key={r.label}

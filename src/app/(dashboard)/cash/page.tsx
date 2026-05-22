@@ -49,7 +49,8 @@ export default function CashPage() {
         eyebrow="Asset Cash Tracker"
         title={
           <>
-            Target tabungan <em className="italic text-amber-deep">yang terukur</em>.
+            Target tabungan <em className="italic text-amber-text dark:text-amber">yang terukur</em>
+            .
           </>
         }
         action={
@@ -64,7 +65,7 @@ export default function CashPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Total Terkumpul
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
             {rpShort(totalUsed)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -75,7 +76,7 @@ export default function CashPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Target Bulanan
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
             {rpShort(monthlySum)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -86,7 +87,7 @@ export default function CashPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Goal Aktif
           </div>
-          <div className="serif mt-2 text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
             {goals.length}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -98,7 +99,7 @@ export default function CashPage() {
       {goals.length === 0 ? (
         <Card className="py-16 text-center">
           <div className="mb-3 text-[40px]">🎯</div>
-          <div className="serif mb-1 text-[19px] font-semibold">Belum ada target</div>
+          <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada target</div>
           <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
             Mulai dengan membuat target tabungan pertamamu, mis. dana darurat.
           </div>
@@ -131,7 +132,9 @@ export default function CashPage() {
                 </div>
                 <div className="mb-[9px] flex items-end justify-between">
                   <div>
-                    <div className="serif text-[24px] font-semibold">{rpShort(g.usedAmount)}</div>
+                    <div className="font-serif text-[24px] font-semibold">
+                      {rpShort(g.usedAmount)}
+                    </div>
                     <div className="text-[12.5px] text-ink-dim dark:text-slate-400">
                       dari {rpShort(g.targetAmount)}
                     </div>
