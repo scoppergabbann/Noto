@@ -25,7 +25,7 @@ export function ConfirmDialog({
       title={title}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} className="w-full sm:w-auto">
             Batal
           </Button>
           <Button
@@ -34,13 +34,14 @@ export function ConfirmDialog({
               onConfirm();
               onClose();
             }}
+            className="w-full sm:w-auto"
           >
             {confirmLabel}
           </Button>
         </>
       }
     >
-      <p className="text-[14px] text-ink-dim dark:text-slate-400">{message}</p>
+      <p className="text-body text-[15px] leading-relaxed sm:text-[14px]">{message}</p>
     </Modal>
   );
 }

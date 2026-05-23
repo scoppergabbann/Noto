@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useId } from "react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   label: string;
@@ -8,50 +9,79 @@ interface Props {
   onChange: (val: number) => void;
   placeholder?: string;
   hint?: string;
+  error?: string;
   required?: boolean;
+  className?: string;
 }
 
-/** Format angka ke "10.000.000" (titik sebagai pemisah ribuan Indonesia) */
 function formatRp(n: number): string {
   if (!n) return "";
   return n.toLocaleString("id-ID");
 }
 
-/** Parse "10.000.000" atau "10000000" → 10000000 */
-function parseRp(s: string): number {
-  return Number(s.replace(/\./g, "").replace(/,/g, "")) || 0;
-}
-
-export function CurrencyInput({ label, value, onChange, placeholder, hint, required }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
+export function CurrencyInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  hint,
+  error,
+  required,
+  className,
+}: Props) {
+  const id = useId();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value.replace(/[^\d]/g, ""); // hanya digit
-    const num = Number(raw) || 0;
-    onChange(num);
+    const raw = e.target.value.replace(/[^\d]/g, "");
+    onChange(Number(raw) || 0);
   }
 
   return (
-    <div>
-      <label className="text-heading mb-1.5 block text-[13.5px] font-semibold">
+    <div className={cn("flex flex-col gap-1.5", className)}>
+      <label htmlFor={id} className="text-heading text-[13.5px] font-semibold">
         {label}
-        {required && <span className="ml-1 text-neg">*</span>}
+        {required && (
+          <span className="ml-1 text-neg" aria-hidden="true">
+            *
+          </span>
+        )}
+        {required && <span className="sr-only">(wajib diisi)</span>}
       </label>
       <div className="relative">
-        <span className="text-subtle pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[14px] font-semibold">
+        <span
+          aria-hidden="true"
+          className="text-subtle pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[15px] font-semibold"
+        >
           Rp
         </span>
         <input
-          ref={inputRef}
+          id={id}
           type="text"
           inputMode="numeric"
           value={formatRp(value)}
           onChange={handleChange}
           placeholder={placeholder ?? "0"}
-          className="text-heading placeholder:text-subtle w-full rounded-xl border border-black/[.08] bg-white py-2.5 pl-9 pr-4 text-[14.5px] font-semibold tabular-nums outline-none transition placeholder:font-normal focus:border-amber focus:ring-2 focus:ring-amber/20 dark:border-white/10 dark:bg-white/5 dark:text-white"
+          aria-label={`${label} dalam Rupiah`}
+          className={cn(
+            "min-h-[44px] w-full rounded-xl border py-3 pl-11 pr-4",
+            "text-heading text-[15px] font-semibold tabular-nums",
+            "bg-white outline-none transition-all",
+            "placeholder:text-subtle placeholder:font-normal",
+            error
+              ? "border-neg focus:border-neg focus:ring-2 focus:ring-neg/20"
+              : "border-black/[.08] focus:border-amber focus:ring-2 focus:ring-amber/20",
+            "dark:border-white/10 dark:bg-white/5 dark:text-white",
+            "touch-manipulation",
+            "sm:text-[14.5px]"
+          )}
         />
       </div>
-      {hint && <p className="text-subtle mt-1 text-[12px]">{hint}</p>}
+      {hint && !error && <span className="text-subtle text-[12.5px]">{hint}</span>}
+      {error && (
+        <span className="text-[12.5px] font-medium text-neg-strong dark:text-neg-dark" role="alert">
+          {error}
+        </span>
+      )}
     </div>
   );
 }
