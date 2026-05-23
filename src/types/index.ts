@@ -20,6 +20,8 @@ export interface Receivable {
   total: number;
   paid: number;
   dueDate: string;
+  interestType: "none" | "flat" | "floating";
+  interestRate: number;
   notes?: string;
 }
 
@@ -30,6 +32,8 @@ export interface Debt {
   total: number;
   paid: number;
   dueDate: string;
+  interestType: "none" | "flat" | "floating";
+  interestRate: number;
   notes?: string;
 }
 
@@ -43,6 +47,16 @@ export interface CreditCard {
   last4: string;
 }
 
+export interface CardTransaction {
+  id: string;
+  cardId: string;
+  merchant: string;
+  category: string;
+  amount: number;
+  date: string;
+  note?: string;
+}
+
 export interface GoldAsset {
   id: string;
   item: string;
@@ -52,6 +66,18 @@ export interface GoldAsset {
   buyValue: number;
   usedValue: number;
   currentPricePerGram: number;
+  notes?: string;
+}
+
+export interface StockHolding {
+  id: string;
+  ticker: string;
+  name: string;
+  exchange: string;
+  lots: number;
+  avgPrice: number;
+  currentPrice: number;
+  dividendReceived: number;
   notes?: string;
 }
 
@@ -70,11 +96,11 @@ export interface Transaction {
   type: "income" | "expense";
   category: string;
   amount: number;
-  date: string; // "YYYY-MM-DD"
+  date: string;
   note?: string;
 }
 
-// Legacy chart types (used by mock data)
+// Legacy chart types
 export interface SpendingCategory {
   name: string;
   value: number;

@@ -3,7 +3,9 @@ import {
   useReceivablesStore,
   useDebtsStore,
   useCardsStore,
+  useCardTxStore,
   useGoldStore,
+  useStocksStore,
   useAssetsStore,
   useTransactionsStore,
 } from "./index";
@@ -13,7 +15,9 @@ const STORES = {
   receivables: useReceivablesStore,
   debts: useDebtsStore,
   cards: useCardsStore,
+  cardTx: useCardTxStore,
   gold: useGoldStore,
+  stocks: useStocksStore,
   assets: useAssetsStore,
   transactions: useTransactionsStore,
 } as const;
@@ -21,7 +25,7 @@ const STORES = {
 export function exportData(): string {
   const data: Record<string, unknown> = {
     _app: "noto",
-    _version: 2,
+    _version: 3,
     exportedAt: new Date().toISOString(),
   };
   (Object.keys(STORES) as (keyof typeof STORES)[]).forEach((k) => {
@@ -47,11 +51,7 @@ export function importData(json: string): { ok: boolean; message: string } {
     (Object.keys(STORES) as (keyof typeof STORES)[]).forEach((k) => {
       if (Array.isArray(data[k])) STORES[k].getState().replaceAll(data[k]);
     });
-    return {
-      ok: true,
-      message:
-        "Data dipulihkan ke tampilan. Simpan ulang dari halaman masing-masing untuk sync ke Supabase.",
-    };
+    return { ok: true, message: "Data berhasil dipulihkan dari backup." };
   } catch {
     return { ok: false, message: "File tidak valid atau rusak." };
   }

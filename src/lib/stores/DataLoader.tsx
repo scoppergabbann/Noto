@@ -6,7 +6,9 @@ import {
   useReceivablesStore,
   useDebtsStore,
   useCardsStore,
+  useCardTxStore,
   useGoldStore,
+  useStocksStore,
   useAssetsStore,
   useTransactionsStore,
 } from "./index";
@@ -17,7 +19,9 @@ export function DataLoader({ userId }: { userId: string }) {
   const fetchReceivables = useReceivablesStore((s) => s.fetch);
   const fetchDebts = useDebtsStore((s) => s.fetch);
   const fetchCards = useCardsStore((s) => s.fetch);
+  const fetchCardTx = useCardTxStore((s) => s.fetch);
   const fetchGold = useGoldStore((s) => s.fetch);
+  const fetchStocks = useStocksStore((s) => s.fetch);
   const fetchAssets = useAssetsStore((s) => s.fetch);
   const fetchTransactions = useTransactionsStore((s) => s.fetch);
 
@@ -25,19 +29,19 @@ export function DataLoader({ userId }: { userId: string }) {
     if (!userId) return;
 
     async function loadAll() {
-      // Fix #4 — JWT issued at future: refresh session dulu sebelum fetch data
-      // Ini terjadi saat clock device tidak sinkron dengan server Supabase
+      // Fix JWT issued at future — pastikan session valid dulu
       const sb = createClient();
       const { error: sessionErr } = await sb.auth.getSession();
-      if (sessionErr) {
-        await sb.auth.refreshSession();
-      }
+      if (sessionErr) await sb.auth.refreshSession();
+
       await Promise.all([
         fetchGoals(),
         fetchReceivables(),
         fetchDebts(),
         fetchCards(),
+        fetchCardTx(),
         fetchGold(),
+        fetchStocks(),
         fetchAssets(),
         fetchTransactions(),
       ]);
@@ -50,7 +54,9 @@ export function DataLoader({ userId }: { userId: string }) {
     fetchReceivables,
     fetchDebts,
     fetchCards,
+    fetchCardTx,
     fetchGold,
+    fetchStocks,
     fetchAssets,
     fetchTransactions,
   ]);

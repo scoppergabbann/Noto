@@ -122,6 +122,8 @@ export const receivables: Receivable[] = [
     paid: 2_000_000,
     dueDate: "",
     notes: "",
+    interestType: "none" as const,
+    interestRate: 0,
   },
   {
     id: "r2",
@@ -131,6 +133,8 @@ export const receivables: Receivable[] = [
     paid: 2_400_000,
     dueDate: "",
     notes: "",
+    interestType: "none" as const,
+    interestRate: 0,
   },
   {
     id: "r3",
@@ -140,6 +144,8 @@ export const receivables: Receivable[] = [
     paid: 0,
     dueDate: "",
     notes: "",
+    interestType: "none" as const,
+    interestRate: 0,
   },
 ];
 
@@ -152,6 +158,8 @@ export const debts: Debt[] = [
     paid: 95_000_000,
     dueDate: "tgl 5",
     notes: "",
+    interestType: "none" as const,
+    interestRate: 0,
   },
   {
     id: "d2",
@@ -161,6 +169,8 @@ export const debts: Debt[] = [
     paid: 12_000_000,
     dueDate: "tgl 20",
     notes: "",
+    interestType: "none" as const,
+    interestRate: 0,
   },
   {
     id: "d3",
@@ -170,6 +180,8 @@ export const debts: Debt[] = [
     paid: 1_100_000,
     dueDate: "tgl 28",
     notes: "",
+    interestType: "none" as const,
+    interestRate: 0,
   },
 ];
 

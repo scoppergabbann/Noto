@@ -3,7 +3,9 @@ import type {
   Receivable,
   Debt,
   CreditCard,
+  CardTransaction,
   GoldAsset,
+  StockHolding,
   OtherAsset,
   Transaction,
 } from "@/types";
@@ -12,12 +14,13 @@ import type {
   ReceivableRow,
   DebtRow,
   CreditCardRow,
+  CardTransactionRow,
   GoldAssetRow,
+  StockHoldingRow,
   OtherAssetRow,
   TransactionRow,
 } from "./types";
 
-// ---- Goals ----
 export const toGoal = (r: GoalRow): Goal => ({
   id: r.id,
   item: r.item,
@@ -44,7 +47,6 @@ export const fromGoal = (g: Omit<Goal, "id">, userId: string) => ({
   updated_at: new Date().toISOString(),
 });
 
-// ---- Receivables ----
 export const toReceivable = (r: ReceivableRow): Receivable => ({
   id: r.id,
   item: r.item,
@@ -52,6 +54,8 @@ export const toReceivable = (r: ReceivableRow): Receivable => ({
   total: Number(r.total),
   paid: Number(r.paid),
   dueDate: r.due_date ?? "",
+  interestType: r.interest_type ?? "none",
+  interestRate: Number(r.interest_rate ?? 0),
   notes: r.notes ?? "",
 });
 export const fromReceivable = (d: Omit<Receivable, "id">, userId: string) => ({
@@ -61,11 +65,12 @@ export const fromReceivable = (d: Omit<Receivable, "id">, userId: string) => ({
   total: d.total,
   paid: d.paid,
   due_date: d.dueDate || null,
+  interest_type: d.interestType,
+  interest_rate: d.interestRate,
   notes: d.notes || null,
   updated_at: new Date().toISOString(),
 });
 
-// ---- Debts ----
 export const toDebt = (r: DebtRow): Debt => ({
   id: r.id,
   item: r.item,
@@ -73,6 +78,8 @@ export const toDebt = (r: DebtRow): Debt => ({
   total: Number(r.total),
   paid: Number(r.paid),
   dueDate: r.due_date ?? "",
+  interestType: r.interest_type ?? "none",
+  interestRate: Number(r.interest_rate ?? 0),
   notes: r.notes ?? "",
 });
 export const fromDebt = (d: Omit<Debt, "id">, userId: string) => ({
@@ -82,11 +89,12 @@ export const fromDebt = (d: Omit<Debt, "id">, userId: string) => ({
   total: d.total,
   paid: d.paid,
   due_date: d.dueDate || null,
+  interest_type: d.interestType,
+  interest_rate: d.interestRate,
   notes: d.notes || null,
   updated_at: new Date().toISOString(),
 });
 
-// ---- Credit Cards ----
 export const toCreditCard = (r: CreditCardRow): CreditCard => ({
   id: r.id,
   name: r.name,
@@ -107,7 +115,26 @@ export const fromCreditCard = (c: Omit<CreditCard, "id">, userId: string) => ({
   updated_at: new Date().toISOString(),
 });
 
-// ---- Gold ----
+export const toCardTransaction = (r: CardTransactionRow): CardTransaction => ({
+  id: r.id,
+  cardId: r.card_id,
+  merchant: r.merchant,
+  category: r.category,
+  amount: Number(r.amount),
+  date: r.date,
+  note: r.note ?? "",
+});
+export const fromCardTransaction = (t: Omit<CardTransaction, "id">, userId: string) => ({
+  user_id: userId,
+  card_id: t.cardId,
+  merchant: t.merchant,
+  category: t.category,
+  amount: t.amount,
+  date: t.date,
+  note: t.note || null,
+  updated_at: new Date().toISOString(),
+});
+
 export const toGoldAsset = (r: GoldAssetRow): GoldAsset => ({
   id: r.id,
   item: r.item,
@@ -132,7 +159,30 @@ export const fromGoldAsset = (g: Omit<GoldAsset, "id">, userId: string) => ({
   updated_at: new Date().toISOString(),
 });
 
-// ---- Other Assets ----
+export const toStockHolding = (r: StockHoldingRow): StockHolding => ({
+  id: r.id,
+  ticker: r.ticker,
+  name: r.name,
+  exchange: r.exchange,
+  lots: Number(r.lots),
+  avgPrice: Number(r.avg_price),
+  currentPrice: Number(r.current_price),
+  dividendReceived: Number(r.dividend_received),
+  notes: r.notes ?? "",
+});
+export const fromStockHolding = (s: Omit<StockHolding, "id">, userId: string) => ({
+  user_id: userId,
+  ticker: s.ticker.toUpperCase(),
+  name: s.name,
+  exchange: s.exchange,
+  lots: s.lots,
+  avg_price: s.avgPrice,
+  current_price: s.currentPrice,
+  dividend_received: s.dividendReceived,
+  notes: s.notes || null,
+  updated_at: new Date().toISOString(),
+});
+
 export const toOtherAsset = (r: OtherAssetRow): OtherAsset => ({
   id: r.id,
   item: r.item,
@@ -153,7 +203,6 @@ export const fromOtherAsset = (a: Omit<OtherAsset, "id">, userId: string) => ({
   updated_at: new Date().toISOString(),
 });
 
-// ---- Transactions ----
 export const toTransaction = (r: TransactionRow): Transaction => ({
   id: r.id,
   type: r.type,

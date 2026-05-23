@@ -21,6 +21,8 @@ export interface ReceivableRow {
   total: number;
   paid: number;
   due_date: string | null;
+  interest_type: "none" | "flat" | "floating";
+  interest_rate: number;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -33,6 +35,8 @@ export interface DebtRow {
   total: number;
   paid: number;
   due_date: string | null;
+  interest_type: "none" | "flat" | "floating";
+  interest_rate: number;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -49,6 +53,18 @@ export interface CreditCardRow {
   created_at: string;
   updated_at: string;
 }
+export interface CardTransactionRow {
+  id: string;
+  user_id: string;
+  card_id: string;
+  merchant: string;
+  category: string;
+  amount: number;
+  date: string;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+}
 export interface GoldAssetRow {
   id: string;
   user_id: string;
@@ -59,6 +75,20 @@ export interface GoldAssetRow {
   buy_value: number;
   used_value: number;
   current_price_per_gram: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export interface StockHoldingRow {
+  id: string;
+  user_id: string;
+  ticker: string;
+  name: string;
+  exchange: string;
+  lots: number;
+  avg_price: number;
+  current_price: number;
+  dividend_received: number;
   notes: string | null;
   created_at: string;
   updated_at: string;

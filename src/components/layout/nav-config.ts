@@ -7,6 +7,8 @@ import {
   Boxes,
   HandCoins,
   Landmark,
+  ArrowLeftRight,
+  TrendingUp,
 } from "lucide-react";
 
 export const navItems = [
@@ -15,14 +17,15 @@ export const navItems = [
   { href: "/receivables", label: "Piutang", short: "Piutang", icon: HandCoins },
   { href: "/debts", label: "Utang & Cicilan", short: "Utang", icon: Landmark },
   { href: "/cards", label: "Credit Card", short: "Kartu", icon: CreditCard },
-  { href: "/gold", label: "Emas & Investasi", short: "Emas", icon: Gem },
+  { href: "/gold", label: "Emas", short: "Emas", icon: Gem },
+  { href: "/stocks", label: "Saham", short: "Saham", icon: TrendingUp },
   { href: "/assets", label: "Asset Lainnya", short: "Aset", icon: Boxes },
+  { href: "/transactions", label: "Transaksi", short: "Transaksi", icon: ArrowLeftRight },
   { href: "/summary", label: "Summary", short: "Summary", icon: PieChart },
 ];
 
-// Bottom-nav HP hanya menampilkan item utama agar tidak sesak (sisanya via sidebar di layar lebar).
 export const mobileNavItems = navItems.filter((n) =>
-  ["/dashboard", "/cash", "/cards", "/summary"].includes(n.href)
+  ["/dashboard", "/transactions", "/cards", "/summary"].includes(n.href)
 );
 
 export const comingSoon: { label: string; icon: typeof Gem }[] = [];

@@ -8,8 +8,12 @@ import {
   fromDebt,
   toCreditCard,
   fromCreditCard,
+  toCardTransaction,
+  fromCardTransaction,
   toGoldAsset,
   fromGoldAsset,
+  toStockHolding,
+  fromStockHolding,
   toOtherAsset,
   fromOtherAsset,
   toTransaction,
@@ -20,7 +24,9 @@ import type {
   ReceivableRow,
   DebtRow,
   CreditCardRow,
+  CardTransactionRow,
   GoldAssetRow,
+  StockHoldingRow,
   OtherAssetRow,
   TransactionRow,
 } from "./types";
@@ -29,7 +35,9 @@ import type {
   Receivable,
   Debt,
   CreditCard,
+  CardTransaction,
   GoldAsset,
+  StockHolding,
   OtherAsset,
   Transaction,
 } from "@/types";
@@ -46,10 +54,20 @@ export const cardsRepo = makeRepo<CreditCardRow, CreditCard>(
   toCreditCard,
   fromCreditCard
 );
+export const cardTxRepo = makeRepo<CardTransactionRow, CardTransaction>(
+  "card_transactions",
+  toCardTransaction,
+  fromCardTransaction
+);
 export const goldRepo = makeRepo<GoldAssetRow, GoldAsset>(
   "gold_assets",
   toGoldAsset,
   fromGoldAsset
+);
+export const stocksRepo = makeRepo<StockHoldingRow, StockHolding>(
+  "stock_holdings",
+  toStockHolding,
+  fromStockHolding
 );
 export const assetsRepo = makeRepo<OtherAssetRow, OtherAsset>(
   "other_assets",

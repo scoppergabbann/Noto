@@ -1,45 +1,36 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, TrendingUp, TrendingDown, Lightbulb } from "lucide-react";
+import { TrendingUp, TrendingDown, Lightbulb, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { RowActions } from "@/components/ui/RowActions";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { CashFlowChart } from "@/components/charts/CashFlowChart";
-import { TransactionForm, type TxDraft } from "@/components/forms/TransactionForm";
 import { useTransactionsStore } from "@/lib/stores";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 import { expenseCategories } from "@/data/mock";
 import {
   availableMonths,
   monthLabel,
-  monthShort,
   txInMonth,
   byCategory,
   cashflowSeries,
   monthInsight,
 } from "@/lib/analytics";
 import { rpShort } from "@/lib/format";
-import type { Transaction } from "@/types";
 
 const catColor = (name: string) =>
   expenseCategories.find((c) => c.name === name)?.color ?? "#64748b";
 const catEmoji = (name: string) => expenseCategories.find((c) => c.name === name)?.emoji ?? "📦";
 
 export default function SummaryPage() {
-  const { items, loading, error, fetch, add, update, remove } = useTransactionsStore();
+  const { items, loading, error, fetch } = useTransactionsStore();
 
   const months = useMemo(() => availableMonths(items), [items]);
   const [month, setMonth] = useState<string>("");
   const activeMonth = month || months[months.length - 1] || "";
-
-  const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<Transaction | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const insight = useMemo(() => monthInsight(items, activeMonth), [items, activeMonth]);
   const monthTx = useMemo(() => txInMonth(items, activeMonth), [items, activeMonth]);
@@ -49,23 +40,11 @@ export default function SummaryPage() {
   );
   const flow = useMemo(() => cashflowSeries(items, 6), [items]);
   const recent = useMemo(
-    () => [...monthTx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8),
+    () => [...monthTx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5),
     [monthTx]
   );
 
-  function openNew() {
-    setEditing(null);
-    setFormOpen(true);
-  }
-  function openEdit(t: Transaction) {
-    setEditing(t);
-    setFormOpen(true);
-  }
-  function handleSubmit(d: TxDraft) {
-    editing ? update(editing.id, d) : add(d);
-  }
-
-  if (loading) return <LoadingState label="Memuat transaksi…" />;
+  if (loading) return <LoadingState label="Memuat data ringkasan…" />;
   if (error) return <ErrorState message={error} onRetry={fetch} />;
 
   return (
@@ -74,17 +53,12 @@ export default function SummaryPage() {
         eyebrow={`Financial Summary · ${activeMonth ? monthLabel(activeMonth) : "—"}`}
         title={
           <>
-            Ke mana <em className="italic text-amber-text dark:text-amber">uangmu</em> pergi.
+            Ringkasan <em className="italic text-amber-text dark:text-amber">keuanganmu</em>.
           </>
-        }
-        action={
-          <Button onClick={openNew}>
-            <Plus size={17} strokeWidth={2.5} /> Catat transaksi
-          </Button>
         }
       />
 
-      {/* month selector */}
+      {/* Month selector */}
       {months.length > 0 && (
         <div className="mb-5 flex flex-wrap gap-2">
           {months.map((m) => (
@@ -103,17 +77,17 @@ export default function SummaryPage() {
         </div>
       )}
 
-      {/* stat row */}
+      {/* Stats */}
       <section className="stagger mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Pemasukan</div>
-          <div className="mt-2 font-serif text-[24px] font-semibold tabular-nums leading-none tracking-tight text-pos-strong dark:text-pos-dark sm:text-[28px]">
+          <div className="mt-2 font-serif text-[24px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[28px]">
             {rpShort(insight.income)}
           </div>
         </Card>
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Pengeluaran</div>
-          <div className="mt-2 font-serif text-[24px] font-semibold tabular-nums leading-none tracking-tight text-neg-strong dark:text-neg-dark sm:text-[28px]">
+          <div className="mt-2 font-serif text-[24px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[28px]">
             {rpShort(insight.expense)}
           </div>
           {insight.expenseChange !== null && (
@@ -127,13 +101,13 @@ export default function SummaryPage() {
         </Card>
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Ditabung</div>
-          <div className="text-heading mt-2 font-serif text-[24px] font-semibold tabular-nums leading-none tracking-tight sm:text-[28px]">
+          <div className="text-heading mt-2 font-serif text-[24px] font-semibold tabular-nums sm:text-[28px]">
             {rpShort(insight.saved)}
           </div>
         </Card>
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Savings Rate</div>
-          <div className="text-heading mt-2 font-serif text-[24px] font-semibold tabular-nums leading-none tracking-tight sm:text-[28px]">
+          <div className="text-heading mt-2 font-serif text-[24px] font-semibold tabular-nums sm:text-[28px]">
             {insight.savingsRate}%
           </div>
           <div className="mt-2">
@@ -148,7 +122,7 @@ export default function SummaryPage() {
         </Card>
       </section>
 
-      {/* insight banner */}
+      {/* Insight banner */}
       {insight.topCategory && (
         <Card className="mb-5 flex items-start gap-3.5 !bg-amber-soft/60 dark:!bg-amber/[0.07]">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber/15 text-amber-text dark:text-amber">
@@ -158,14 +132,15 @@ export default function SummaryPage() {
             Bulan ini pengeluaran terbesarmu di{" "}
             <strong className="text-heading font-bold">{insight.topCategory.name}</strong> sebesar{" "}
             <strong className="text-heading font-bold">{rpShort(insight.topCategory.value)}</strong>
+            .
             {insight.expenseChange !== null && insight.expenseChange > 10 && (
               <>
                 {" "}
-                — total belanja naik{" "}
+                Total belanja naik{" "}
                 <strong className="font-bold text-neg-strong dark:text-neg-dark">
                   {insight.expenseChange}%
                 </strong>{" "}
-                dari bulan lalu. Mungkin waktunya cek lagi?
+                dari bulan lalu.
               </>
             )}
             {insight.savingsRate >= 20 && (
@@ -175,14 +150,14 @@ export default function SummaryPage() {
                 <strong className="font-bold text-pos-strong dark:text-pos-dark">
                   {insight.savingsRate}%
                 </strong>{" "}
-                dari pemasukan — kerja bagus! 🎉
+                — bagus! 🎉
               </>
             )}
           </div>
         </Card>
       )}
 
-      {/* charts */}
+      {/* Charts */}
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.5fr]">
         <Card>
           <h2 className="text-heading font-serif text-[20px] font-semibold">
@@ -193,11 +168,11 @@ export default function SummaryPage() {
           </p>
           {expenseCats.length > 0 ? (
             <>
-              <div className="relative mx-auto h-[200px] w-full max-w-[230px]">
+              <div className="relative mx-auto h-[180px] w-full max-w-[220px]">
                 <DonutChart data={expenseCats} formatValue={(v) => rpShort(v)} innerRadius={54} />
               </div>
               <ul className="mt-4 space-y-2">
-                {expenseCats.map((c) => (
+                {expenseCats.slice(0, 5).map((c) => (
                   <li key={c.name} className="flex items-center gap-2.5 text-[13.5px]">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.color }} />
                     <span className="text-body font-medium">
@@ -216,10 +191,11 @@ export default function SummaryPage() {
             </p>
           )}
         </Card>
+
         <Card>
           <h2 className="text-heading font-serif text-[20px] font-semibold">Arus Kas Bulanan</h2>
           <p className="text-muted mb-4 mt-0.5 text-[13.5px] font-medium">
-            Pemasukan vs pengeluaran · {flow.length} bulan
+            {flow.length} bulan terakhir
           </p>
           <div className="mb-3 flex items-center gap-3 text-[12.5px] font-semibold">
             <span className="text-muted flex items-center gap-1.5">
@@ -235,14 +211,18 @@ export default function SummaryPage() {
         </Card>
       </section>
 
-      {/* recent transactions */}
+      {/* Recent transactions preview — full CRUD di /transactions */}
       <Card>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-heading font-serif text-[20px] font-semibold">
-            Transaksi {activeMonth ? monthLabel(activeMonth) : ""}
-          </h2>
-          <span className="text-subtle text-[13px] font-medium">{monthTx.length} transaksi</span>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-heading font-serif text-[20px] font-semibold">Transaksi Terbaru</h2>
+          <Link
+            href="/transactions"
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[13.5px] font-bold text-amber-text transition hover:bg-amber-soft dark:text-amber dark:hover:bg-amber/10"
+          >
+            Lihat semua <ArrowUpRight size={15} strokeWidth={2.5} />
+          </Link>
         </div>
+
         {recent.length > 0 ? (
           <ul>
             {recent.map((t) => {
@@ -261,53 +241,40 @@ export default function SummaryPage() {
                     {inc ? "💰" : catEmoji(t.category)}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="text-heading truncate text-[14.5px] font-semibold">
+                    <div className="text-heading truncate text-[14px] font-semibold">
                       {t.category}
                     </div>
                     <div className="text-subtle truncate text-[12.5px]">
-                      {t.note || (inc ? "Pemasukan" : "Pengeluaran")} · {t.date}
+                      {t.note || "—"} · {t.date}
                     </div>
                   </div>
                   <span
-                    className={`shrink-0 text-[14.5px] font-bold tabular-nums ${inc ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
+                    className={`shrink-0 font-serif text-[14.5px] font-bold tabular-nums ${
+                      inc
+                        ? "text-pos-strong dark:text-pos-dark"
+                        : "text-neg-strong dark:text-neg-dark"
+                    }`}
                   >
                     {inc ? "+" : "−"}
                     {rpShort(t.amount)}
                   </span>
-                  <RowActions onEdit={() => openEdit(t)} onDelete={() => setDeleteId(t.id)} />
                 </li>
               );
             })}
           </ul>
         ) : (
-          <div className="py-12 text-center">
-            <div className="mb-3 text-[40px]">🧾</div>
-            <div className="text-heading mb-1 font-serif text-[18px] font-semibold">
-              Belum ada transaksi
-            </div>
-            <div className="text-muted mx-auto mb-5 max-w-xs text-[14px]">
-              Catat pemasukan & pengeluaran untuk melihat analitik bulananmu.
-            </div>
-            <Button onClick={openNew} className="mx-auto">
-              <Plus size={17} strokeWidth={2.5} /> Catat transaksi
-            </Button>
+          <div className="py-10 text-center">
+            <div className="mb-2 text-[36px]">🧾</div>
+            <p className="text-muted text-[14px]">Belum ada transaksi bulan ini.</p>
+            <Link
+              href="/transactions"
+              className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-amber-text dark:text-amber"
+            >
+              Catat di halaman Transaksi <ArrowUpRight size={14} />
+            </Link>
           </div>
         )}
       </Card>
-
-      <TransactionForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSubmit={handleSubmit}
-        initial={editing}
-      />
-      <ConfirmDialog
-        open={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        onConfirm={() => deleteId && remove(deleteId)}
-        title="Hapus transaksi?"
-        message="Transaksi ini akan dihapus permanen."
-      />
     </>
   );
 }
