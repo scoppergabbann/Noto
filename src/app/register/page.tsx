@@ -22,12 +22,20 @@ export default function RegisterPage() {
     }
     setLoading(true);
     setError("");
+
     const sb = createClient();
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : "/auth/callback";
+
     const { error } = await sb.auth.signUp({
       email,
       password,
-      options: { data: { full_name: name } },
+      options: {
+        data: { full_name: name },
+        emailRedirectTo: redirectTo,
+      },
     });
+
     if (error) {
       setError(error.message);
       setLoading(false);
@@ -39,16 +47,19 @@ export default function RegisterPage() {
   if (done)
     return (
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="card w-full max-w-md text-center">
-          <div className="mb-3 text-[48px]">📬</div>
-          <h2 className="text-heading mb-2 font-serif text-[24px] font-semibold">Cek emailmu!</h2>
-          <p className="text-muted mb-5 text-[14.5px]">
-            Kami kirim link konfirmasi ke <strong className="text-heading">{email}</strong>. Klik
-            link tersebut untuk mengaktifkan akun.
+        <div className="card w-full max-w-sm text-center">
+          <div className="mb-3 text-[48px]" aria-hidden="true">
+            📬
+          </div>
+          <h2 className="text-heading mb-2 font-serif text-[22px] font-semibold">Cek emailmu!</h2>
+          <p className="text-muted mb-6 text-[15px] leading-relaxed">
+            Kami kirim link konfirmasi ke{" "}
+            <strong className="text-heading font-semibold">{email}</strong>. Klik link itu untuk
+            mengaktifkan akun.
           </p>
           <Link
             href="/login"
-            className="inline-block rounded-xl bg-gradient-to-br from-amber to-amber-deep px-6 py-2.5 text-[14.5px] font-bold text-white shadow-glow"
+            className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-gradient-to-br from-amber to-amber-deep text-[15px] font-bold text-white shadow-glow transition hover:brightness-105"
           >
             Ke halaman login
           </Link>
@@ -56,25 +67,29 @@ export default function RegisterPage() {
       </div>
     );
 
+  const inputClass =
+    "min-h-[48px] w-full rounded-xl border border-black/[.08] bg-white px-4 py-3 text-[15px] text-heading outline-none transition placeholder:text-subtle focus:border-amber focus:ring-2 focus:ring-amber/20 dark:border-white/10 dark:bg-white/5 dark:text-white touch-manipulation";
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="text-heading mb-3 font-serif text-[36px] font-semibold tracking-tight">
-            Noto
+          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-amber to-amber-deep text-white">
+            <span className="font-serif text-[22px] font-bold">N</span>
           </div>
-          <p className="text-muted text-[14.5px]">Mulai kelola finansialmu hari ini.</p>
+          <h1 className="text-heading font-serif text-[26px] font-semibold tracking-tight">Noto</h1>
+          <p className="text-muted mt-1 text-[15px]">Mulai kelola finansialmu</p>
         </div>
 
-        <form onSubmit={handleRegister} className="card flex flex-col gap-4 !p-5 sm:!p-6">
+        <form onSubmit={handleRegister} className="card flex flex-col gap-4" noValidate>
           {[
             {
               id: "name",
-              label: "Nama",
+              label: "Nama lengkap",
               type: "text",
               val: name,
               set: setName,
-              ph: "Rangga A.",
+              ph: "Rangga Aditya",
               auto: "name",
             },
             {
@@ -87,7 +102,7 @@ export default function RegisterPage() {
               auto: "email",
             },
             {
-              id: "pass",
+              id: "password",
               label: "Password",
               type: "password",
               val: password,
@@ -96,8 +111,8 @@ export default function RegisterPage() {
               auto: "new-password",
             },
           ].map(({ id, label, type, val, set, ph, auto }) => (
-            <div key={id}>
-              <label className="text-heading mb-1.5 block text-[13.5px] font-semibold" htmlFor={id}>
+            <div key={id} className="flex flex-col gap-1.5">
+              <label htmlFor={id} className="text-heading text-[13.5px] font-semibold">
                 {label}
               </label>
               <input
@@ -108,13 +123,16 @@ export default function RegisterPage() {
                 value={val}
                 onChange={(e) => set(e.target.value)}
                 placeholder={ph}
-                className="text-heading placeholder:text-subtle w-full rounded-xl border border-black/[.08] bg-white px-4 py-2.5 text-[14.5px] outline-none transition focus:border-amber focus:ring-2 focus:ring-amber/20 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                className={inputClass}
               />
             </div>
           ))}
 
           {error && (
-            <div className="rounded-xl bg-neg-soft px-4 py-2.5 text-[13.5px] font-medium text-neg-strong dark:bg-neg/15 dark:text-neg-dark">
+            <div
+              role="alert"
+              className="rounded-xl bg-neg-soft px-4 py-3 text-[14px] font-medium text-neg-strong dark:bg-neg/15 dark:text-neg-dark"
+            >
               {error}
             </div>
           )}
@@ -122,12 +140,12 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 w-full rounded-xl bg-gradient-to-br from-amber to-amber-deep py-3 text-[15px] font-bold text-white shadow-glow transition hover:-translate-y-px hover:brightness-105 disabled:opacity-60"
+            className="min-h-[48px] w-full touch-manipulation rounded-xl bg-gradient-to-br from-amber to-amber-deep py-3 text-[15px] font-bold text-white shadow-glow transition hover:-translate-y-px hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber active:translate-y-0 disabled:opacity-60"
           >
             {loading ? "Mendaftar…" : "Daftar sekarang"}
           </button>
 
-          <p className="text-muted text-center text-[13.5px]">
+          <p className="text-muted text-center text-[14px]">
             Sudah punya akun?{" "}
             <Link
               href="/login"

@@ -167,7 +167,7 @@ export default function TransactionsPage() {
               return (
                 <li
                   key={t.id}
-                  className="flex items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
+                  className="flex min-h-[52px] items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
                 >
                   <span
                     className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[18px]"

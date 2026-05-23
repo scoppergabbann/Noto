@@ -51,6 +51,24 @@
       radial-gradient(820px 520px at -6% 2%, rgba(15, 157, 107, 0.1), transparent 52%);
   }
 
+  /* Base reading comfort */
+  body {
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  p,
+  li {
+    line-height: 1.65;
+  }
+
+  /* Prevent content from touching screen edges */
+  .container-safe {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
   /* Accessible focus ring across all interactive elements */
   *:focus-visible {
     outline: 2px solid #f59425;

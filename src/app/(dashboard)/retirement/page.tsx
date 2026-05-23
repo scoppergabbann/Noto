@@ -218,7 +218,7 @@ export default function RetirementPage() {
             ["Nabung/bln", rpShort(monthlyContribTotal), "text-heading"],
           ].map(([label, value, cls]) => (
             <div key={label} className="rounded-xl bg-surface-sunken p-3 dark:bg-white/5">
-              <div className="text-subtle text-[11.5px] font-semibold">{label}</div>
+              <div className="text-subtle text-[12.5px] font-semibold">{label}</div>
               <div className={`mt-0.5 font-serif text-[16px] font-semibold tabular-nums ${cls}`}>
                 {value}
               </div>

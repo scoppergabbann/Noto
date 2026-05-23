@@ -23,6 +23,13 @@ import { TransactionForm, type TxDraft } from "@/components/forms/TransactionFor
 import { progressPct, healthScore, remainingGrams, currentGoldValue } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 
+const HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+function formatTanggal(d: Date): string {
+  return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 export default function DashboardPage() {
   const [userName, setUserName] = useState("...");
 
@@ -80,7 +87,7 @@ export default function DashboardPage() {
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
         <div>
           <p className="text-subtle mb-2 text-[12.5px] font-bold uppercase tracking-[.14em]">
-            Kamis, 21 Mei 2026
+            {formatTanggal(new Date())}
           </p>
           <h1 className="text-heading font-serif text-[28px] font-semibold leading-[1.08] tracking-tight sm:text-[36px]">
             Halo {userName},
@@ -173,7 +180,7 @@ export default function DashboardPage() {
             <DonutChart data={composition} formatValue={(v) => rpShort(v)} />
             <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
               <div>
-                <div className="text-subtle text-[11px] font-bold uppercase tracking-wide">
+                <div className="text-subtle text-[12px] font-bold uppercase tracking-wide">
                   Total
                 </div>
                 <div className="text-heading font-serif text-[19px] font-semibold tabular-nums">

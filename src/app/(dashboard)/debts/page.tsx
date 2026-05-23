@@ -142,7 +142,7 @@ export default function DebtsPage() {
           </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((d) => {
             const p = progressPct(d.paid, d.total);
             const left = d.total - d.paid;
@@ -169,13 +169,13 @@ export default function DebtsPage() {
                 <ProgressBar value={p} color="#1f9e6f" height={10} />
                 <div className="mt-3.5 flex justify-between border-t border-black/5 pt-3.5 dark:border-white/5">
                   <div>
-                    <div className="text-[11.5px] text-ink-dim dark:text-slate-400">Dibayar</div>
+                    <div className="text-[12.5px] text-ink-dim dark:text-slate-400">Dibayar</div>
                     <div className="text-[14px] font-semibold text-brand-green">
                       {rpShort(d.paid)}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[11.5px] text-ink-dim dark:text-slate-400">
+                    <div className="text-[12.5px] text-ink-dim dark:text-slate-400">
                       Jatuh tempo
                     </div>
                     <div className="text-[14px] font-semibold">
