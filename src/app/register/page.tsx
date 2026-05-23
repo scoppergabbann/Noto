@@ -38,7 +38,7 @@ export default function RegisterPage() {
 
   if (done)
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <div className="card w-full max-w-md text-center">
           <div className="mb-3 text-[48px]">📬</div>
           <h2 className="text-heading mb-2 font-serif text-[24px] font-semibold">Cek emailmu!</h2>
@@ -57,7 +57,7 @@ export default function RegisterPage() {
     );
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="text-heading mb-3 font-serif text-[36px] font-semibold tracking-tight">
@@ -66,7 +66,7 @@ export default function RegisterPage() {
           <p className="text-muted text-[14.5px]">Mulai kelola finansialmu hari ini.</p>
         </div>
 
-        <form onSubmit={handleRegister} className="card flex flex-col gap-4">
+        <form onSubmit={handleRegister} className="card flex flex-col gap-4 !p-5 sm:!p-6">
           {[
             {
               id: "name",

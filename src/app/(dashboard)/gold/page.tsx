@@ -72,12 +72,12 @@ export default function GoldPage() {
         }
       />
 
-      <div className="stagger mb-[18px] grid grid-cols-1 gap-[18px] sm:grid-cols-3">
+      <div className="stagger mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Card hoverable>
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Emas Tersimpan
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight sm:text-[26px]">
             {totalGrams.toFixed(1)}
             <span className="text-[16px] text-ink-faint"> gr</span>
           </div>
@@ -86,7 +86,7 @@ export default function GoldPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Estimasi Nilai Kini
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight sm:text-[26px]">
             {rpShort(totalNow)}
           </div>
         </Card>
@@ -95,7 +95,7 @@ export default function GoldPage() {
             Profit / Loss
           </div>
           <div
-            className={`serif mt-2 text-[30px] font-semibold leading-none tracking-tight ${profit ? "text-brand-green" : "text-brand-red"}`}
+            className={`serif mt-2 text-[20px] font-semibold leading-none tracking-tight sm:text-[26px] ${profit ? "text-brand-green" : "text-brand-red"}`}
           >
             {profit ? "+" : ""}
             {rpShort(totalPL)}

@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area insets untuk iOS notch dan home indicator */
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+
 @layer base {
   :root {
     /* Dark-theme ink scale (applied via .dark .text-* helpers below) */
@@ -153,4 +161,9 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* Safe area bottom padding for mobile nav */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }

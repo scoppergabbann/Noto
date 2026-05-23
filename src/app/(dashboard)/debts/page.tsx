@@ -89,12 +89,12 @@ export default function DebtsPage() {
         }
       />
 
-      <div className="stagger mb-6 grid grid-cols-1 gap-[18px] sm:grid-cols-3">
+      <div className="stagger mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Card hoverable>
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sisa Utang
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-brand-red">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight text-brand-red sm:text-[26px]">
             {rpShort(totalLeft)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -105,7 +105,7 @@ export default function DebtsPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sudah Dibayar
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-brand-green">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight text-brand-green sm:text-[26px]">
             {rpShort(totalPaid)}
           </div>
           <div className="mt-[11px] text-[13px]">
@@ -116,7 +116,7 @@ export default function DebtsPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Debt Health
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight sm:text-[26px]">
             {debtHealth}
             <span className="text-[16px] text-ink-faint">/100</span>
           </div>
@@ -157,7 +157,7 @@ export default function DebtsPage() {
                 </div>
                 <div className="mb-[9px] flex items-end justify-between">
                   <div>
-                    <div className="font-serif text-[24px] font-semibold text-brand-red">
+                    <div className="font-serif text-[18px] font-semibold text-brand-red sm:text-[22px]">
                       {rpShort(left)}
                     </div>
                     <div className="text-[12.5px] text-ink-dim dark:text-slate-400">

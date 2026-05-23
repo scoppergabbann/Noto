@@ -65,7 +65,7 @@ export default function StocksPage() {
         }
       />
 
-      <div className="stagger mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           ["Nilai Pasar", rpShort(totalMarket), ""],
           ["Modal", rpShort(totalCost), ""],
@@ -85,7 +85,7 @@ export default function StocksPage() {
           <Card key={label} hoverable>
             <div className="text-muted text-[13px] font-semibold">{label}</div>
             <div
-              className={`text-heading mt-2 font-serif text-[24px] font-semibold tabular-nums leading-none ${cls}`}
+              className={`text-heading mt-2 font-serif text-[18px] font-semibold tabular-nums leading-none sm:text-[22px] ${cls}`}
             >
               {value}
             </div>

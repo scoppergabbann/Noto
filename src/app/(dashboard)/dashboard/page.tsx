@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/Card";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { DonutChart } from "@/components/charts/DonutChart";
@@ -78,7 +77,7 @@ export default function DashboardPage() {
   return (
     <>
       {/* ── Header ── */}
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
         <div>
           <p className="text-subtle mb-2 text-[12.5px] font-bold uppercase tracking-[.14em]">
             Kamis, 21 Mei 2026
@@ -90,7 +89,6 @@ export default function DashboardPage() {
           </h1>
         </div>
         <div className="flex items-center gap-2.5">
-          <ThemeToggle />
           <Button className="shadow-glow" onClick={() => setTxOpen(true)}>
             <Plus size={17} strokeWidth={2.5} />
             <span className="hidden sm:inline">Catat transaksi</span>
@@ -102,7 +100,7 @@ export default function DashboardPage() {
       {/* ── Metrics row ── */}
       <section
         aria-label="Ringkasan kekayaan"
-        className="stagger mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        className="stagger mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-3"
       >
         <MetricCard
           id="nw"

@@ -64,7 +64,7 @@ export default function CashPage() {
         }
       />
 
-      <div className="stagger mb-6 grid grid-cols-1 gap-[18px] sm:grid-cols-3">
+      <div className="stagger mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Card hoverable>
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Total Terkumpul

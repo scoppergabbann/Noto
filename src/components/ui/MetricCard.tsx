@@ -56,7 +56,7 @@ export function MetricCard({
       <div className="relative z-10 flex items-start justify-between">
         <span
           className={cn(
-            "text-[13px] font-semibold tracking-wide",
+            "text-[12px] font-semibold tracking-wide sm:text-[13px]",
             hero ? "text-white/70" : "text-muted"
           )}
         >

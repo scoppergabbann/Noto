@@ -160,7 +160,7 @@ export default function CardsPage() {
 
                   <ProgressBar value={util} color={warn ? "#d83a3a" : "#0f9d6b"} height={10} />
 
-                  <div className="mt-4 grid grid-cols-3 gap-2.5">
+                  <div className="mt-4 grid grid-cols-3 gap-2">
                     {[
                       ["Pemakaian", rpShort(c.spent), ""],
                       ["Dibayar", rpShort(c.paid), "text-pos-strong dark:text-pos-dark"],

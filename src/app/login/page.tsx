@@ -30,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo / brand */}
         <div className="mb-8 text-center">
@@ -40,7 +40,7 @@ export default function LoginPage() {
           <p className="text-muted text-[14.5px]">Masuk untuk melanjutkan ke finansialmu.</p>
         </div>
 
-        <form onSubmit={handleLogin} className="card flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="card flex flex-col gap-4 !p-5 sm:!p-6">
           <div>
             <label
               className="text-heading mb-1.5 block text-[13.5px] font-semibold"

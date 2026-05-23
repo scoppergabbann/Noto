@@ -62,7 +62,7 @@ export default function ReceivablesPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Piutang Aktif
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-amber-text dark:text-amber">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight text-amber-text dark:text-amber sm:text-[26px]">
             {rpShort(totalActive)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -73,7 +73,7 @@ export default function ReceivablesPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Total Piutang
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight sm:text-[26px]">
             {rpShort(totalAll)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -84,7 +84,7 @@ export default function ReceivablesPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sudah Diterima
           </div>
-          <div className="mt-2 font-serif text-[30px] font-semibold leading-none tracking-tight text-brand-green">
+          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight text-brand-green sm:text-[26px]">
             {rpShort(totalPaid)}
           </div>
           <div className="mt-[11px] text-[13px]">

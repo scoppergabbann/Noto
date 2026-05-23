@@ -80,7 +80,7 @@ export default function TransactionsPage() {
         }
       />
 
-      <div className="stagger mb-5 grid grid-cols-3 gap-4">
+      <div className="stagger mb-4 grid grid-cols-3 gap-2 sm:gap-4">
         <Card hoverable>
           <div className="text-muted text-[12.5px] font-semibold">Pemasukan</div>
           <div className="mt-1.5 font-serif text-[22px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[26px]">
@@ -117,7 +117,7 @@ export default function TransactionsPage() {
               </button>
             ))}
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             {(["all", "income", "expense"] as const).map((t) => (
               <button
                 key={t}

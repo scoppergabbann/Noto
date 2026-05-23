@@ -56,7 +56,7 @@ export default function AssetsPage() {
         <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
           Total Nilai Aset Lainnya
         </div>
-        <div className="mt-2 font-serif text-[34px] font-semibold leading-none tracking-tight">
+        <div className="mt-2 font-serif text-[22px] font-semibold leading-none tracking-tight sm:text-[30px]">
           {rpShort(total)}
         </div>
         <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">

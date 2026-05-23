@@ -78,16 +78,16 @@ export default function SummaryPage() {
       )}
 
       {/* Stats */}
-      <section className="stagger mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Pemasukan</div>
-          <div className="mt-2 font-serif text-[24px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[28px]">
+          <div className="mt-2 font-serif text-[18px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[22px] sm:text-[28px]">
             {rpShort(insight.income)}
           </div>
         </Card>
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Pengeluaran</div>
-          <div className="mt-2 font-serif text-[24px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[28px]">
+          <div className="mt-2 font-serif text-[18px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[22px] sm:text-[28px]">
             {rpShort(insight.expense)}
           </div>
           {insight.expenseChange !== null && (
@@ -101,13 +101,13 @@ export default function SummaryPage() {
         </Card>
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Ditabung</div>
-          <div className="text-heading mt-2 font-serif text-[24px] font-semibold tabular-nums sm:text-[28px]">
+          <div className="text-heading mt-2 font-serif text-[18px] font-semibold tabular-nums sm:text-[22px] sm:text-[28px]">
             {rpShort(insight.saved)}
           </div>
         </Card>
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Savings Rate</div>
-          <div className="text-heading mt-2 font-serif text-[24px] font-semibold tabular-nums sm:text-[28px]">
+          <div className="text-heading mt-2 font-serif text-[18px] font-semibold tabular-nums sm:text-[22px] sm:text-[28px]">
             {insight.savingsRate}%
           </div>
           <div className="mt-2">
