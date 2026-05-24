@@ -111,3 +111,26 @@ export function stockTotalReturn(
 ): number {
   return stockUnrealizedPL(lots, avgPrice, currentPrice) + dividendReceived;
 }
+
+/** Weighted average return portofolio saham (berdasarkan modal). */
+export function portfolioWeightedReturn(
+  holdings: { lots: number; avgPrice: number; currentPrice: number }[]
+): number {
+  const totalCost = holdings.reduce((s, h) => s + stockCostBasis(h.lots, h.avgPrice), 0);
+  if (totalCost <= 0) return 0;
+  const weightedPL = holdings.reduce(
+    (s, h) => s + stockUnrealizedPL(h.lots, h.avgPrice, h.currentPrice),
+    0
+  );
+  return Math.round((weightedPL / totalCost) * 100 * 10) / 10;
+}
+
+/** Bobot portofolio saham (% dari total market value). */
+export function stockPortfolioWeight(
+  lots: number,
+  currentPrice: number,
+  totalMarketValue: number
+): number {
+  if (totalMarketValue <= 0) return 0;
+  return Math.round((stockMarketValue(lots, currentPrice) / totalMarketValue) * 100 * 10) / 10;
+}

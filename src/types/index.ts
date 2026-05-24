@@ -74,10 +74,15 @@ export interface StockHolding {
   ticker: string;
   name: string;
   exchange: string;
+  broker: string; // sekuritas/broker
   lots: number;
-  avgPrice: number;
-  currentPrice: number;
-  dividendReceived: number;
+  avgPrice: number; // harga beli rata-rata per lembar
+  currentPrice: number; // harga kini per lembar
+  dividendReceived: number; // total dividen diterima
+  targetPrice: number; // target harga jual
+  buyReason: string; // alasan beli
+  exitPlan: string; // rencana keluar
+  conviction: number; // 1-5 (keyakinan)
   notes?: string;
 }
 
@@ -125,13 +130,13 @@ export interface CashFlowPoint {
 // Pensiun
 export interface RetirementPlan {
   id: string;
-  label: string;
+  label: string; // nama rencana
   currentAge: number;
   retirementAge: number;
-  monthlyNeedToday: number;
-  inflationRate: number;
-  expectedReturn: number;
-  lifeExpectancy: number;
+  monthlyNeedToday: number; // kebutuhan bulanan saat ini (Rp)
+  inflationRate: number; // % per tahun, mis. 5
+  expectedReturn: number; // % per tahun dari investasi, mis. 8
+  currentSavings: number; // total dana pensiun yang sudah terkumpul
   notes?: string;
 }
 
@@ -143,14 +148,4 @@ export interface RetirementFund {
   currentValue: number;
   monthlyContribution: number;
   notes?: string;
-}
-
-export interface AssetTransfer {
-  id: string;
-  fromGoalId: string;
-  toGoalId: string;
-  amount: number;
-  date: string; // "YYYY-MM-DD"
-  note?: string;
-  createdAt: string;
 }
