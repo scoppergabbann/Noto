@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Plus, ArrowLeftRight, Clock } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -32,6 +32,16 @@ export default function CashPage() {
   const [transferOpen, setTransferOpen] = useState(false);
   const [editing, setEditing] = useState<Goal | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  useEffect(() => {
+  fetchTransfers();
+}, [fetchTransfers]);
+
+useEffect(() => {
+  if (tab === "history") {
+    fetchTransfers();
+  }
+}, [tab, fetchTransfers]);
 
   // Aggregations
   const totalUsed = goals.reduce((s, g) => s + g.usedAmount, 0);
