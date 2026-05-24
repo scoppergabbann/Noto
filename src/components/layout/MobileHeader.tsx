@@ -45,15 +45,11 @@ export function MobileHeader() {
           className="flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
           aria-label="Noto — kembali ke dashboard"
         >
-          <div
-            className="grid h-8 w-8 place-items-center rounded-[9px] bg-gradient-to-br from-amber to-amber-deep font-serif text-[16px] font-bold text-white"
-            aria-hidden="true"
-          >
-            N
-          </div>
-          <span className="text-heading font-serif text-[18px] font-semibold tracking-tight">
-            Noto
-          </span>
+          <img
+          src="/logo-noto-header-transparent.png"
+          alt="Noto"
+          className="h-8 w-auto object-contain"
+        />
         </Link>
 
         <div className="flex items-center gap-1">

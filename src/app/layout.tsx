@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s · Noto",
   },
   description:
-    "Aplikasi personal finance untuk menata cashflow, tabungan, aset, utang, saham, emas, dan perjalanan finansialmu dengan lebih rapi.",
+    "Noto membantumu menata hidup dan finansial: dari cashflow harian, tabungan, aset, utang, saham, emas, sampai investasi pribadi.",
   keywords: [
     "Noto",
     "Noto urip noto finansial",
@@ -40,13 +40,24 @@ export const metadata: Metadata = {
   creator: "Mochammad Fawwaz",
   publisher: "Noto",
   applicationName: "Noto",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon.ico",
+  },
   openGraph: {
     type: "website",
     url: "https://noto-eight.vercel.app",
     siteName: "Noto",
     title: "Noto — Noto urip, noto finansial.",
     description:
-      "Noto membantumu menata hidup dan finansial: dari cashflow harian, tabungan, aset, utang, sampai investasi pribadi.",
+      "Aplikasi personal finance untuk menata cashflow, tabungan, aset, utang, saham, emas, dan perjalanan finansialmu dengan lebih rapi.",
     locale: "id_ID",
     images: [
       {
@@ -63,10 +74,6 @@ export const metadata: Metadata = {
     description:
       "Catat cashflow, tabungan, aset, utang, saham, emas, dan perjalanan finansialmu dalam satu aplikasi personal finance.",
     images: ["/og-image.png"],
-  },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
   },
 };
 

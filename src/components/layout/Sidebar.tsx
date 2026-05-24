@@ -35,14 +35,17 @@ export function Sidebar({
       className="fixed inset-y-0 left-0 z-40 hidden w-[232px] flex-col overflow-y-auto border-r border-black/[.06] bg-surface-base/80 px-3 py-5 backdrop-blur dark:border-white/[.06] dark:bg-night-base/80 lg:flex"
     >
       {/* Logo */}
-      <div className="mb-5 flex items-center gap-2.5 px-2">
-        <div className="grid h-8 w-8 place-items-center rounded-[9px] bg-gradient-to-br from-amber to-amber-deep font-serif text-[16px] font-bold text-white">
-          N
-        </div>
-        <span className="text-heading font-serif text-[19px] font-semibold tracking-tight">
-          Noto
-        </span>
-      </div>
+      <Link
+        href="/dashboard"
+        aria-label="Kembali ke dashboard Noto"
+        className="mb-5 flex items-center px-2"
+      >
+        <img
+          src="/logo-noto-header-transparent.png"
+          alt="Noto"
+          className="h-10 w-auto object-contain"
+        />
+      </Link>
 
       {/* Nav groups */}
       <nav aria-label="Menu navigasi" className="flex-1 space-y-5">
