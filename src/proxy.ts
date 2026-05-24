@@ -4,6 +4,14 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
+  const pathname = request.nextUrl.pathname;
+
+  const isPublicRoute =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/auth/callback") ||
+    pathname.startsWith("/auth/error");
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -14,10 +22,12 @@ export async function proxy(request: NextRequest) {
         },
         setAll(toSet: { name: string; value: string; options: CookieOptions }[]) {
           toSet.forEach(({ name, value }) => request.cookies.set(name, value));
+
           supabaseResponse = NextResponse.next({ request });
-          toSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
+
+          toSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
+          });
         },
       },
     }
@@ -28,17 +38,29 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isPublicRoute =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/register");
-
+  // Kalau belum login dan bukan public route, lempar ke login
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
+
     url.pathname = "/login";
+
+    // Simpan intended path, tapi jangan untuk auth callback
+    if (pathname !== "/") {
+      url.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
+    }
+
     return NextResponse.redirect(url);
   }
 
-  // Anti-cache header untuk dashboard routes (mencegah stale JWT)
+  // Kalau user sudah login lalu buka login/register, arahkan ke dashboard
+  if (user && (pathname.startsWith("/login") || pathname.startsWith("/register"))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
+  // Anti-cache header untuk protected routes
   if (!isPublicRoute) {
     supabaseResponse.headers.set("Cache-Control", "no-store, max-age=0");
   }
@@ -47,5 +69,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
 };

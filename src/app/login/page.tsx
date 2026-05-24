@@ -35,7 +35,7 @@ const loginFeatures = [
   },
 ];
 
-function getSiteUrl() {
+function getAuthCallbackUrl() {
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
     (typeof window !== "undefined"
@@ -44,9 +44,9 @@ function getSiteUrl() {
 
   try {
     const url = new URL(raw);
-    return url.origin;
+    return `${url.origin}/auth/callback`;
   } catch {
-    return "http://localhost:3000";
+    return "http://localhost:3000/auth/callback";
   }
 }
 
@@ -62,36 +62,36 @@ function LoginForm() {
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const err = searchParams.get("error");
-    const errorCode = searchParams.get("error_code");
+useEffect(() => {
+  const err = searchParams.get("error");
+  const errorCode = searchParams.get("error_code");
 
-    if (err === "auth_callback_failed") {
-      setError(
-        "Login gagal diproses. Coba ulangi lagi, atau gunakan metode login lain."
-      );
-    }
+  if (err === "auth_callback_failed") {
+    setError(
+      "Login gagal diproses. Coba ulangi lagi, atau gunakan metode login lain."
+    );
+  }
 
-    if (errorCode === "otp_expired") {
-      setError(
-        "Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru."
-      );
-    }
-  }, [searchParams]);
+  if (errorCode === "otp_expired") {
+    setError(
+      "Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru."
+    );
+  }
+}, [searchParams]);
 
   async function handleGoogleLogin() {
     setLoadingGoogle(true);
     setError("");
 
     const supabase = createClient();
-    const siteUrl = getSiteUrl();
+    const redirectTo = getAuthCallbackUrl();
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${siteUrl}/auth/callback`,
-      },
-    });
+const { error } = await supabase.auth.signInWithOAuth({
+  provider: "google",
+  options: {
+    redirectTo,
+  },
+});
 
     if (error) {
       setError(error.message);
