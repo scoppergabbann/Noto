@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
-import { navItems } from "./nav-config";
+import { navGroups } from "./nav-config";
 import { createClient } from "@/lib/supabase/client";
 
 export function MobileHeader() {
@@ -14,12 +14,12 @@ export function MobileHeader() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Close menu on route change
+  // Auto-close on route change
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Prevent body scroll when menu open
+  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -28,15 +28,14 @@ export function MobileHeader() {
   }, [open]);
 
   async function handleLogout() {
-    const sb = createClient();
-    await sb.auth.signOut();
+    await createClient().auth.signOut();
     router.push("/login");
     router.refresh();
   }
 
   return (
     <>
-      {/* Sticky top bar */}
+      {/* Top bar */}
       <header
         className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-black/[.06] bg-surface-base/95 px-4 backdrop-blur-xl dark:border-white/[.06] dark:bg-night-base/95 lg:hidden"
         role="banner"
@@ -63,7 +62,7 @@ export function MobileHeader() {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Tutup menu" : "Buka menu"}
             aria-expanded={open}
-            aria-controls="mobile-menu"
+            aria-controls="mobile-drawer"
             className={cn(
               "grid h-11 w-11 touch-manipulation place-items-center rounded-xl",
               "text-ink-dim transition hover:bg-black/[.05] active:bg-black/10",
@@ -76,61 +75,69 @@ export function MobileHeader() {
         </div>
       </header>
 
-      {/* Full-screen drawer */}
+      {/* Drawer */}
       {open && (
         <div
-          id="mobile-menu"
+          id="mobile-drawer"
           role="navigation"
           aria-label="Menu navigasi"
           className="fixed inset-0 z-30 flex flex-col bg-surface-base pt-14 dark:bg-night-base lg:hidden"
         >
-          {/* Nav items */}
-          <nav className="flex-1 overflow-y-auto px-3 py-3">
-            <p className="text-subtle mb-2 px-4 text-[11px] font-bold uppercase tracking-[.14em]">
-              Navigasi
-            </p>
-            {navItems.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "mb-0.5 flex min-h-[52px] items-center gap-3.5 rounded-xl px-4 text-[15.5px] font-medium transition",
-                    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
-                    "touch-manipulation",
-                    active
-                      ? "bg-white text-ink shadow-soft dark:bg-white/5 dark:text-slate-100"
-                      : "text-ink-dim hover:bg-white/70 active:bg-white dark:text-slate-400 dark:hover:bg-white/5"
-                  )}
-                >
-                  <Icon
-                    size={21}
-                    strokeWidth={active ? 2.3 : 1.8}
-                    className={active ? "text-amber-deep" : "text-ink-faint"}
-                    aria-hidden="true"
-                  />
-                  {label}
-                  {active && (
-                    <span
-                      className="ml-auto h-2 w-2 rounded-full bg-amber-deep"
-                      aria-hidden="true"
-                    />
-                  )}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+            {navGroups.map((group) => (
+              <div key={group.title}>
+                {/* Section label */}
+                <p className="text-subtle mb-1.5 px-4 text-[10.5px] font-bold tracking-[.12em]">
+                  {group.title}
+                </p>
+
+                {/* Items */}
+                <ul className="space-y-0.5">
+                  {group.items.map(({ href, label, icon: Icon }) => {
+                    const isActive = pathname === href;
+                    return (
+                      <li key={href}>
+                        <Link
+                          href={href}
+                          aria-current={isActive ? "page" : undefined}
+                          className={cn(
+                            "flex min-h-[48px] items-center gap-3.5 rounded-xl px-4 text-[15px] font-medium transition",
+                            "touch-manipulation focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber",
+                            isActive
+                              ? "bg-white text-ink shadow-soft dark:bg-white/[.07] dark:text-slate-100"
+                              : "text-ink-dim hover:bg-white/70 active:bg-white dark:text-slate-400 dark:hover:bg-white/5"
+                          )}
+                        >
+                          <Icon
+                            size={19}
+                            strokeWidth={isActive ? 2.3 : 1.8}
+                            className={isActive ? "text-amber-deep" : "text-ink-faint"}
+                            aria-hidden="true"
+                          />
+                          {label}
+                          {isActive && (
+                            <span
+                              className="ml-auto h-2 w-2 rounded-full bg-amber-deep"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
           </nav>
 
-          {/* Footer */}
+          {/* Logout */}
           <div className="border-t border-black/[.06] px-3 pb-8 pt-3 dark:border-white/[.06]">
             <button
               onClick={handleLogout}
               className={cn(
-                "flex min-h-[52px] w-full items-center gap-3.5 rounded-xl px-4 text-[15.5px] font-medium",
-                "text-neg-strong transition hover:bg-neg-soft active:bg-neg-soft",
+                "flex min-h-[48px] w-full items-center gap-3.5 rounded-xl px-4 text-[15px] font-medium",
+                "touch-manipulation text-neg-strong transition hover:bg-neg-soft active:bg-neg-soft",
                 "dark:text-neg-dark dark:hover:bg-neg/15",
-                "touch-manipulation",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-neg"
               )}
             >

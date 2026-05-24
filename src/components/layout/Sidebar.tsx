@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Settings, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { navItems, comingSoon } from "./nav-config";
+import { navGroups } from "./nav-config";
 import { createClient } from "@/lib/supabase/client";
 
 export function Sidebar({
@@ -18,11 +18,11 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+
   const active = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   async function handleLogout() {
-    const sb = createClient();
-    await sb.auth.signOut();
+    await createClient().auth.signOut();
     router.push("/login");
     router.refresh();
   }
@@ -32,77 +32,66 @@ export function Sidebar({
   return (
     <aside
       aria-label="Navigasi sidebar"
-      className="fixed inset-y-0 left-0 z-40 hidden w-[240px] flex-col gap-1 overflow-y-auto border-r border-black/[.06] bg-surface-base/80 px-3 py-5 backdrop-blur dark:border-white/[.06] dark:bg-night-base/80 lg:flex"
+      className="fixed inset-y-0 left-0 z-40 hidden w-[232px] flex-col overflow-y-auto border-r border-black/[.06] bg-surface-base/80 px-3 py-5 backdrop-blur dark:border-white/[.06] dark:bg-night-base/80 lg:flex"
     >
       {/* Logo */}
-      <div className="mb-4 px-3">
-        <span className="text-heading font-serif text-[22px] font-semibold tracking-tight">
+      <div className="mb-5 flex items-center gap-2.5 px-2">
+        <div className="grid h-8 w-8 place-items-center rounded-[9px] bg-gradient-to-br from-amber to-amber-deep font-serif text-[16px] font-bold text-white">
+          N
+        </div>
+        <span className="text-heading font-serif text-[19px] font-semibold tracking-tight">
           Noto
         </span>
-        <span className="text-subtle ml-1.5 text-[11px] font-bold">urip</span>
       </div>
 
-      {/* Nav items */}
-      {navItems.map(({ href, label, icon: Icon }) => (
-        <Link
-          key={href}
-          href={href}
-          aria-current={active(href) ? "page" : undefined}
-          className={cn(
-            "flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-[14.5px] font-medium transition",
-            active(href)
-              ? "bg-white text-ink shadow-soft dark:bg-white/5 dark:text-slate-100"
-              : "text-ink-dim hover:bg-white dark:text-slate-400 dark:hover:bg-white/5"
-          )}
-        >
-          <Icon
-            size={19}
-            className={cn("transition", active(href) ? "text-amber-deep" : "text-ink-faint")}
-          />
-          {label}
-        </Link>
-      ))}
+      {/* Nav groups */}
+      <nav aria-label="Menu navigasi" className="flex-1 space-y-5">
+        {navGroups.map((group) => (
+          <div key={group.title}>
+            {/* Section label */}
+            <p className="text-subtle mb-1 px-3 text-[10.5px] font-bold tracking-[.12em]">
+              {group.title}
+            </p>
 
-      {comingSoon.length > 0 && (
-        <div className="mt-2 border-t border-black/[.06] pt-2 dark:border-white/[.06]">
-          {comingSoon.map(({ label, icon: Icon }, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-ink-faint opacity-50"
-            >
-              <Icon size={19} />
-              {label}
-              <span className="ml-auto rounded-md bg-black/[.05] px-1.5 py-0.5 text-[10px] font-bold dark:bg-white/10">
-                soon
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+            {/* Items */}
+            <ul className="space-y-0.5">
+              {group.items.map(({ href, label, icon: Icon }) => {
+                const isActive = active(href);
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-all",
+                        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber",
+                        isActive
+                          ? "bg-white text-ink shadow-soft dark:bg-white/[.07] dark:text-slate-100"
+                          : "text-ink-dim hover:bg-white/70 hover:text-ink dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                      )}
+                    >
+                      <Icon
+                        size={17}
+                        strokeWidth={isActive ? 2.3 : 1.9}
+                        className={cn(
+                          "shrink-0 transition-colors",
+                          isActive ? "text-amber-deep" : "text-ink-faint dark:text-slate-500"
+                        )}
+                        aria-hidden="true"
+                      />
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
 
-      {/* Footer */}
-      <div className="mt-auto flex flex-col gap-1.5">
-        <Link
-          href="/settings"
-          className={cn(
-            "flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-[14.5px] font-medium transition",
-            pathname === "/settings"
-              ? "bg-white text-ink shadow-soft dark:bg-white/5 dark:text-slate-100"
-              : "text-ink-dim hover:bg-white dark:text-slate-400 dark:hover:bg-white/5"
-          )}
-        >
-          <Settings
-            size={19}
-            className={cn(
-              "transition",
-              pathname === "/settings" ? "text-amber-deep" : "text-ink-faint"
-            )}
-          />
-          Pengaturan
-        </Link>
-
-        {/* User chip */}
-        <div className="flex items-center gap-3 rounded-2xl border border-black/[.08] bg-white p-3 dark:border-white/10 dark:bg-white/5">
+      {/* User chip + logout */}
+      <div className="mt-4 border-t border-black/[.06] pt-4 dark:border-white/[.06]">
+        <div className="flex items-center gap-3 rounded-2xl border border-black/[.07] bg-white p-3 dark:border-white/10 dark:bg-white/5">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-bold text-white">
             {initials}
           </div>
@@ -113,9 +102,10 @@ export function Sidebar({
           <button
             onClick={handleLogout}
             title="Keluar"
-            className="rounded-lg p-1.5 text-ink-faint transition hover:bg-neg-soft hover:text-neg-strong dark:hover:bg-neg/15 dark:hover:text-neg-dark"
+            aria-label="Keluar dari akun"
+            className="grid h-9 w-9 shrink-0 touch-manipulation place-items-center rounded-xl text-ink-faint transition hover:bg-neg-soft hover:text-neg-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-neg dark:hover:bg-neg/15 dark:hover:text-neg-dark"
           >
-            <LogOut size={16} strokeWidth={2.2} />
+            <LogOut size={16} strokeWidth={2} aria-hidden="true" />
           </button>
         </div>
       </div>
