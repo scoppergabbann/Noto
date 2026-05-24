@@ -123,6 +123,11 @@ export default function RetirementPage() {
     notes: "",
   });
 
+  useEffect(() => {
+  fetchPlans();
+  fetchFunds();
+}, [fetchPlans, fetchFunds]);
+
   // ---- Sync store → local form (hanya sekali saat data datang) ----
   const storedPlan = plans[0] ?? null;
 

@@ -18,6 +18,8 @@ import {
   fromOtherAsset,
   toTransaction,
   fromTransaction,
+  toRetirementPlan,
+  fromRetirementPlan,
   toRetirementFund,
   fromRetirementFund,
   toAssetTransfer,
@@ -33,6 +35,7 @@ import type {
   StockHoldingRow,
   OtherAssetRow,
   TransactionRow,
+  RetirementPlanRow,
   RetirementFundRow,
   AssetTransferRow,
 } from "./types";
@@ -46,6 +49,7 @@ import type {
   StockHolding,
   OtherAsset,
   Transaction,
+  RetirementPlan,
   RetirementFund,
   AssetTransfer,
 } from "@/types";
@@ -96,15 +100,11 @@ export const transactionsRepo = makeRepo<TransactionRow, Transaction>(
   fromTransaction
 );
 
-// NOTE:
-// retirementPlansRepo sementara dimatikan karena mappers.ts belum export:
-// toRetirementPlan dan fromRetirementPlan.
-// Aktifkan lagi kalau mapper-nya sudah dibuat.
-// export const retirementPlansRepo = makeRepo<RetirementPlanRow, RetirementPlan>(
-//   "retirement_plans",
-//   toRetirementPlan,
-//   fromRetirementPlan
-// );
+export const retirementPlansRepo = makeRepo<RetirementPlanRow, RetirementPlan>(
+  "retirement_plans",
+  toRetirementPlan,
+  fromRetirementPlan
+);
 
 export const retirementFundsRepo = makeRepo<RetirementFundRow, RetirementFund>(
   "retirement_funds",

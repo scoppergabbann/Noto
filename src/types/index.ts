@@ -130,22 +130,32 @@ export interface CashFlowPoint {
 // Pensiun
 export interface RetirementPlan {
   id: string;
-  label: string; // nama rencana
+  label: string;
   currentAge: number;
   retirementAge: number;
-  monthlyNeedToday: number; // kebutuhan bulanan saat ini (Rp)
-  inflationRate: number; // % per tahun, mis. 5
-  expectedReturn: number; // % per tahun dari investasi, mis. 8
-  currentSavings: number; // total dana pensiun yang sudah terkumpul
+  monthlyNeedToday: number;
+  inflationRate: number;
+  expectedReturn: number;
+  lifeExpectancy: number;
   notes?: string;
 }
 
 export interface RetirementFund {
   id: string;
   planId: string;
-  name: string; // mis. "DPLK BCA", "Tabungan Khusus"
+  name: string;
   type: "dplk" | "bpjs" | "savings" | "investment" | "property" | "other";
   currentValue: number;
   monthlyContribution: number;
   notes?: string;
+}
+
+export interface AssetTransfer {
+  id: string;
+  fromGoalId: string;
+  toGoalId: string;
+  amount: number;
+  date: string;
+  note: string;
+  createdAt: string;
 }
