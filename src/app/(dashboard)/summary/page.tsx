@@ -33,6 +33,7 @@ import {
 } from "@/lib/stores";
 import { currentGoldValue, stockMarketValue } from "@/lib/finance";
 import { availableMonths, txInMonth, sumByType, monthLabel } from "@/lib/analytics";
+import { CashFlowSankey } from "@/components/charts/CashFlowSankey";
 import { rpShort } from "@/lib/format";
 
 const COLORS = {
@@ -341,6 +342,13 @@ export default function SummaryPage() {
     },
   ];
 
+  const months = availableMonths(transactionsStore.items);
+  const activeMonth = months[months.length - 1] || "";
+
+  const monthTx = activeMonth
+  ? txInMonth(transactionsStore.items, activeMonth)
+  : [];
+
   if (loading) return <LoadingState label="Memuat ringkasan finansial…" />;
   if (error) return <ErrorState message={error} onRetry={retryAll} />;
 
@@ -500,6 +508,22 @@ export default function SummaryPage() {
           )}
         </Card>
       </section>
+
+      {/* Alur Cashflow */}
+        <Card className="mb-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+              Alur Cash Flow
+            </h2>
+            <p className="text-muted mt-0.5 text-[13.5px]">
+              Dari pemasukan, tabungan, sampai pengeluaran per kategori.
+            </p>
+          </div>
+        </div>
+
+        <CashFlowSankey transactions={monthTx} />
+      </Card>
 
       {/* Detail cards */}
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
