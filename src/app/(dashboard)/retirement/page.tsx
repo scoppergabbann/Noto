@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Plus, TrendingUp, Target, Wallet, AlertCircle, CheckCircle } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Plus, TrendingUp, AlertCircle, CheckCircle, Trash2, Save } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -10,7 +10,9 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Badge } from "@/components/ui/Badge";
-import { rpShort, rpFull } from "@/lib/format";
+import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { rpShort } from "@/lib/format";
 import {
   targetFund,
   projectedFund,
@@ -18,37 +20,26 @@ import {
   requiredMonthlySaving,
   retirementProgress,
 } from "@/lib/retirement";
-import { useGoldStore, useStocksStore, useAssetsStore } from "@/lib/stores";
-import { stockMarketValue, currentGoldValue, remainingGrams } from "@/lib/finance";
+import {
+  useRetirementPlansStore,
+  useRetirementFundsStore,
+  useGoldStore,
+  useStocksStore,
+  useAssetsStore,
+} from "@/lib/stores";
+import { stockMarketValue, currentGoldValue } from "@/lib/finance";
+import type { RetirementPlan, RetirementFund } from "@/types";
 
-// ---- Local state types (belum Supabase — simpan di sessionStorage untuk sekarang)
-interface Plan {
-  currentAge: number;
-  retirementAge: number;
-  monthlyNeedToday: number;
-  inflationRate: number;
-  expectedReturn: number;
-  lifeExpectancy: number;
-}
-
-interface Fund {
-  id: string;
-  name: string;
-  type: "dplk" | "bpjs" | "savings" | "investment" | "property" | "other";
-  currentValue: number;
-  monthlyContribution: number;
-}
-
-const TYPE_LABELS: Record<Fund["type"], string> = {
+const TYPE_LABELS: Record<RetirementFund["type"], string> = {
   dplk: "DPLK",
   bpjs: "BPJS Ketenagakerjaan",
-  savings: "Tabungan",
+  savings: "Tabungan Khusus",
   investment: "Reksa Dana / Obligasi",
   property: "Properti",
   other: "Lainnya",
 };
 
-const TYPE_EMOJI: Record<Fund["type"], string> = {
+const TYPE_EMOJI: Record<RetirementFund["type"], string> = {
   dplk: "🏦",
   bpjs: "🏛️",
   savings: "💰",
@@ -57,34 +48,96 @@ const TYPE_EMOJI: Record<Fund["type"], string> = {
   other: "📦",
 };
 
-const DEFAULT_PLAN: Plan = {
+const DEFAULT_PLAN: Omit<RetirementPlan, "id"> = {
+  label: "Rencana Pensiun Utama",
   currentAge: 30,
   retirementAge: 55,
   monthlyNeedToday: 10_000_000,
   inflationRate: 5,
   expectedReturn: 8,
   lifeExpectancy: 25,
+  notes: "",
 };
 
 export default function RetirementPage() {
-  const [plan, setPlan] = useState<Plan>(DEFAULT_PLAN);
-  const [funds, setFunds] = useState<Fund[]>([]);
+  const {
+    items: plans,
+    loading: plansLoading,
+    error: plansError,
+    fetch: fetchPlans,
+    add: addPlan,
+    update: updatePlan,
+  } = useRetirementPlansStore();
+
+  const {
+    items: funds,
+    loading: fundsLoading,
+    error: fundsError,
+    fetch: fetchFunds,
+    add: addFund,
+    remove: removeFund,
+  } = useRetirementFundsStore();
+
+  const goldItems = useGoldStore((s) => s.items);
+  const stockItems = useStocksStore((s) => s.items);
+  const assetItems = useAssetsStore((s) => s.items);
+
+  // Local edit state (syncs to Supabase on save)
+  const [editPlan, setEditPlan] = useState<Omit<RetirementPlan, "id"> | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [addingFund, setAddingFund] = useState(false);
-  const [draft, setDraft] = useState<Omit<Fund, "id">>({
+  const [deleteFundId, setDeleteFundId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Omit<RetirementFund, "id">>({
+    planId: "",
     name: "",
     type: "savings",
     currentValue: 0,
     monthlyContribution: 0,
   });
 
-  // Koneksi ke aset yang sudah ada
-  const goldItems = useGoldStore((s) => s.items);
-  const stockItems = useStocksStore((s) => s.items);
-  const assetItems = useAssetsStore((s) => s.items);
+  // Use first plan (atau buat baru)
+  const plan = plans[0];
 
-  const yearsToRetirement = Math.max(0, plan.retirementAge - plan.currentAge);
+  // Sync plan ke edit state ketika data datang
+  useEffect(() => {
+    if (plan && !editPlan) {
+      const { id: _id, ...rest } = plan;
+      void _id;
+      setEditPlan(rest);
+    } else if (!plan && !editPlan) {
+      setEditPlan(DEFAULT_PLAN);
+    }
+  }, [plan, editPlan]);
 
-  // Hitung nilai aset yang sudah ada
+  function handlePlanChange(patch: Partial<typeof editPlan>) {
+    setEditPlan((p) => (p ? { ...p, ...patch } : p));
+    setIsDirty(true);
+  }
+
+  async function savePlan() {
+    if (!editPlan) return;
+    setSaving(true);
+    if (plan) {
+      await updatePlan(plan.id, editPlan);
+    } else {
+      await addPlan(editPlan);
+      await fetchPlans();
+    }
+    setSaving(false);
+    setIsDirty(false);
+  }
+
+  async function handleAddFund() {
+    if (!draft.name.trim()) return;
+    const planId = plan?.id ?? "";
+    await addFund({ ...draft, planId });
+    setDraft({ planId: "", name: "", type: "savings", currentValue: 0, monthlyContribution: 0 });
+    setAddingFund(false);
+    await fetchFunds();
+  }
+
+  // Linked assets
   const linkedAssets = useMemo(() => {
     const goldValue = goldItems.reduce(
       (s, g) => s + currentGoldValue(g.boughtGrams, g.soldGrams, g.currentPricePerGram),
@@ -95,33 +148,31 @@ export default function RetirementPage() {
     return { goldValue, stockValue, otherValue, total: goldValue + stockValue + otherValue };
   }, [goldItems, stockItems, assetItems]);
 
-  // Total dari dana pensiun manual + aset terhubung
-  const manualTotal = funds.reduce((s, f) => s + f.currentValue, 0);
-  const monthlyContribTotal = funds.reduce((s, f) => s + f.monthlyContribution, 0);
+  const planFunds = funds.filter((f) => !plan || f.planId === plan.id);
+  const manualTotal = planFunds.reduce((s, f) => s + f.currentValue, 0);
+  const monthlyContribTotal = planFunds.reduce((s, f) => s + f.monthlyContribution, 0);
   const totalCurrentSavings = manualTotal + linkedAssets.total;
 
-  // Kalkulasi utama
+  const ep = editPlan ?? DEFAULT_PLAN;
+  const yearsToRetirement = Math.max(0, ep.retirementAge - ep.currentAge);
+
   const target = useMemo(
     () =>
       targetFund(
-        plan.monthlyNeedToday,
+        ep.monthlyNeedToday,
         yearsToRetirement,
-        plan.inflationRate,
-        plan.lifeExpectancy,
-        plan.expectedReturn
+        ep.inflationRate,
+        ep.lifeExpectancy,
+        ep.expectedReturn
       ),
-    [plan, yearsToRetirement]
+    [ep, yearsToRetirement]
   );
 
-  const projected = useMemo(
-    () =>
-      projectedFund(
-        totalCurrentSavings,
-        monthlyContribTotal,
-        yearsToRetirement,
-        plan.expectedReturn
-      ),
-    [totalCurrentSavings, monthlyContribTotal, yearsToRetirement, plan.expectedReturn]
+  const projected = projectedFund(
+    totalCurrentSavings,
+    monthlyContribTotal,
+    yearsToRetirement,
+    ep.expectedReturn
   );
 
   const gap = fundGap(target, projected);
@@ -130,22 +181,16 @@ export default function RetirementPage() {
     target,
     totalCurrentSavings,
     yearsToRetirement,
-    plan.expectedReturn
+    ep.expectedReturn
   );
-
   const onTrack = gap >= 0;
   const shortfall = Math.max(0, -gap);
+  const monthlyAtRetirement =
+    ep.monthlyNeedToday * Math.pow(1 + ep.inflationRate / 100, yearsToRetirement);
 
-  function addFund() {
-    if (!draft.name.trim() || draft.currentValue < 0) return;
-    setFunds((prev) => [...prev, { ...draft, id: `f_${Date.now()}` }]);
-    setDraft({ name: "", type: "savings", currentValue: 0, monthlyContribution: 0 });
-    setAddingFund(false);
-  }
-
-  function removeFund(id: string) {
-    setFunds((prev) => prev.filter((f) => f.id !== id));
-  }
+  if (plansLoading || fundsLoading) return <LoadingState label="Memuat rencana pensiun…" />;
+  if (plansError) return <ErrorState message={plansError} onRetry={fetchPlans} />;
+  if (fundsError) return <ErrorState message={fundsError} onRetry={fetchFunds} />;
 
   return (
     <>
@@ -156,11 +201,23 @@ export default function RetirementPage() {
             Pensiunmu, <em className="italic text-amber-text dark:text-amber">terencana</em>.
           </>
         }
+        action={
+          isDirty ? (
+            <Button onClick={savePlan} disabled={saving}>
+              <Save size={16} strokeWidth={2.3} />
+              {saving ? "Menyimpan…" : "Simpan perubahan"}
+            </Button>
+          ) : undefined
+        }
       />
 
       {/* Status banner */}
       <Card
-        className={`mb-5 flex items-start gap-4 ${onTrack ? "!bg-pos-soft/60 dark:!bg-pos/[0.07]" : "!bg-neg-soft/60 dark:!bg-neg/[0.07]"}`}
+        className={`mb-5 flex items-start gap-4 border-l-4 ${
+          onTrack
+            ? "border-l-pos-strong !bg-pos-soft/60 dark:border-l-pos-dark dark:!bg-pos/[0.07]"
+            : "border-l-neg-strong !bg-neg-soft/60 dark:border-l-neg-dark dark:!bg-neg/[0.07]"
+        }`}
       >
         <div
           className={`mt-0.5 shrink-0 ${onTrack ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
@@ -175,25 +232,31 @@ export default function RetirementPage() {
               ? `On track! Proyeksi surplus ${rpShort(gap)}`
               : `Perlu ${rpShort(shortfall)} lagi untuk mencapai target`}
           </div>
-          <div className="text-body mt-0.5 text-[13px]">
-            {yearsToRetirement} tahun lagi menuju pensiun usia {plan.retirementAge}.
-            {!onTrack && ` Tambah tabungan ${rpShort(required)}/bulan untuk on track.`}
+          <div className="text-body mt-0.5 text-[13.5px] leading-relaxed">
+            {yearsToRetirement} tahun lagi menuju pensiun usia {ep.retirementAge}.
+            {!onTrack && ` Tambah tabungan `}
+            {!onTrack && <strong className="text-heading">{rpShort(required)}/bulan</strong>}
+            {!onTrack && ` untuk on track.`}
           </div>
         </div>
       </Card>
 
-      {/* Progress */}
+      {/* Progress card */}
       <Card className="mb-5">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-heading font-serif text-[18px] font-semibold sm:text-[20px]">
               Progres Dana Pensiun
             </h2>
-            <p className="text-muted mt-0.5 text-[13px]">Proyeksi vs target saat pensiun</p>
+            <p className="text-muted mt-0.5 text-[13px]">Proyeksi saat pensiun vs target</p>
           </div>
           <div className="text-right">
             <div
-              className={`font-serif text-[22px] font-semibold tabular-nums sm:text-[26px] ${onTrack ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
+              className={`font-serif text-[19px] font-semibold tabular-nums sm:text-[24px] ${
+                onTrack
+                  ? "text-pos-strong dark:text-pos-dark"
+                  : "text-neg-strong dark:text-neg-dark"
+              }`}
             >
               {progress}%
             </div>
@@ -206,20 +269,16 @@ export default function RetirementPage() {
           height={12}
           label={`Progress pensiun ${progress}%`}
         />
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
-            ["Target Dana", rpShort(target), "text-heading"],
-            [
-              "Proyeksi",
-              rpShort(projected),
-              onTrack ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark",
-            ],
-            ["Dana Kini", rpShort(totalCurrentSavings), "text-heading"],
-            ["Nabung/bln", rpShort(monthlyContribTotal), "text-heading"],
-          ].map(([label, value, cls]) => (
+            ["Target Dana", rpShort(target)],
+            ["Proyeksi", rpShort(projected)],
+            ["Dana Kini", rpShort(totalCurrentSavings)],
+            ["Nabung/bln", rpShort(monthlyContribTotal)],
+          ].map(([label, value]) => (
             <div key={label} className="rounded-xl bg-surface-sunken p-3 dark:bg-white/5">
-              <div className="text-subtle text-[12.5px] font-semibold">{label}</div>
-              <div className={`mt-0.5 font-serif text-[16px] font-semibold tabular-nums ${cls}`}>
+              <div className="text-subtle text-[12px] font-semibold">{label}</div>
+              <div className="text-heading mt-0.5 font-serif text-[15px] font-semibold tabular-nums">
                 {value}
               </div>
             </div>
@@ -228,9 +287,9 @@ export default function RetirementPage() {
       </Card>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Parameter kalkulator */}
+        {/* Parameter */}
         <Card>
-          <h2 className="text-heading mb-4 font-serif text-[18px] font-semibold sm:text-[20px]">
+          <h2 className="text-heading mb-4 font-serif text-[18px] font-semibold">
             Parameter Rencana
           </h2>
           <div className="flex flex-col gap-4">
@@ -239,71 +298,67 @@ export default function RetirementPage() {
                 label="Usia sekarang"
                 type="number"
                 inputMode="numeric"
-                value={plan.currentAge}
-                onChange={(e) => setPlan({ ...plan, currentAge: Number(e.target.value) })}
+                value={ep.currentAge}
+                onChange={(e) => handlePlanChange({ currentAge: Number(e.target.value) })}
               />
               <Input
                 label="Target usia pensiun"
                 type="number"
                 inputMode="numeric"
-                value={plan.retirementAge}
-                onChange={(e) => setPlan({ ...plan, retirementAge: Number(e.target.value) })}
+                value={ep.retirementAge}
+                onChange={(e) => handlePlanChange({ retirementAge: Number(e.target.value) })}
               />
             </div>
             <CurrencyInput
               label="Kebutuhan bulanan saat ini (Rp)"
-              hint="Estimasi pengeluaran bulanan saat pensiun nanti (dalam nilai uang hari ini)"
-              value={plan.monthlyNeedToday}
-              onChange={(v) => setPlan({ ...plan, monthlyNeedToday: v })}
+              hint="Nilai uang hari ini — akan disesuaikan inflasi"
+              value={ep.monthlyNeedToday}
+              onChange={(v) => handlePlanChange({ monthlyNeedToday: v })}
             />
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Inflasi/tahun (%)"
                 type="number"
                 inputMode="decimal"
-                hint="Rata-rata Indonesia ~5-6%"
-                value={plan.inflationRate}
-                onChange={(e) => setPlan({ ...plan, inflationRate: Number(e.target.value) })}
+                hint="Rata-rata Indonesia ±5-6%"
+                value={ep.inflationRate}
+                onChange={(e) => handlePlanChange({ inflationRate: Number(e.target.value) })}
               />
               <Input
                 label="Return investasi/tahun (%)"
                 type="number"
                 inputMode="decimal"
-                hint="Reksa dana ~8-12%, deposito ~5%"
-                value={plan.expectedReturn}
-                onChange={(e) => setPlan({ ...plan, expectedReturn: Number(e.target.value) })}
+                hint="Reksa dana ~8-12%"
+                value={ep.expectedReturn}
+                onChange={(e) => handlePlanChange({ expectedReturn: Number(e.target.value) })}
               />
             </div>
             <Input
-              label="Estimasi masa pensiun (tahun)"
+              label="Masa pensiun (tahun)"
               type="number"
               inputMode="numeric"
-              hint={`Umur ${plan.retirementAge} sampai ${plan.retirementAge + plan.lifeExpectancy} tahun`}
-              value={plan.lifeExpectancy}
-              onChange={(e) => setPlan({ ...plan, lifeExpectancy: Number(e.target.value) })}
+              hint={`Estimasi hidup hingga ${ep.retirementAge + ep.lifeExpectancy} tahun`}
+              value={ep.lifeExpectancy}
+              onChange={(e) => handlePlanChange({ lifeExpectancy: Number(e.target.value) })}
             />
 
-            {/* Insight kalkulator */}
-            <div className="rounded-xl border border-black/[.06] bg-surface-sunken p-4 dark:border-white/10 dark:bg-white/5">
+            {/* Ringkasan kalkulasi */}
+            <div className="rounded-xl border border-black/[.06] bg-surface-sunken p-3.5 dark:border-white/10 dark:bg-white/5 sm:p-4">
               <div className="text-subtle mb-3 text-[12px] font-bold uppercase tracking-wide">
                 Ringkasan kalkulasi
               </div>
-              <div className="space-y-2 text-[13.5px]">
-                <div className="flex justify-between">
-                  <span className="text-muted">Kebutuhan saat pensiun/bln</span>
-                  <span className="text-heading font-semibold tabular-nums">
-                    {rpShort(
-                      plan.monthlyNeedToday *
-                        Math.pow(1 + plan.inflationRate / 100, yearsToRetirement)
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted">Target total dana</span>
-                  <span className="text-heading font-semibold tabular-nums">{rpShort(target)}</span>
-                </div>
-                <div className="flex justify-between border-t border-black/[.06] pt-2 dark:border-white/10">
-                  <span className="text-muted font-medium">Perlu nabung/bulan</span>
+              <div className="space-y-2.5 text-[13.5px]">
+                {[
+                  ["Kebutuhan/bln saat pensiun", rpShort(monthlyAtRetirement)],
+                  ["Target total dana", rpShort(target)],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex items-center justify-between gap-2">
+                    <span className="text-muted">{label}</span>
+                    <span className="text-heading font-semibold tabular-nums">{value}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between gap-2 border-t border-black/[.06] pt-2.5 dark:border-white/10">
+                  <span className="text-body font-semibold">Perlu nabung/bulan</span>
                   <span
                     className={`font-bold tabular-nums ${required > 0 ? "text-neg-strong dark:text-neg-dark" : "text-pos-strong dark:text-pos-dark"}`}
                   >
@@ -312,34 +367,42 @@ export default function RetirementPage() {
                 </div>
               </div>
             </div>
+
+            {isDirty && (
+              <Button onClick={savePlan} disabled={saving} className="w-full">
+                <Save size={16} />
+                {saving ? "Menyimpan…" : "Simpan parameter"}
+              </Button>
+            )}
           </div>
         </Card>
 
         {/* Sumber dana */}
         <div className="flex flex-col gap-4">
-          {/* Aset terhubung otomatis */}
+          {/* Aset terhubung */}
           <Card>
-            <h2 className="text-heading mb-3 font-serif text-[18px] font-semibold sm:text-[20px]">
+            <h2 className="text-heading mb-1 font-serif text-[18px] font-semibold">
               Aset Terhubung
             </h2>
-            <p className="text-muted mb-4 text-[13px]">
-              Dihitung otomatis dari data Emas, Saham, dan Aset Lainnya kamu.
-            </p>
+            <p className="text-muted mb-4 text-[13px]">Dari Emas, Saham, dan Aset Lainnya.</p>
             <ul className="space-y-2.5">
               {[
                 ["🪙 Emas", linkedAssets.goldValue],
                 ["📈 Saham", linkedAssets.stockValue],
                 ["📦 Aset Lainnya", linkedAssets.otherValue],
               ].map(([label, value]) => (
-                <li key={String(label)} className="flex items-center justify-between text-[13.5px]">
+                <li
+                  key={String(label)}
+                  className="flex items-center justify-between gap-3 text-[13.5px]"
+                >
                   <span className="text-body">{label}</span>
                   <span className="text-heading font-semibold tabular-nums">
                     {rpShort(Number(value))}
                   </span>
                 </li>
               ))}
-              <li className="flex items-center justify-between border-t border-black/[.06] pt-2.5 text-[14px] dark:border-white/10">
-                <span className="text-heading font-semibold">Total aset terhubung</span>
+              <li className="flex items-center justify-between gap-3 border-t border-black/[.06] pt-2.5 text-[14px] dark:border-white/10">
+                <span className="text-heading font-semibold">Total terhubung</span>
                 <span className="text-heading font-bold tabular-nums">
                   {rpShort(linkedAssets.total)}
                 </span>
@@ -349,8 +412,8 @@ export default function RetirementPage() {
 
           {/* Dana pensiun manual */}
           <Card>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-heading font-serif text-[18px] font-semibold sm:text-[20px]">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-heading font-serif text-[18px] font-semibold">
                 Sumber Dana Pensiun
               </h2>
               <Button size="sm" onClick={() => setAddingFund(true)}>
@@ -358,7 +421,7 @@ export default function RetirementPage() {
               </Button>
             </div>
 
-            {/* Form tambah dana */}
+            {/* Form tambah */}
             {addingFund && (
               <div className="mb-4 rounded-xl border border-black/[.07] bg-surface-sunken p-4 dark:border-white/10 dark:bg-white/5">
                 <div className="text-heading mb-3 text-[13px] font-bold">Tambah Sumber Dana</div>
@@ -372,7 +435,9 @@ export default function RetirementPage() {
                   <Select
                     label="Jenis"
                     value={draft.type}
-                    onChange={(e) => setDraft({ ...draft, type: e.target.value as Fund["type"] })}
+                    onChange={(e) =>
+                      setDraft({ ...draft, type: e.target.value as RetirementFund["type"] })
+                    }
                   >
                     {Object.entries(TYPE_LABELS).map(([v, l]) => (
                       <option key={v} value={v}>
@@ -391,16 +456,9 @@ export default function RetirementPage() {
                     value={draft.monthlyContribution}
                     onChange={(v) => setDraft({ ...draft, monthlyContribution: v })}
                   />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={addFund} className="flex-1">
-                      Simpan
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setAddingFund(false)}
-                      className="flex-1"
-                    >
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button onClick={handleAddFund}>Simpan</Button>
+                    <Button variant="secondary" onClick={() => setAddingFund(false)}>
                       Batal
                     </Button>
                   </div>
@@ -408,56 +466,58 @@ export default function RetirementPage() {
               </div>
             )}
 
-            {funds.length === 0 && !addingFund ? (
+            {planFunds.length === 0 && !addingFund ? (
               <div className="py-8 text-center">
-                <div className="mb-2 text-[36px]" aria-hidden="true">
+                <div className="mb-2 text-[22px] sm:text-[36px]" aria-hidden="true">
                   🏦
                 </div>
-                <p className="text-muted text-[13.5px]">
+                <p className="text-muted text-[13.5px] leading-relaxed">
                   Belum ada sumber dana khusus pensiun.
                   <br />
                   Tambahkan DPLK, BPJS, atau tabungan pensiun.
                 </p>
               </div>
             ) : (
-              <ul className="space-y-2.5">
-                {funds.map((f) => (
+              <ul className="space-y-2">
+                {planFunds.map((f) => (
                   <li
                     key={f.id}
                     className="flex items-center gap-3 rounded-xl border border-black/[.05] p-3 dark:border-white/5"
                   >
-                    <span className="text-[22px]" aria-hidden="true">
-                      {TYPE_EMOJI[f.type]}
+                    <span className="shrink-0 text-[18px] sm:text-[22px]" aria-hidden="true">
+                      {TYPE_EMOJI[f.type as RetirementFund["type"]] ?? "📦"}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="text-heading truncate text-[14px] font-semibold">
                         {f.name}
                       </div>
-                      <div className="text-subtle text-[12px]">
-                        {TYPE_LABELS[f.type]}
+                      <div className="text-subtle text-[12.5px]">
+                        {TYPE_LABELS[f.type as RetirementFund["type"]] ?? f.type}
                         {f.monthlyContribution > 0 && ` · +${rpShort(f.monthlyContribution)}/bln`}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="shrink-0 text-right">
                       <div className="text-heading font-serif text-[15px] font-semibold tabular-nums">
                         {rpShort(f.currentValue)}
                       </div>
                     </div>
                     <button
-                      onClick={() => removeFund(f.id)}
+                      onClick={() => setDeleteFundId(f.id)}
                       aria-label={`Hapus ${f.name}`}
                       className="grid h-11 w-11 shrink-0 touch-manipulation place-items-center rounded-xl text-ink-faint transition hover:bg-neg-soft hover:text-neg-strong dark:hover:bg-neg/15 dark:hover:text-neg-dark"
                     >
-                      ×
+                      <Trash2 size={16} />
                     </button>
                   </li>
                 ))}
-                <li className="flex items-center justify-between border-t border-black/[.06] pt-2.5 text-[14px] dark:border-white/10">
-                  <span className="text-heading font-semibold">Total</span>
-                  <span className="text-heading font-bold tabular-nums">
-                    {rpShort(manualTotal)}
-                  </span>
-                </li>
+                {planFunds.length > 0 && (
+                  <li className="flex items-center justify-between border-t border-black/[.06] pt-2.5 text-[14px] dark:border-white/10">
+                    <span className="text-heading font-semibold">Total</span>
+                    <span className="text-heading font-bold tabular-nums">
+                      {rpShort(manualTotal)}
+                    </span>
+                  </li>
+                )}
               </ul>
             )}
           </Card>
@@ -470,16 +530,24 @@ export default function RetirementPage() {
                 className="mt-0.5 shrink-0 text-amber-text dark:text-amber"
                 aria-hidden="true"
               />
-              <div className="text-body text-[13px] leading-relaxed">
-                <strong className="text-heading font-bold">Tips:</strong> Aturan umum — dana pensiun
-                ideal adalah <strong className="text-heading">25× pengeluaran tahunan</strong> (Rule
-                of 25). Dengan inflasi 5% dan masa pensiun {plan.lifeExpectancy} tahun, target kamu{" "}
-                <strong className="text-heading">{rpFull(Math.round(target))}</strong>.
-              </div>
+              <p className="text-body text-[13.5px] leading-relaxed">
+                <strong className="text-heading font-semibold">Rule of 25:</strong> Dana pensiun
+                ideal adalah 25× pengeluaran tahunan. Dengan kebutuhanmu{" "}
+                <strong className="text-heading">{rpShort(monthlyAtRetirement)}/bulan</strong> saat
+                pensiun, targetmu <strong className="text-heading">{rpShort(target)}</strong>.
+              </p>
             </div>
           </Card>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteFundId}
+        onClose={() => setDeleteFundId(null)}
+        onConfirm={() => deleteFundId && removeFund(deleteFundId)}
+        title="Hapus sumber dana?"
+        message="Data ini akan dihapus permanen dari rencana pensiunmu."
+      />
     </>
   );
 }

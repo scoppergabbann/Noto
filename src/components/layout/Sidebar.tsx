@@ -30,7 +30,10 @@ export function Sidebar({
   const initials = userName.slice(0, 2).toUpperCase();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[240px] flex-col gap-1 overflow-y-auto border-r border-black/[.06] bg-surface-base/80 px-3 py-5 backdrop-blur dark:border-white/[.06] dark:bg-night-base/80 lg:flex">
+    <aside
+      aria-label="Navigasi sidebar"
+      className="fixed inset-y-0 left-0 z-40 hidden w-[240px] flex-col gap-1 overflow-y-auto border-r border-black/[.06] bg-surface-base/80 px-3 py-5 backdrop-blur dark:border-white/[.06] dark:bg-night-base/80 lg:flex"
+    >
       {/* Logo */}
       <div className="mb-4 px-3">
         <span className="text-heading font-serif text-[22px] font-semibold tracking-tight">
@@ -44,6 +47,7 @@ export function Sidebar({
         <Link
           key={href}
           href={href}
+          aria-current={active(href) ? "page" : undefined}
           className={cn(
             "flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-[14.5px] font-medium transition",
             active(href)

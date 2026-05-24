@@ -87,7 +87,7 @@ export function MetricCard({
         {trend && (
           <span
             className={cn(
-              "inline-flex items-center gap-0.5 rounded-lg px-2 py-1 text-[12.5px] font-bold tabular-nums",
+              "inline-flex items-center gap-0.5 rounded-lg px-2 py-1 text-[12px] font-bold tabular-nums sm:text-[12.5px]",
               hero
                 ? trendGood
                   ? "bg-pos-dark/20 text-pos-dark"
@@ -109,7 +109,7 @@ export function MetricCard({
       </div>
 
       {spark && (
-        <div className="relative z-10 mt-4 h-10 w-full opacity-90">
+        <div className="relative z-10 mt-3 h-9 w-full opacity-90 sm:h-10">
           <Sparkline data={spark} color={hero ? "#a5b4fc" : sparkColor} id={id} />
         </div>
       )}

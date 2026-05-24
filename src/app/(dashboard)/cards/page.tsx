@@ -85,9 +85,9 @@ export default function CardsPage() {
       />
 
       {cards.length === 0 ? (
-        <Card className="py-16 text-center">
-          <div className="mb-3 text-[40px]">💳</div>
-          <div className="text-heading mb-1 font-serif text-[19px] font-semibold">
+        <Card className="py-10 text-center sm:py-14">
+          <div className="mb-3 text-[22px] sm:text-[40px]">💳</div>
+          <div className="text-heading mb-1 font-serif text-[17px] font-semibold sm:text-[19px]">
             Belum ada kartu
           </div>
           <div className="text-muted mx-auto mb-5 max-w-xs text-[14px]">
@@ -98,7 +98,7 @@ export default function CardsPage() {
           </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {cards.map((c) => {
             const util = utilization(c.spent, c.creditLimit);
             const bill = c.spent - c.paid;
@@ -111,7 +111,7 @@ export default function CardsPage() {
               <div key={c.id}>
                 {/* Card visual */}
                 <div
-                  className="cc relative flex min-h-[188px] flex-col justify-between overflow-hidden rounded-[20px] p-6 text-white shadow-[0_16px_40px_rgba(16,16,24,.22)]"
+                  className="cc relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[20px] p-5 text-white shadow-[0_16px_40px_rgba(16,16,24,.22)] sm:min-h-[188px] sm:p-6"
                   style={{ background: c.gradient }}
                 >
                   <div className="relative z-10 flex items-start justify-between">
@@ -160,7 +160,7 @@ export default function CardsPage() {
 
                   <ProgressBar value={util} color={warn ? "#d83a3a" : "#0f9d6b"} height={10} />
 
-                  <div className="mt-4 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-3 gap-2">
                     {[
                       ["Pemakaian", rpShort(c.spent), ""],
                       ["Dibayar", rpShort(c.paid), "text-pos-strong dark:text-pos-dark"],

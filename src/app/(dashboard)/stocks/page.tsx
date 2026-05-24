@@ -97,9 +97,9 @@ export default function StocksPage() {
       </div>
 
       {items.length === 0 ? (
-        <Card className="py-16 text-center">
-          <div className="mb-3 text-[42px]">📈</div>
-          <div className="text-heading mb-1 font-serif text-[19px] font-semibold">
+        <Card className="py-10 text-center sm:py-14">
+          <div className="mb-3 text-[22px] sm:text-[42px]">📈</div>
+          <div className="text-heading mb-1 font-serif text-[17px] font-semibold sm:text-[19px]">
             Belum ada saham
           </div>
           <div className="text-muted mx-auto mb-5 max-w-xs text-[14px]">
@@ -120,7 +120,7 @@ export default function StocksPage() {
             return (
               <Card key={h.id} hoverable>
                 <div className="mb-4 flex items-start gap-3">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-indigo-500/10 text-[11px] font-black text-indigo-500">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-indigo-500/10 text-[10px] font-black text-indigo-500 sm:h-12 sm:w-12 sm:text-[11px]">
                     {h.ticker}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -130,7 +130,7 @@ export default function StocksPage() {
                   </div>
                   <div className="text-right">
                     <div
-                      className={`font-serif text-[20px] font-semibold tabular-nums ${isUp ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
+                      className={`font-serif text-[17px] font-semibold tabular-nums sm:text-[20px] ${isUp ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
                     >
                       {isUp ? "+" : ""}
                       {uplPct}%
@@ -144,7 +144,7 @@ export default function StocksPage() {
                   </div>
                   <RowActions onEdit={() => openEdit(h)} onDelete={() => setDeleteId(h.id)} />
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/5 pt-4 dark:border-white/5">
+                <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 border-t border-black/5 pt-3.5 dark:border-white/5">
                   {[
                     ["Lot", `${h.lots} lot (${(h.lots * 100).toLocaleString("id-ID")} lbr)`],
                     ["Nilai Pasar", rpShort(market)],

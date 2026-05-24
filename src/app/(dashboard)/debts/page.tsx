@@ -89,12 +89,12 @@ export default function DebtsPage() {
         }
       />
 
-      <div className="stagger mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card hoverable>
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sisa Utang
           </div>
-          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight text-brand-red sm:text-[26px]">
+          <div className="mt-2 font-serif text-[17px] font-semibold leading-none tracking-tight text-brand-red sm:text-[20px] sm:text-[26px]">
             {rpShort(totalLeft)}
           </div>
           <div className="mt-[11px] text-[13px] text-ink-dim dark:text-slate-400">
@@ -105,7 +105,7 @@ export default function DebtsPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Sudah Dibayar
           </div>
-          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight text-brand-green sm:text-[26px]">
+          <div className="mt-2 font-serif text-[17px] font-semibold leading-none tracking-tight text-brand-green sm:text-[20px] sm:text-[26px]">
             {rpShort(totalPaid)}
           </div>
           <div className="mt-[11px] text-[13px]">
@@ -116,7 +116,7 @@ export default function DebtsPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Debt Health
           </div>
-          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight sm:text-[26px]">
+          <div className="mt-2 font-serif text-[17px] font-semibold leading-none tracking-tight sm:text-[20px] sm:text-[26px]">
             {debtHealth}
             <span className="text-[16px] text-ink-faint">/100</span>
           </div>
@@ -131,9 +131,11 @@ export default function DebtsPage() {
       </div>
 
       {items.length === 0 ? (
-        <Card className="py-16 text-center">
-          <div className="mb-3 text-[40px]">🏦</div>
-          <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada utang tercatat</div>
+        <Card className="py-10 text-center sm:py-14">
+          <div className="mb-3 text-[22px] sm:text-[40px]">🏦</div>
+          <div className="mb-1 font-serif text-[17px] font-semibold sm:text-[19px]">
+            Belum ada utang tercatat
+          </div>
           <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
             Catat cicilan & utang untuk memantau progress pelunasan.
           </div>
@@ -142,7 +144,7 @@ export default function DebtsPage() {
           </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 xl:grid-cols-3">
           {items.map((d) => {
             const p = progressPct(d.paid, d.total);
             const left = d.total - d.paid;
@@ -169,13 +171,13 @@ export default function DebtsPage() {
                 <ProgressBar value={p} color="#1f9e6f" height={10} />
                 <div className="mt-3.5 flex justify-between border-t border-black/5 pt-3.5 dark:border-white/5">
                   <div>
-                    <div className="text-[12.5px] text-ink-dim dark:text-slate-400">Dibayar</div>
+                    <div className="text-[11.5px] text-ink-dim dark:text-slate-400">Dibayar</div>
                     <div className="text-[14px] font-semibold text-brand-green">
                       {rpShort(d.paid)}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[12.5px] text-ink-dim dark:text-slate-400">
+                    <div className="text-[11.5px] text-ink-dim dark:text-slate-400">
                       Jatuh tempo
                     </div>
                     <div className="text-[14px] font-semibold">

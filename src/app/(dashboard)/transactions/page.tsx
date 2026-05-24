@@ -80,23 +80,23 @@ export default function TransactionsPage() {
         }
       />
 
-      <div className="stagger mb-4 grid grid-cols-3 gap-2 sm:gap-4">
+      <div className="stagger mb-4 grid grid-cols-3 gap-2">
         <Card hoverable>
           <div className="text-muted text-[12.5px] font-semibold">Pemasukan</div>
-          <div className="mt-1.5 font-serif text-[22px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[26px]">
+          <div className="mt-1.5 font-serif text-[18px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[22px] sm:text-[26px]">
             {rpShort(totalIn)}
           </div>
         </Card>
         <Card hoverable>
           <div className="text-muted text-[12.5px] font-semibold">Pengeluaran</div>
-          <div className="mt-1.5 font-serif text-[22px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[26px]">
+          <div className="mt-1.5 font-serif text-[18px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[22px] sm:text-[26px]">
             {rpShort(totalOut)}
           </div>
         </Card>
         <Card hoverable>
           <div className="text-muted text-[12.5px] font-semibold">Selisih</div>
           <div
-            className={`mt-1.5 font-serif text-[22px] font-semibold tabular-nums sm:text-[26px] ${net >= 0 ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
+            className={`mt-1.5 font-serif text-[18px] font-semibold tabular-nums sm:text-[22px] sm:text-[26px] ${net >= 0 ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
           >
             {net >= 0 ? "+" : ""}
             {rpShort(net)}
@@ -105,8 +105,8 @@ export default function TransactionsPage() {
       </div>
 
       <Card className="mb-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
             {months.map((m) => (
               <button
                 key={m}
@@ -117,7 +117,7 @@ export default function TransactionsPage() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex items-center gap-1.5">
             {(["all", "income", "expense"] as const).map((t) => (
               <button
                 key={t}
@@ -149,7 +149,7 @@ export default function TransactionsPage() {
         </div>
         {filtered.length === 0 ? (
           <div className="py-14 text-center">
-            <div className="mb-3 text-[40px]">🧾</div>
+            <div className="mb-3 text-[22px] sm:text-[40px]">🧾</div>
             <div className="text-heading mb-1 font-serif text-[17px] font-semibold">
               Belum ada transaksi
             </div>
@@ -167,7 +167,7 @@ export default function TransactionsPage() {
               return (
                 <li
                   key={t.id}
-                  className="flex min-h-[52px] items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
+                  className="flex items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
                 >
                   <span
                     className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[18px]"

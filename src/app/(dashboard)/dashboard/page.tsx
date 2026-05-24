@@ -23,13 +23,6 @@ import { TransactionForm, type TxDraft } from "@/components/forms/TransactionFor
 import { progressPct, healthScore, remainingGrams, currentGoldValue } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 
-const HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-
-function formatTanggal(d: Date): string {
-  return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
-}
-
 export default function DashboardPage() {
   const [userName, setUserName] = useState("...");
 
@@ -87,9 +80,9 @@ export default function DashboardPage() {
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
         <div>
           <p className="text-subtle mb-2 text-[12.5px] font-bold uppercase tracking-[.14em]">
-            {formatTanggal(new Date())}
+            Kamis, 21 Mei 2026
           </p>
-          <h1 className="text-heading font-serif text-[28px] font-semibold leading-[1.08] tracking-tight sm:text-[36px]">
+          <h1 className="text-heading font-serif text-[20px] font-semibold leading-[1.08] tracking-tight sm:text-[28px] sm:text-[36px]">
             Halo {userName},
             <br className="hidden sm:block" /> ini ringkasan{" "}
             <em className="italic text-amber-text dark:text-amber">finansialmu</em>.
@@ -148,11 +141,11 @@ export default function DashboardPage() {
       </section>
 
       {/* ── Net worth chart + composition ── */}
-      <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1.65fr_1fr]">
+      <section className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.65fr_1fr]">
         <Card>
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-heading font-serif text-[20px] font-semibold">
+              <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
                 Pertumbuhan Kekayaan
               </h2>
               <p className="text-muted mt-0.5 text-[13.5px] font-medium">
@@ -174,16 +167,18 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <h2 className="text-heading font-serif text-[20px] font-semibold">Komposisi Aset</h2>
+          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            Komposisi Aset
+          </h2>
           <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">Sebaran kekayaanmu</p>
           <div className="relative mx-auto h-[168px] w-full max-w-[210px]">
             <DonutChart data={composition} formatValue={(v) => rpShort(v)} />
             <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
               <div>
-                <div className="text-subtle text-[12px] font-bold uppercase tracking-wide">
+                <div className="text-subtle text-[11px] font-bold uppercase tracking-wide">
                   Total
                 </div>
-                <div className="text-heading font-serif text-[19px] font-semibold tabular-nums">
+                <div className="text-heading font-serif text-[17px] font-semibold tabular-nums sm:text-[19px]">
                   {rpShort(totalAsset)}
                 </div>
               </div>
@@ -206,7 +201,9 @@ export default function DashboardPage() {
       {/* ── Health + goals ── */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.45fr]">
         <Card>
-          <h2 className="text-heading font-serif text-[20px] font-semibold">Kesehatan Finansial</h2>
+          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            Kesehatan Finansial
+          </h2>
           <p className="text-muted mb-5 mt-0.5 text-[13.5px] font-medium">
             Rasio aset terhadap utang
           </p>
@@ -227,7 +224,9 @@ export default function DashboardPage() {
 
         <Card>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-heading font-serif text-[20px] font-semibold">Financial Goals</h2>
+            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+              Financial Goals
+            </h2>
             <Link
               href="/cash"
               className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[13.5px] font-bold text-amber-text transition hover:bg-amber-soft dark:text-amber dark:hover:bg-amber/10"
@@ -239,9 +238,12 @@ export default function DashboardPage() {
             {topGoals.map((g) => {
               const p = progressPct(g.usedAmount, g.targetAmount);
               return (
-                <li key={g.id} className="flex items-center gap-3.5 rounded-xl px-1 py-2.5">
+                <li
+                  key={g.id}
+                  className="flex min-h-[60px] items-center gap-3 rounded-xl px-1 py-2"
+                >
                   <span
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-[20px]"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-[17px] sm:text-[20px]"
                     style={{ background: `${g.color}1f` }}
                   >
                     {g.emoji}

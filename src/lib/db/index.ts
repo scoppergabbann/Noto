@@ -18,6 +18,10 @@ import {
   fromOtherAsset,
   toTransaction,
   fromTransaction,
+  toRetirementPlan,
+  fromRetirementPlan,
+  toRetirementFund,
+  fromRetirementFund,
 } from "./mappers";
 import type {
   GoalRow,
@@ -29,6 +33,8 @@ import type {
   StockHoldingRow,
   OtherAssetRow,
   TransactionRow,
+  RetirementPlanRow,
+  RetirementFundRow,
 } from "./types";
 import type {
   Goal,
@@ -40,6 +46,8 @@ import type {
   StockHolding,
   OtherAsset,
   Transaction,
+  RetirementPlan,
+  RetirementFund,
 } from "@/types";
 
 export const goalsRepo = makeRepo<GoalRow, Goal>("goals", toGoal, fromGoal);
@@ -78,4 +86,14 @@ export const transactionsRepo = makeRepo<TransactionRow, Transaction>(
   "transactions",
   toTransaction,
   fromTransaction
+);
+export const retirementPlansRepo = makeRepo<RetirementPlanRow, RetirementPlan>(
+  "retirement_plans",
+  toRetirementPlan,
+  fromRetirementPlan
+);
+export const retirementFundsRepo = makeRepo<RetirementFundRow, RetirementFund>(
+  "retirement_funds",
+  toRetirementFund,
+  fromRetirementFund
 );

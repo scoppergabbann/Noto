@@ -77,7 +77,7 @@ export default function GoldPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Emas Tersimpan
           </div>
-          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight sm:text-[26px]">
+          <div className="mt-2 font-serif text-[17px] font-semibold leading-none tracking-tight sm:text-[20px] sm:text-[26px]">
             {totalGrams.toFixed(1)}
             <span className="text-[16px] text-ink-faint"> gr</span>
           </div>
@@ -86,7 +86,7 @@ export default function GoldPage() {
           <div className="text-[13.5px] font-medium text-ink-dim dark:text-slate-400">
             Estimasi Nilai Kini
           </div>
-          <div className="mt-2 font-serif text-[20px] font-semibold leading-none tracking-tight sm:text-[26px]">
+          <div className="mt-2 font-serif text-[17px] font-semibold leading-none tracking-tight sm:text-[20px] sm:text-[26px]">
             {rpShort(totalNow)}
           </div>
         </Card>
@@ -95,7 +95,7 @@ export default function GoldPage() {
             Profit / Loss
           </div>
           <div
-            className={`serif mt-2 text-[20px] font-semibold leading-none tracking-tight sm:text-[26px] ${profit ? "text-brand-green" : "text-brand-red"}`}
+            className={`serif mt-2 text-[17px] font-semibold leading-none tracking-tight sm:text-[20px] sm:text-[26px] ${profit ? "text-brand-green" : "text-brand-red"}`}
           >
             {profit ? "+" : ""}
             {rpShort(totalPL)}
@@ -110,9 +110,11 @@ export default function GoldPage() {
       </div>
 
       {items.length === 0 ? (
-        <Card className="py-16 text-center">
-          <div className="mb-3 text-[40px]">🪙</div>
-          <div className="mb-1 font-serif text-[19px] font-semibold">Belum ada catatan emas</div>
+        <Card className="py-10 text-center sm:py-14">
+          <div className="mb-3 text-[22px] sm:text-[40px]">🪙</div>
+          <div className="mb-1 font-serif text-[17px] font-semibold sm:text-[19px]">
+            Belum ada catatan emas
+          </div>
           <div className="mx-auto mb-5 max-w-xs text-[14px] text-ink-dim dark:text-slate-400">
             Catat pembelian emasmu untuk memantau profit/loss otomatis.
           </div>
@@ -123,14 +125,16 @@ export default function GoldPage() {
       ) : (
         <>
           <Card className="mb-[18px]">
-            <div className="mb-1 font-serif text-[19px] font-semibold">Pertumbuhan Nilai Emas</div>
+            <div className="mb-1 font-serif text-[17px] font-semibold sm:text-[19px]">
+              Pertumbuhan Nilai Emas
+            </div>
             <div className="mb-2 text-[13.5px] text-ink-dim dark:text-slate-400">
               Estimasi nilai total, 6 bulan terakhir
             </div>
             <GoldValueChart />
           </Card>
 
-          <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {items.map((g) => {
               const grams = remainingGrams(g.boughtGrams, g.soldGrams);
               const now = currentGoldValue(g.boughtGrams, g.soldGrams, g.currentPricePerGram);
@@ -153,7 +157,7 @@ export default function GoldPage() {
               return (
                 <Card key={g.id} hoverable>
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-xl bg-amber/15 text-[22px]">
+                    <div className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-xl bg-amber/15 text-[18px] sm:text-[22px]">
                       🪙
                     </div>
                     <div className="min-w-0 flex-1">
@@ -163,7 +167,7 @@ export default function GoldPage() {
                       </Badge>
                     </div>
                     <div className={`text-right ${up ? "text-brand-green" : "text-brand-red"}`}>
-                      <div className="font-serif text-[20px] font-semibold">
+                      <div className="font-serif text-[17px] font-semibold sm:text-[20px]">
                         {up ? "+" : ""}
                         {plPct}%
                       </div>

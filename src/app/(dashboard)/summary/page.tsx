@@ -60,7 +60,7 @@ export default function SummaryPage() {
 
       {/* Month selector */}
       {months.length > 0 && (
-        <div className="mb-5 flex flex-wrap gap-2">
+        <div className="mb-4 flex flex-wrap gap-2">
           {months.map((m) => (
             <button
               key={m}
@@ -160,7 +160,7 @@ export default function SummaryPage() {
       {/* Charts */}
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.5fr]">
         <Card>
-          <h2 className="text-heading font-serif text-[20px] font-semibold">
+          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
             Pengeluaran per Kategori
           </h2>
           <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
@@ -193,7 +193,9 @@ export default function SummaryPage() {
         </Card>
 
         <Card>
-          <h2 className="text-heading font-serif text-[20px] font-semibold">Arus Kas Bulanan</h2>
+          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            Arus Kas Bulanan
+          </h2>
           <p className="text-muted mb-4 mt-0.5 text-[13.5px] font-medium">
             {flow.length} bulan terakhir
           </p>
@@ -214,7 +216,9 @@ export default function SummaryPage() {
       {/* Recent transactions preview — full CRUD di /transactions */}
       <Card>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-heading font-serif text-[20px] font-semibold">Transaksi Terbaru</h2>
+          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            Transaksi Terbaru
+          </h2>
           <Link
             href="/transactions"
             className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[13.5px] font-bold text-amber-text transition hover:bg-amber-soft dark:text-amber dark:hover:bg-amber/10"
@@ -230,7 +234,7 @@ export default function SummaryPage() {
               return (
                 <li
                   key={t.id}
-                  className="flex min-h-[52px] items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
+                  className="flex items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
                 >
                   <span
                     className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[17px]"
@@ -264,7 +268,7 @@ export default function SummaryPage() {
           </ul>
         ) : (
           <div className="py-10 text-center">
-            <div className="mb-2 text-[36px]">🧾</div>
+            <div className="mb-2 text-[22px] sm:text-[36px]">🧾</div>
             <p className="text-muted text-[14px]">Belum ada transaksi bulan ini.</p>
             <Link
               href="/transactions"

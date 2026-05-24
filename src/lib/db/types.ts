@@ -116,3 +116,31 @@ export interface TransactionRow {
   created_at: string;
   updated_at: string;
 }
+
+export interface RetirementPlanRow {
+  id: string;
+  user_id: string;
+  label: string;
+  current_age: number;
+  retirement_age: number;
+  monthly_need_today: number;
+  inflation_rate: number;
+  expected_return: number;
+  life_expectancy: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RetirementFundRow {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  name: string;
+  type: string;
+  current_value: number;
+  monthly_contribution: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}

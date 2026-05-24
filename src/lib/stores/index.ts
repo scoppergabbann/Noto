@@ -9,6 +9,8 @@ import {
   stocksRepo,
   assetsRepo,
   transactionsRepo,
+  retirementPlansRepo,
+  retirementFundsRepo,
 } from "@/lib/db";
 import type {
   Goal,
@@ -20,6 +22,8 @@ import type {
   StockHolding,
   OtherAsset,
   Transaction,
+  RetirementPlan,
+  RetirementFund,
 } from "@/types";
 
 export const useGoalsStore = createSupabaseStore<Goal>(goalsRepo, "goals");
@@ -33,4 +37,12 @@ export const useAssetsStore = createSupabaseStore<OtherAsset>(assetsRepo, "asset
 export const useTransactionsStore = createSupabaseStore<Transaction>(
   transactionsRepo,
   "transactions"
+);
+export const useRetirementPlansStore = createSupabaseStore<RetirementPlan>(
+  retirementPlansRepo,
+  "retirement-plans"
+);
+export const useRetirementFundsStore = createSupabaseStore<RetirementFund>(
+  retirementFundsRepo,
+  "retirement-funds"
 );

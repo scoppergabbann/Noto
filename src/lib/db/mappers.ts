@@ -220,3 +220,53 @@ export const fromTransaction = (t: Omit<Transaction, "id">, userId: string) => (
   note: t.note || null,
   updated_at: new Date().toISOString(),
 });
+
+// ---- Retirement ----
+import type { RetirementPlan, RetirementFund } from "@/types";
+import type { RetirementPlanRow, RetirementFundRow } from "./types";
+
+export const toRetirementPlan = (r: RetirementPlanRow): RetirementPlan => ({
+  id: r.id,
+  label: r.label,
+  currentAge: r.current_age,
+  retirementAge: r.retirement_age,
+  monthlyNeedToday: Number(r.monthly_need_today),
+  inflationRate: Number(r.inflation_rate),
+  expectedReturn: Number(r.expected_return),
+  lifeExpectancy: Number(r.life_expectancy),
+  notes: r.notes ?? "",
+});
+
+export const fromRetirementPlan = (p: Omit<RetirementPlan, "id">, userId: string) => ({
+  user_id: userId,
+  label: p.label,
+  current_age: p.currentAge,
+  retirement_age: p.retirementAge,
+  monthly_need_today: p.monthlyNeedToday,
+  inflation_rate: p.inflationRate,
+  expected_return: p.expectedReturn,
+  life_expectancy: p.lifeExpectancy,
+  notes: p.notes || null,
+  updated_at: new Date().toISOString(),
+});
+
+export const toRetirementFund = (r: RetirementFundRow): RetirementFund => ({
+  id: r.id,
+  planId: r.plan_id,
+  name: r.name,
+  type: r.type as RetirementFund["type"],
+  currentValue: Number(r.current_value),
+  monthlyContribution: Number(r.monthly_contribution),
+  notes: r.notes ?? "",
+});
+
+export const fromRetirementFund = (f: Omit<RetirementFund, "id">, userId: string) => ({
+  user_id: userId,
+  plan_id: f.planId,
+  name: f.name,
+  type: f.type,
+  current_value: f.currentValue,
+  monthly_contribution: f.monthlyContribution,
+  notes: f.notes || null,
+  updated_at: new Date().toISOString(),
+});

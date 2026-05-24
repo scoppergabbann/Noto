@@ -125,13 +125,13 @@ export interface CashFlowPoint {
 // Pensiun
 export interface RetirementPlan {
   id: string;
-  label: string; // nama rencana
+  label: string;
   currentAge: number;
   retirementAge: number;
-  monthlyNeedToday: number; // kebutuhan bulanan saat ini (Rp)
-  inflationRate: number; // % per tahun, mis. 5
-  expectedReturn: number; // % per tahun dari investasi, mis. 8
-  currentSavings: number; // total dana pensiun yang sudah terkumpul
+  monthlyNeedToday: number;
+  inflationRate: number;
+  expectedReturn: number;
+  lifeExpectancy: number;
   notes?: string;
 }
 
