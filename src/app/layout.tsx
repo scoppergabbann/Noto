@@ -17,8 +17,57 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Noto · Financial Planner",
-  description: "Noto urip, noto finansial.",
+  metadataBase: new URL("https://noto-eight.vercel.app"),
+  title: {
+    default: "Noto — Noto urip, noto finansial.",
+    template: "%s · Noto",
+  },
+  description:
+    "Aplikasi personal finance untuk menata cashflow, tabungan, aset, utang, saham, emas, dan perjalanan finansialmu dengan lebih rapi.",
+  keywords: [
+    "Noto",
+    "Noto urip noto finansial",
+    "personal finance",
+    "financial planner",
+    "finance tracker",
+    "catatan keuangan",
+    "tabungan",
+    "aset",
+    "utang",
+    "investasi",
+  ],
+  authors: [{ name: "Mochammad Fawwaz" }],
+  creator: "Mochammad Fawwaz",
+  publisher: "Noto",
+  applicationName: "Noto",
+  openGraph: {
+    type: "website",
+    url: "https://noto-eight.vercel.app",
+    siteName: "Noto",
+    title: "Noto — Noto urip, noto finansial.",
+    description:
+      "Noto membantumu menata hidup dan finansial: dari cashflow harian, tabungan, aset, utang, sampai investasi pribadi.",
+    locale: "id_ID",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Noto — Noto urip, noto finansial.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Noto — Noto urip, noto finansial.",
+    description:
+      "Catat cashflow, tabungan, aset, utang, saham, emas, dan perjalanan finansialmu dalam satu aplikasi personal finance.",
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
