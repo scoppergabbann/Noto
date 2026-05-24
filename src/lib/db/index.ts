@@ -32,9 +32,9 @@ import type {
   GoldAssetRow,
   StockHoldingRow,
   OtherAssetRow,
-  TransactionRow,
   RetirementPlanRow,
   RetirementFundRow,
+  TransactionRow,
 } from "./types";
 import type {
   Goal,

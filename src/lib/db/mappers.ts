@@ -233,7 +233,7 @@ export const toRetirementPlan = (r: RetirementPlanRow): RetirementPlan => ({
   monthlyNeedToday: Number(r.monthly_need_today),
   inflationRate: Number(r.inflation_rate),
   expectedReturn: Number(r.expected_return),
-  lifeExpectancy: Number(r.life_expectancy),
+  lifeExpectancy: r.life_expectancy,
   notes: r.notes ?? "",
 });
 

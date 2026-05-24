@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Plus, TrendingUp, AlertCircle, CheckCircle, Trash2, Save } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -30,6 +30,7 @@ import {
 import { stockMarketValue, currentGoldValue } from "@/lib/finance";
 import type { RetirementPlan, RetirementFund } from "@/types";
 
+// ---- Constants ----
 const TYPE_LABELS: Record<RetirementFund["type"], string> = {
   dplk: "DPLK",
   bpjs: "BPJS Ketenagakerjaan",
@@ -59,7 +60,30 @@ const DEFAULT_PLAN: Omit<RetirementPlan, "id"> = {
   notes: "",
 };
 
+// ---- Helper: save status toast ----
+function SaveStatus({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
+  if (status === "idle") return null;
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-xl px-4 py-2.5 text-[13.5px] font-semibold shadow-softlg transition-all lg:bottom-6 ${
+        status === "saving"
+          ? "text-muted bg-surface-raised dark:bg-night-raised2"
+          : status === "saved"
+            ? "bg-pos-strong text-white"
+            : "bg-neg text-white"
+      }`}
+    >
+      {status === "saving" && "Menyimpan…"}
+      {status === "saved" && "✓ Tersimpan"}
+      {status === "error" && "Gagal menyimpan"}
+    </div>
+  );
+}
+
 export default function RetirementPage() {
+  // ---- Stores ----
   const {
     items: plans,
     loading: plansLoading,
@@ -82,62 +106,86 @@ export default function RetirementPage() {
   const stockItems = useStocksStore((s) => s.items);
   const assetItems = useAssetsStore((s) => s.items);
 
-  // Local edit state (syncs to Supabase on save)
-  const [editPlan, setEditPlan] = useState<Omit<RetirementPlan, "id"> | null>(null);
+  // ---- Local edit state for the plan form ----
+  const [localPlan, setLocalPlan] = useState<Omit<RetirementPlan, "id">>(DEFAULT_PLAN);
   const [isDirty, setIsDirty] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  // ---- Fund form ----
   const [addingFund, setAddingFund] = useState(false);
   const [deleteFundId, setDeleteFundId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Omit<RetirementFund, "id">>({
+  const [fundDraft, setFundDraft] = useState<Omit<RetirementFund, "id">>({
     planId: "",
     name: "",
     type: "savings",
     currentValue: 0,
     monthlyContribution: 0,
+    notes: "",
   });
 
-  // Use first plan (atau buat baru)
-  const plan = plans[0];
+  // ---- Sync store → local form (hanya sekali saat data datang) ----
+  const storedPlan = plans[0] ?? null;
 
-  // Sync plan ke edit state ketika data datang
   useEffect(() => {
-    if (plan && !editPlan) {
-      const { id: _id, ...rest } = plan;
+    if (storedPlan && !isDirty) {
+      // Ada data dari Supabase → pakai data user
+      const { id: _id, ...rest } = storedPlan;
       void _id;
-      setEditPlan(rest);
-    } else if (!plan && !editPlan) {
-      setEditPlan(DEFAULT_PLAN);
+      setLocalPlan(rest);
     }
-  }, [plan, editPlan]);
+    // Kalau belum ada plan dan !isDirty, biarkan DEFAULT_PLAN tampil
+  }, [storedPlan, isDirty]);
 
-  function handlePlanChange(patch: Partial<typeof editPlan>) {
-    setEditPlan((p) => (p ? { ...p, ...patch } : p));
+  // ---- Handler perubahan parameter ----
+  function handleChange(patch: Partial<Omit<RetirementPlan, "id">>) {
+    setLocalPlan((prev) => ({ ...prev, ...patch }));
     setIsDirty(true);
   }
 
-  async function savePlan() {
-    if (!editPlan) return;
-    setSaving(true);
-    if (plan) {
-      await updatePlan(plan.id, editPlan);
-    } else {
-      await addPlan(editPlan);
-      await fetchPlans();
+  // ---- Save ke Supabase ----
+  const handleSave = useCallback(async () => {
+    setSaveStatus("saving");
+    try {
+      if (storedPlan) {
+        // Update plan yang sudah ada
+        await updatePlan(storedPlan.id, localPlan);
+      } else {
+        // Buat plan baru (pertama kali)
+        await addPlan(localPlan);
+        await fetchPlans();
+      }
+      setIsDirty(false);
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    } catch {
+      setSaveStatus("error");
+      setTimeout(() => setSaveStatus("idle"), 3000);
     }
-    setSaving(false);
-    setIsDirty(false);
-  }
+  }, [storedPlan, localPlan, updatePlan, addPlan, fetchPlans]);
 
+  // ---- Add fund ----
   async function handleAddFund() {
-    if (!draft.name.trim()) return;
-    const planId = plan?.id ?? "";
-    await addFund({ ...draft, planId });
-    setDraft({ planId: "", name: "", type: "savings", currentValue: 0, monthlyContribution: 0 });
-    setAddingFund(false);
+    if (!fundDraft.name.trim()) return;
+    const planId = storedPlan?.id ?? "";
+    if (!planId) {
+      // Harus save plan dulu sebelum tambah fund
+      await handleSave();
+      return;
+    }
+    await addFund({ ...fundDraft, planId });
     await fetchFunds();
+    setFundDraft({
+      planId: "",
+      name: "",
+      type: "savings",
+      currentValue: 0,
+      monthlyContribution: 0,
+      notes: "",
+    });
+    setAddingFund(false);
   }
 
-  // Linked assets
+  // ---- Linked assets (dari store lain) ----
   const linkedAssets = useMemo(() => {
     const goldValue = goldItems.reduce(
       (s, g) => s + currentGoldValue(g.boughtGrams, g.soldGrams, g.currentPricePerGram),
@@ -148,31 +196,31 @@ export default function RetirementPage() {
     return { goldValue, stockValue, otherValue, total: goldValue + stockValue + otherValue };
   }, [goldItems, stockItems, assetItems]);
 
-  const planFunds = funds.filter((f) => !plan || f.planId === plan.id);
+  // ---- Calculations ----
+  const planFunds = funds.filter((f) => !storedPlan || f.planId === storedPlan.id);
   const manualTotal = planFunds.reduce((s, f) => s + f.currentValue, 0);
   const monthlyContribTotal = planFunds.reduce((s, f) => s + f.monthlyContribution, 0);
   const totalCurrentSavings = manualTotal + linkedAssets.total;
 
-  const ep = editPlan ?? DEFAULT_PLAN;
-  const yearsToRetirement = Math.max(0, ep.retirementAge - ep.currentAge);
+  const lp = localPlan; // alias untuk keterbacaan
+  const yearsToRetirement = Math.max(0, lp.retirementAge - lp.currentAge);
 
   const target = useMemo(
     () =>
       targetFund(
-        ep.monthlyNeedToday,
+        lp.monthlyNeedToday,
         yearsToRetirement,
-        ep.inflationRate,
-        ep.lifeExpectancy,
-        ep.expectedReturn
+        lp.inflationRate,
+        lp.lifeExpectancy,
+        lp.expectedReturn
       ),
-    [ep, yearsToRetirement]
+    [lp, yearsToRetirement]
   );
 
-  const projected = projectedFund(
-    totalCurrentSavings,
-    monthlyContribTotal,
-    yearsToRetirement,
-    ep.expectedReturn
+  const projected = useMemo(
+    () =>
+      projectedFund(totalCurrentSavings, monthlyContribTotal, yearsToRetirement, lp.expectedReturn),
+    [totalCurrentSavings, monthlyContribTotal, yearsToRetirement, lp.expectedReturn]
   );
 
   const gap = fundGap(target, projected);
@@ -181,13 +229,14 @@ export default function RetirementPage() {
     target,
     totalCurrentSavings,
     yearsToRetirement,
-    ep.expectedReturn
+    lp.expectedReturn
   );
   const onTrack = gap >= 0;
   const shortfall = Math.max(0, -gap);
   const monthlyAtRetirement =
-    ep.monthlyNeedToday * Math.pow(1 + ep.inflationRate / 100, yearsToRetirement);
+    lp.monthlyNeedToday * Math.pow(1 + lp.inflationRate / 100, yearsToRetirement);
 
+  // ---- Loading / Error states ----
   if (plansLoading || fundsLoading) return <LoadingState label="Memuat rencana pensiun…" />;
   if (plansError) return <ErrorState message={plansError} onRetry={fetchPlans} />;
   if (fundsError) return <ErrorState message={fundsError} onRetry={fetchFunds} />;
@@ -203,13 +252,25 @@ export default function RetirementPage() {
         }
         action={
           isDirty ? (
-            <Button onClick={savePlan} disabled={saving}>
+            <Button onClick={handleSave} disabled={saveStatus === "saving"}>
               <Save size={16} strokeWidth={2.3} />
-              {saving ? "Menyimpan…" : "Simpan perubahan"}
+              {saveStatus === "saving" ? "Menyimpan…" : "Simpan"}
             </Button>
           ) : undefined
         }
       />
+
+      {/* Info: belum pernah simpan */}
+      {!storedPlan && (
+        <Card className="mb-5 flex items-start gap-3.5 !bg-amber-soft/60 dark:!bg-amber/[0.07]">
+          <TrendingUp size={18} className="mt-0.5 shrink-0 text-amber-text dark:text-amber" />
+          <p className="text-body text-[13.5px] leading-relaxed">
+            Atur parameter di bawah sesuai kondisimu, lalu tekan{" "}
+            <strong className="text-heading font-bold">Simpan</strong> agar data tersimpan ke akun
+            dan tidak hilang saat refresh.
+          </p>
+        </Card>
+      )}
 
       {/* Status banner */}
       <Card
@@ -226,22 +287,31 @@ export default function RetirementPage() {
         </div>
         <div>
           <div
-            className={`text-[14px] font-bold ${onTrack ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"}`}
+            className={`text-[14px] font-bold ${
+              onTrack ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark"
+            }`}
           >
             {onTrack
               ? `On track! Proyeksi surplus ${rpShort(gap)}`
               : `Perlu ${rpShort(shortfall)} lagi untuk mencapai target`}
           </div>
-          <div className="text-body mt-0.5 text-[13.5px] leading-relaxed">
-            {yearsToRetirement} tahun lagi menuju pensiun usia {ep.retirementAge}.
-            {!onTrack && ` Tambah tabungan `}
-            {!onTrack && <strong className="text-heading">{rpShort(required)}/bulan</strong>}
-            {!onTrack && ` untuk on track.`}
-          </div>
+          <p className="text-body mt-0.5 text-[13.5px] leading-relaxed">
+            {yearsToRetirement} tahun lagi menuju pensiun usia {lp.retirementAge}.
+            {!onTrack && (
+              <>
+                {" "}
+                Tambah tabungan{" "}
+                <strong className="text-heading font-semibold">
+                  {rpShort(required)}/bulan
+                </strong>{" "}
+                untuk on track.
+              </>
+            )}
+          </p>
         </div>
       </Card>
 
-      {/* Progress card */}
+      {/* Progress */}
       <Card className="mb-5">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
@@ -252,7 +322,7 @@ export default function RetirementPage() {
           </div>
           <div className="text-right">
             <div
-              className={`font-serif text-[19px] font-semibold tabular-nums sm:text-[24px] ${
+              className={`font-serif text-[26px] font-semibold tabular-nums ${
                 onTrack
                   ? "text-pos-strong dark:text-pos-dark"
                   : "text-neg-strong dark:text-neg-dark"
@@ -263,13 +333,15 @@ export default function RetirementPage() {
             <Badge tone={onTrack ? "green" : "red"}>{onTrack ? "on track" : "perlu upaya"}</Badge>
           </div>
         </div>
+
         <ProgressBar
           value={progress}
           color={onTrack ? "#0f9d6b" : "#d83a3a"}
           height={12}
           label={`Progress pensiun ${progress}%`}
         />
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           {[
             ["Target Dana", rpShort(target)],
             ["Proyeksi", rpShort(projected)],
@@ -287,63 +359,76 @@ export default function RetirementPage() {
       </Card>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Parameter */}
+        {/* ---- Parameter form ---- */}
         <Card>
-          <h2 className="text-heading mb-4 font-serif text-[18px] font-semibold">
-            Parameter Rencana
-          </h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-heading font-serif text-[18px] font-semibold">Parameter Rencana</h2>
+            {isDirty && (
+              <span className="rounded-lg bg-amber/15 px-2 py-1 text-[12px] font-bold text-amber-text dark:text-amber">
+                Belum disimpan
+              </span>
+            )}
+          </div>
+
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Usia sekarang"
                 type="number"
                 inputMode="numeric"
-                value={ep.currentAge}
-                onChange={(e) => handlePlanChange({ currentAge: Number(e.target.value) })}
+                min={1}
+                max={100}
+                value={lp.currentAge || ""}
+                onChange={(e) => handleChange({ currentAge: Number(e.target.value) })}
               />
               <Input
                 label="Target usia pensiun"
                 type="number"
                 inputMode="numeric"
-                value={ep.retirementAge}
-                onChange={(e) => handlePlanChange({ retirementAge: Number(e.target.value) })}
+                min={1}
+                max={100}
+                value={lp.retirementAge || ""}
+                onChange={(e) => handleChange({ retirementAge: Number(e.target.value) })}
               />
             </div>
+
             <CurrencyInput
               label="Kebutuhan bulanan saat ini (Rp)"
               hint="Nilai uang hari ini — akan disesuaikan inflasi"
-              value={ep.monthlyNeedToday}
-              onChange={(v) => handlePlanChange({ monthlyNeedToday: v })}
+              value={lp.monthlyNeedToday}
+              onChange={(v) => handleChange({ monthlyNeedToday: v })}
             />
+
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Inflasi/tahun (%)"
                 type="number"
                 inputMode="decimal"
-                hint="Rata-rata Indonesia ±5-6%"
-                value={ep.inflationRate}
-                onChange={(e) => handlePlanChange({ inflationRate: Number(e.target.value) })}
+                hint="Rata-rata Indonesia ±5–6%"
+                value={lp.inflationRate || ""}
+                onChange={(e) => handleChange({ inflationRate: Number(e.target.value) })}
               />
               <Input
                 label="Return investasi/tahun (%)"
                 type="number"
                 inputMode="decimal"
-                hint="Reksa dana ~8-12%"
-                value={ep.expectedReturn}
-                onChange={(e) => handlePlanChange({ expectedReturn: Number(e.target.value) })}
+                hint="Reksa dana ~8–12%"
+                value={lp.expectedReturn || ""}
+                onChange={(e) => handleChange({ expectedReturn: Number(e.target.value) })}
               />
             </div>
+
             <Input
               label="Masa pensiun (tahun)"
               type="number"
               inputMode="numeric"
-              hint={`Estimasi hidup hingga ${ep.retirementAge + ep.lifeExpectancy} tahun`}
-              value={ep.lifeExpectancy}
-              onChange={(e) => handlePlanChange({ lifeExpectancy: Number(e.target.value) })}
+              hint={`Estimasi hidup hingga ${lp.retirementAge + lp.lifeExpectancy} tahun`}
+              value={lp.lifeExpectancy || ""}
+              onChange={(e) => handleChange({ lifeExpectancy: Number(e.target.value) })}
             />
 
             {/* Ringkasan kalkulasi */}
-            <div className="rounded-xl border border-black/[.06] bg-surface-sunken p-3.5 dark:border-white/10 dark:bg-white/5 sm:p-4">
+            <div className="rounded-xl border border-black/[.06] bg-surface-sunken p-3.5 dark:border-white/10 dark:bg-white/5">
               <div className="text-subtle mb-3 text-[12px] font-bold uppercase tracking-wide">
                 Ringkasan kalkulasi
               </div>
@@ -352,15 +437,19 @@ export default function RetirementPage() {
                   ["Kebutuhan/bln saat pensiun", rpShort(monthlyAtRetirement)],
                   ["Target total dana", rpShort(target)],
                 ].map(([label, value]) => (
-                  <div key={label} className="flex items-center justify-between gap-2">
+                  <div key={label} className="flex items-center justify-between gap-3">
                     <span className="text-muted">{label}</span>
                     <span className="text-heading font-semibold tabular-nums">{value}</span>
                   </div>
                 ))}
-                <div className="flex items-center justify-between gap-2 border-t border-black/[.06] pt-2.5 dark:border-white/10">
+                <div className="flex items-center justify-between gap-3 border-t border-black/[.06] pt-2.5 dark:border-white/10">
                   <span className="text-body font-semibold">Perlu nabung/bulan</span>
                   <span
-                    className={`font-bold tabular-nums ${required > 0 ? "text-neg-strong dark:text-neg-dark" : "text-pos-strong dark:text-pos-dark"}`}
+                    className={`font-bold tabular-nums ${
+                      required > 0
+                        ? "text-neg-strong dark:text-neg-dark"
+                        : "text-pos-strong dark:text-pos-dark"
+                    }`}
                   >
                     {required > 0 ? rpShort(required) : "Sudah cukup! 🎉"}
                   </span>
@@ -368,23 +457,26 @@ export default function RetirementPage() {
               </div>
             </div>
 
+            {/* Tombol simpan */}
             {isDirty && (
-              <Button onClick={savePlan} disabled={saving} className="w-full">
+              <Button onClick={handleSave} disabled={saveStatus === "saving"} className="w-full">
                 <Save size={16} />
-                {saving ? "Menyimpan…" : "Simpan parameter"}
+                {saveStatus === "saving" ? "Menyimpan…" : "Simpan parameter"}
               </Button>
             )}
           </div>
         </Card>
 
-        {/* Sumber dana */}
+        {/* ---- Sumber dana ---- */}
         <div className="flex flex-col gap-4">
-          {/* Aset terhubung */}
+          {/* Aset terhubung otomatis */}
           <Card>
             <h2 className="text-heading mb-1 font-serif text-[18px] font-semibold">
               Aset Terhubung
             </h2>
-            <p className="text-muted mb-4 text-[13px]">Dari Emas, Saham, dan Aset Lainnya.</p>
+            <p className="text-muted mb-4 text-[13px]">
+              Dihitung otomatis dari Emas, Saham, dan Aset Lainnya.
+            </p>
             <ul className="space-y-2.5">
               {[
                 ["🪙 Emas", linkedAssets.goldValue],
@@ -416,7 +508,7 @@ export default function RetirementPage() {
               <h2 className="text-heading font-serif text-[18px] font-semibold">
                 Sumber Dana Pensiun
               </h2>
-              <Button size="sm" onClick={() => setAddingFund(true)}>
+              <Button size="sm" onClick={() => setAddingFund(true)} disabled={addingFund}>
                 <Plus size={15} strokeWidth={2.5} /> Tambah
               </Button>
             </div>
@@ -424,19 +516,24 @@ export default function RetirementPage() {
             {/* Form tambah */}
             {addingFund && (
               <div className="mb-4 rounded-xl border border-black/[.07] bg-surface-sunken p-4 dark:border-white/10 dark:bg-white/5">
-                <div className="text-heading mb-3 text-[13px] font-bold">Tambah Sumber Dana</div>
+                {!storedPlan && (
+                  <p className="mb-3 rounded-lg bg-amber-soft px-3 py-2 text-[13px] font-medium text-amber-text dark:bg-amber/10 dark:text-amber">
+                    Simpan parameter dulu sebelum tambah sumber dana.
+                  </p>
+                )}
+                <div className="text-heading mb-3 text-[13px] font-bold">Sumber Dana Baru</div>
                 <div className="flex flex-col gap-3">
                   <Input
                     label="Nama"
                     placeholder="mis. DPLK BCA, Reksa Dana ABC"
-                    value={draft.name}
-                    onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                    value={fundDraft.name}
+                    onChange={(e) => setFundDraft({ ...fundDraft, name: e.target.value })}
                   />
                   <Select
                     label="Jenis"
-                    value={draft.type}
+                    value={fundDraft.type}
                     onChange={(e) =>
-                      setDraft({ ...draft, type: e.target.value as RetirementFund["type"] })
+                      setFundDraft({ ...fundDraft, type: e.target.value as RetirementFund["type"] })
                     }
                   >
                     {Object.entries(TYPE_LABELS).map(([v, l]) => (
@@ -447,18 +544,24 @@ export default function RetirementPage() {
                   </Select>
                   <CurrencyInput
                     label="Nilai saat ini (Rp)"
-                    value={draft.currentValue}
-                    onChange={(v) => setDraft({ ...draft, currentValue: v })}
+                    value={fundDraft.currentValue}
+                    onChange={(v) => setFundDraft({ ...fundDraft, currentValue: v })}
                   />
                   <CurrencyInput
                     label="Kontribusi bulanan (Rp)"
                     hint="0 jika tidak ada iuran rutin"
-                    value={draft.monthlyContribution}
-                    onChange={(v) => setDraft({ ...draft, monthlyContribution: v })}
+                    value={fundDraft.monthlyContribution}
+                    onChange={(v) => setFundDraft({ ...fundDraft, monthlyContribution: v })}
                   />
                   <div className="grid grid-cols-2 gap-2">
-                    <Button onClick={handleAddFund}>Simpan</Button>
-                    <Button variant="secondary" onClick={() => setAddingFund(false)}>
+                    <Button onClick={handleAddFund} className="w-full">
+                      Simpan
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setAddingFund(false)}
+                      className="w-full"
+                    >
                       Batal
                     </Button>
                   </div>
@@ -468,7 +571,7 @@ export default function RetirementPage() {
 
             {planFunds.length === 0 && !addingFund ? (
               <div className="py-8 text-center">
-                <div className="mb-2 text-[22px] sm:text-[36px]" aria-hidden="true">
+                <div className="mb-2 text-[36px]" aria-hidden="true">
                   🏦
                 </div>
                 <p className="text-muted text-[13.5px] leading-relaxed">
@@ -484,15 +587,15 @@ export default function RetirementPage() {
                     key={f.id}
                     className="flex items-center gap-3 rounded-xl border border-black/[.05] p-3 dark:border-white/5"
                   >
-                    <span className="shrink-0 text-[18px] sm:text-[22px]" aria-hidden="true">
-                      {TYPE_EMOJI[f.type as RetirementFund["type"]] ?? "📦"}
+                    <span className="shrink-0 text-[22px]" aria-hidden="true">
+                      {TYPE_EMOJI[f.type as RetirementFund["type"]]}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="text-heading truncate text-[14px] font-semibold">
                         {f.name}
                       </div>
                       <div className="text-subtle text-[12.5px]">
-                        {TYPE_LABELS[f.type as RetirementFund["type"]] ?? f.type}
+                        {TYPE_LABELS[f.type as RetirementFund["type"]]}
                         {f.monthlyContribution > 0 && ` · +${rpShort(f.monthlyContribution)}/bln`}
                       </div>
                     </div>
@@ -510,9 +613,10 @@ export default function RetirementPage() {
                     </button>
                   </li>
                 ))}
+
                 {planFunds.length > 0 && (
                   <li className="flex items-center justify-between border-t border-black/[.06] pt-2.5 text-[14px] dark:border-white/10">
-                    <span className="text-heading font-semibold">Total</span>
+                    <span className="text-heading font-semibold">Total dana khusus</span>
                     <span className="text-heading font-bold tabular-nums">
                       {rpShort(manualTotal)}
                     </span>
@@ -533,8 +637,11 @@ export default function RetirementPage() {
               <p className="text-body text-[13.5px] leading-relaxed">
                 <strong className="text-heading font-semibold">Rule of 25:</strong> Dana pensiun
                 ideal adalah 25× pengeluaran tahunan. Dengan kebutuhanmu{" "}
-                <strong className="text-heading">{rpShort(monthlyAtRetirement)}/bulan</strong> saat
-                pensiun, targetmu <strong className="text-heading">{rpShort(target)}</strong>.
+                <strong className="text-heading font-semibold">
+                  {rpShort(monthlyAtRetirement)}/bulan
+                </strong>{" "}
+                saat pensiun nanti, target danamu adalah{" "}
+                <strong className="text-heading font-semibold">{rpShort(target)}</strong>.
               </p>
             </div>
           </Card>
@@ -544,10 +651,17 @@ export default function RetirementPage() {
       <ConfirmDialog
         open={!!deleteFundId}
         onClose={() => setDeleteFundId(null)}
-        onConfirm={() => deleteFundId && removeFund(deleteFundId)}
+        onConfirm={async () => {
+          if (deleteFundId) {
+            await removeFund(deleteFundId);
+            await fetchFunds();
+          }
+        }}
         title="Hapus sumber dana?"
         message="Data ini akan dihapus permanen dari rencana pensiunmu."
       />
+
+      <SaveStatus status={saveStatus} />
     </>
   );
 }

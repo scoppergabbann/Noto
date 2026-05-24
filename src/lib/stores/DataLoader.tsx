@@ -33,7 +33,7 @@ export function DataLoader({ userId }: { userId: string }) {
     if (!userId) return;
 
     async function loadAll() {
-      // Fix JWT issued at future — pastikan session valid dulu
+      // Fix JWT issued at future
       const sb = createClient();
       const { error: sessionErr } = await sb.auth.getSession();
       if (sessionErr) await sb.auth.refreshSession();
@@ -48,6 +48,8 @@ export function DataLoader({ userId }: { userId: string }) {
         fetchStocks(),
         fetchAssets(),
         fetchTransactions(),
+        fetchRetirementPlans(),
+        fetchRetirementFunds(),
       ]);
     }
 
@@ -63,6 +65,8 @@ export function DataLoader({ userId }: { userId: string }) {
     fetchStocks,
     fetchAssets,
     fetchTransactions,
+    fetchRetirementPlans,
+    fetchRetirementFunds,
   ]);
 
   return null;
