@@ -37,7 +37,7 @@ export const navGroups: NavGroup[] = [
     title: "KEUANGAN",
     items: [
       { href: "/transactions", label: "Transaksi", short: "Transaksi", icon: ArrowLeftRight },
-      { href: "/cash", label: "Asset Cash", short: "Cash", icon: Wallet },
+      { href: "/cash", label: "Tabungan", short: "Tabungan", icon: Wallet },
       { href: "/receivables", label: "Piutang", short: "Piutang", icon: HandCoins },
       { href: "/debts", label: "Utang & Cicilan", short: "Utang", icon: Landmark },
       { href: "/cards", label: "Credit Card", short: "Kartu", icon: CreditCard },

@@ -86,7 +86,7 @@ export default function CashPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Asset Cash"
+        eyebrow="Tabungan"
         title={
           <>
             Tabungan & <em className="italic text-amber-text dark:text-amber">goal</em> finansialmu.

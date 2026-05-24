@@ -75,14 +75,15 @@ export function GoalForm({
       }
     >
       <div className="flex flex-col gap-3.5">
-        <CurrencyInput
-          label="Target tabungan (Rp)"
-          value={d.targetAmount}
-          onChange={(val) => set("targetAmount", val)}
+        <Input
+          label="Nama target"
+          placeholder="mis. Dana darurat, Liburan Jepang, DP Rumah"
+          value={d.item}
+          onChange={(e) => set("item", e.target.value)}
         />
         <Input
           label="Instrumen"
-          placeholder="mis. Bank Jago, Reksadana"
+          placeholder="mis. Bank Jago, Reksadana, Tabungan BCA"
           value={d.instrument}
           onChange={(e) => set("instrument", e.target.value)}
         />
@@ -101,7 +102,7 @@ export function GoalForm({
         <div className="grid grid-cols-2 gap-3">
           <Input
             label="Deadline"
-            placeholder="mis. Des 2026"
+            type="date"
             value={d.deadline}
             onChange={(e) => set("deadline", e.target.value)}
           />

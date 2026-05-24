@@ -18,8 +18,6 @@ import {
   fromOtherAsset,
   toTransaction,
   fromTransaction,
-  toRetirementPlan,
-  fromRetirementPlan,
   toRetirementFund,
   fromRetirementFund,
   toAssetTransfer,
@@ -35,7 +33,6 @@ import type {
   StockHoldingRow,
   OtherAssetRow,
   TransactionRow,
-  RetirementPlanRow,
   RetirementFundRow,
   AssetTransferRow,
 } from "./types";
@@ -49,58 +46,72 @@ import type {
   StockHolding,
   OtherAsset,
   Transaction,
-  RetirementPlan,
   RetirementFund,
   AssetTransfer,
 } from "@/types";
 
 export const goalsRepo = makeRepo<GoalRow, Goal>("goals", toGoal, fromGoal);
+
 export const receivablesRepo = makeRepo<ReceivableRow, Receivable>(
   "receivables",
   toReceivable,
   fromReceivable
 );
+
 export const debtsRepo = makeRepo<DebtRow, Debt>("debts", toDebt, fromDebt);
+
 export const cardsRepo = makeRepo<CreditCardRow, CreditCard>(
   "credit_cards",
   toCreditCard,
   fromCreditCard
 );
+
 export const cardTxRepo = makeRepo<CardTransactionRow, CardTransaction>(
   "card_transactions",
   toCardTransaction,
   fromCardTransaction
 );
+
 export const goldRepo = makeRepo<GoldAssetRow, GoldAsset>(
   "gold_assets",
   toGoldAsset,
   fromGoldAsset
 );
+
 export const stocksRepo = makeRepo<StockHoldingRow, StockHolding>(
   "stock_holdings",
   toStockHolding,
   fromStockHolding
 );
+
 export const assetsRepo = makeRepo<OtherAssetRow, OtherAsset>(
   "other_assets",
   toOtherAsset,
   fromOtherAsset
 );
+
 export const transactionsRepo = makeRepo<TransactionRow, Transaction>(
   "transactions",
   toTransaction,
   fromTransaction
 );
-export const retirementPlansRepo = makeRepo<RetirementPlanRow, RetirementPlan>(
-  "retirement_plans",
-  toRetirementPlan,
-  fromRetirementPlan
-);
+
+// NOTE:
+// retirementPlansRepo sementara dimatikan karena mappers.ts belum export:
+// toRetirementPlan dan fromRetirementPlan.
+// Aktifkan lagi kalau mapper-nya sudah dibuat.
+// export const retirementPlansRepo = makeRepo<RetirementPlanRow, RetirementPlan>(
+//   "retirement_plans",
+//   toRetirementPlan,
+//   fromRetirementPlan
+// );
+
 export const retirementFundsRepo = makeRepo<RetirementFundRow, RetirementFund>(
   "retirement_funds",
   toRetirementFund,
   fromRetirementFund
 );
+
 export const assetTransfersRepo = makeRepo<AssetTransferRow, AssetTransfer>(
   "asset_transfers",
   toAssetTransfer,
@@ -119,9 +130,11 @@ export async function executeTransfer(
   note: string
 ): Promise<{ transfer: AssetTransfer }> {
   const sb = (await import("@/lib/supabase/client")).createClient();
+
   const {
     data: { user },
   } = await sb.auth.getUser();
+
   if (!user) throw new Error("Not authenticated");
 
   const newFromAmount = Math.max(0, fromGoal.usedAmount - amount);
@@ -136,6 +149,7 @@ export async function executeTransfer(
       .eq("user_id", user.id)
       .select("id")
       .single(),
+
     sb
       .from("goals")
       .update({ used_amount: newToAmount, updated_at: now })
@@ -143,6 +157,7 @@ export async function executeTransfer(
       .eq("user_id", user.id)
       .select("id")
       .single(),
+
     sb
       .from("asset_transfers")
       .insert({

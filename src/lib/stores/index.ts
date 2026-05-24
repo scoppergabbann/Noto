@@ -9,7 +9,6 @@ import {
   stocksRepo,
   assetsRepo,
   transactionsRepo,
-  retirementPlansRepo,
   retirementFundsRepo,
   assetTransfersRepo,
 } from "@/lib/db";
@@ -41,7 +40,6 @@ export const useTransactionsStore = createSupabaseStore<Transaction>(
   "transactions"
 );
 export const useRetirementPlansStore = createSupabaseStore<RetirementPlan>(
-  retirementPlansRepo,
   "retirement-plans"
 );
 export const useRetirementFundsStore = createSupabaseStore<RetirementFund>(
