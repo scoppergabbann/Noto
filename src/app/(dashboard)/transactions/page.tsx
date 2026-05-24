@@ -7,6 +7,10 @@ import {
   TrendingDown,
   Search,
   Lightbulb,
+  AlertTriangle,
+  CheckCircle2,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -40,6 +44,110 @@ const catEmoji = (name: string) =>
 const catColor = (name: string) =>
   allCats.find((c) => c.name === name)?.color ?? "#64748b";
 
+type CategoryChange = {
+  category: string;
+  emoji: string;
+  color: string;
+  current: number;
+  previous: number;
+  diff: number;
+  pct: number | null;
+  status: "warning" | "positive" | "new" | "stable";
+  message: string;
+};
+
+function buildCategoryTotalMap(transactions: Transaction[], type: Transaction["type"]) {
+  const map = new Map<string, number>();
+
+  transactions
+    .filter((t) => t.type === type)
+    .forEach((t) => {
+      map.set(t.category, (map.get(t.category) ?? 0) + t.amount);
+    });
+
+  return map;
+}
+
+function getPreviousMonth(months: string[], activeMonth: string) {
+  const index = months.indexOf(activeMonth);
+  if (index <= 0) return "";
+  return months[index - 1];
+}
+
+function compareExpenseCategories({
+  currentTx,
+  previousTx,
+  minDiff = 100_000,
+  minPct = 20,
+}: {
+  currentTx: Transaction[];
+  previousTx: Transaction[];
+  minDiff?: number;
+  minPct?: number;
+}): CategoryChange[] {
+  const currentMap = buildCategoryTotalMap(currentTx, "expense");
+  const previousMap = buildCategoryTotalMap(previousTx, "expense");
+
+  const categories = Array.from(new Set([...currentMap.keys(), ...previousMap.keys()]));
+
+  return categories
+    .map((category) => {
+      const current = currentMap.get(category) ?? 0;
+      const previous = previousMap.get(category) ?? 0;
+      const diff = current - previous;
+      const pct = previous > 0 ? Math.round((diff / previous) * 100) : null;
+
+      let status: CategoryChange["status"] = "stable";
+      let message = "Relatif stabil dibanding bulan sebelumnya.";
+
+      if (previous === 0 && current > 0) {
+        status = "new";
+        message = `Kategori ini baru muncul bulan ini sebesar ${rpShort(current)}.`;
+      } else if (pct !== null && diff >= minDiff && pct >= minPct) {
+        status = "warning";
+        message = `Naik ${rpShort(diff)} atau ${pct}% dibanding bulan lalu. Coba cek apakah ini wajar.`;
+      } else if (pct !== null && diff <= -minDiff && pct <= -minPct) {
+        status = "positive";
+        message = `Turun ${rpShort(Math.abs(diff))} atau ${Math.abs(pct)}% dibanding bulan lalu. Bagus, lebih terkendali.`;
+      }
+
+      return {
+        category,
+        emoji: catEmoji(category),
+        color: catColor(category),
+        current,
+        previous,
+        diff,
+        pct,
+        status,
+        message,
+      };
+    })
+    .filter((item) => item.current > 0 || item.previous > 0)
+    .sort((a, b) => {
+      const priority = { warning: 0, new: 1, positive: 2, stable: 3 };
+      const pa = priority[a.status];
+      const pb = priority[b.status];
+
+      if (pa !== pb) return pa - pb;
+      return Math.abs(b.diff) - Math.abs(a.diff);
+    });
+}
+
+function statusTone(status: CategoryChange["status"]) {
+  if (status === "warning") return "red" as const;
+  if (status === "positive") return "green" as const;
+  if (status === "new") return "amber" as const;
+  return "indigo" as const;
+}
+
+function statusIcon(status: CategoryChange["status"]) {
+  if (status === "warning") return <AlertTriangle size={13} />;
+  if (status === "positive") return <CheckCircle2 size={13} />;
+  if (status === "new") return <Sparkles size={13} />;
+  return <Lightbulb size={13} />;
+}
+
 export default function TransactionsPage() {
   const { items, loading, error, fetch, add, update, remove } = useTransactionsStore();
 
@@ -52,16 +160,19 @@ export default function TransactionsPage() {
 
   const months = useMemo(() => availableMonths(items), [items]);
   const activeMonth = month || months[months.length - 1] || "";
+  const previousMonth = useMemo(() => getPreviousMonth(months, activeMonth), [months, activeMonth]);
 
   const monthTx = useMemo(
     () => (activeMonth ? txInMonth(items, activeMonth) : items),
     [items, activeMonth]
   );
 
-  const insight = useMemo(
-    () => monthInsight(items, activeMonth),
-    [items, activeMonth]
+  const previousMonthTx = useMemo(
+    () => (previousMonth ? txInMonth(items, previousMonth) : []),
+    [items, previousMonth]
   );
+
+  const insight = useMemo(() => monthInsight(items, activeMonth), [items, activeMonth]);
 
   const expenseCats = useMemo(
     () =>
@@ -73,6 +184,20 @@ export default function TransactionsPage() {
   );
 
   const flow = useMemo(() => cashflowSeries(items, 6), [items]);
+
+  const categoryChanges = useMemo(
+    () =>
+      compareExpenseCategories({
+        currentTx: monthTx,
+        previousTx: previousMonthTx,
+      }),
+    [monthTx, previousMonthTx]
+  );
+
+  const importantChanges = useMemo(
+    () => categoryChanges.filter((c) => c.status !== "stable").slice(0, 5),
+    [categoryChanges]
+  );
 
   const filtered = useMemo(() => {
     let list = activeMonth ? txInMonth(items, activeMonth) : items;
@@ -217,7 +342,7 @@ export default function TransactionsPage() {
         </Card>
       </section>
 
-      {/* Insight banner */}
+      {/* Main insight banner */}
       {insight.topCategory && (
         <Card className="mb-5 flex items-start gap-3.5 !bg-amber-soft/60 dark:!bg-amber/[0.07]">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber/15 text-amber-text dark:text-amber">
@@ -259,6 +384,117 @@ export default function TransactionsPage() {
           </div>
         </Card>
       )}
+
+      {/* Monthly Intelligence */}
+      <Card className="mb-5">
+        <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+              Apa yang berubah bulan ini?
+            </h2>
+            <p className="text-muted mt-0.5 text-[13.5px]">
+              {previousMonth
+                ? `${monthLabel(activeMonth)} dibanding ${monthLabel(previousMonth)}`
+                : "Butuh minimal dua bulan data untuk membaca perubahan."}
+            </p>
+          </div>
+
+          {previousMonth && (
+            <Badge tone={importantChanges.length > 0 ? "amber" : "green"}>
+              {importantChanges.length > 0
+                ? `${importantChanges.length} insight`
+                : "stabil"}
+            </Badge>
+          )}
+        </div>
+
+        {!previousMonth ? (
+          <div className="rounded-xl bg-surface-sunken px-4 py-5 text-center dark:bg-white/5">
+            <div className="mb-2 text-[30px]">🌱</div>
+            <p className="text-muted text-[13.5px]">
+              Tambahkan transaksi di bulan lain agar Noto bisa membandingkan pola pengeluaranmu.
+            </p>
+          </div>
+        ) : importantChanges.length === 0 ? (
+          <div className="rounded-xl bg-pos-soft/60 px-4 py-4 dark:bg-pos/[0.07]">
+            <div className="flex items-start gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pos/15 text-pos-strong dark:text-pos-dark">
+                <CheckCircle2 size={19} />
+              </span>
+              <div>
+                <div className="text-heading text-[14px] font-bold">
+                  Pengeluaran terlihat stabil
+                </div>
+                <p className="text-body mt-0.5 text-[13.5px] leading-relaxed">
+                  Tidak ada kategori yang naik atau turun secara signifikan dari bulan sebelumnya.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <ul className="space-y-2.5">
+            {importantChanges.map((item) => (
+              <li
+                key={item.category}
+                className={`rounded-xl border p-3.5 ${
+                  item.status === "warning"
+                    ? "border-neg/15 bg-neg-soft/50 dark:bg-neg/10"
+                    : item.status === "positive"
+                      ? "border-pos/15 bg-pos-soft/50 dark:bg-pos/10"
+                      : "border-amber/20 bg-amber-soft/50 dark:bg-amber/10"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[18px]"
+                    style={{ background: `${item.color}22` }}
+                  >
+                    {item.emoji}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <span className="text-heading font-semibold">
+                        {item.category}
+                      </span>
+                      <Badge tone={statusTone(item.status)}>
+                        {statusIcon(item.status)}
+                        {item.status === "warning"
+                          ? "naik signifikan"
+                          : item.status === "positive"
+                            ? "turun bagus"
+                            : "baru muncul"}
+                      </Badge>
+                    </div>
+
+                    <p className="text-body text-[13.5px] leading-relaxed">
+                      {item.message}
+                    </p>
+
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[12.5px] font-semibold tabular-nums text-muted">
+                      <span>{rpShort(item.previous)}</span>
+                      <ArrowRight size={13} />
+                      <span className="text-heading">{rpShort(item.current)}</span>
+                      {item.pct !== null && (
+                        <span
+                          className={
+                            item.diff >= 0
+                              ? "text-neg-strong dark:text-neg-dark"
+                              : "text-pos-strong dark:text-pos-dark"
+                          }
+                        >
+                          {item.diff >= 0 ? "+" : ""}
+                          {item.pct}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       {/* Charts */}
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.5fr]">
