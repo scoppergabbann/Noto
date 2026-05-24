@@ -65,12 +65,31 @@ useEffect(() => {
   const err = searchParams.get("error");
   const errorCode = searchParams.get("error_code");
 
-  // Rescue kalau OAuth callback nyasar ke /login?code=...
-  // Kita lempar lagi ke route callback yang memang tugasnya exchange code.
-  if (code) {
-    router.replace(`/auth/callback?${searchParams.toString()}`);
-    return;
+  async function handleOAuthCodeOnLoginPage() {
+    if (!code) return;
+
+    setLoadingGoogle(true);
+    setError("");
+
+    const sb = createClient();
+    const { error } = await sb.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      setError(
+        "Login Google gagal diproses. Coba ulangi lagi dari tombol Google."
+      );
+      setLoadingGoogle(false);
+
+      // Bersihkan URL agar code lama tidak diproses berulang.
+      router.replace("/login");
+      return;
+    }
+
+    router.replace("/dashboard");
+    router.refresh();
   }
+
+  handleOAuthCodeOnLoginPage();
 
   if (err === "auth_callback_failed") {
     setError(
