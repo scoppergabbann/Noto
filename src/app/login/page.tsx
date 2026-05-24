@@ -13,6 +13,8 @@ import {
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthTextInput } from "@/components/auth/AuthTextInput";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { AuthDivider } from "@/components/auth/AuthDivider";
 import { createClient } from "@/lib/supabase/client";
 
 const loginFeatures = [
@@ -33,6 +35,13 @@ const loginFeatures = [
   },
 ];
 
+function getSiteUrl() {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000")
+  );
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,16 +50,44 @@ function LoginForm() {
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const err = searchParams.get("error");
+    const errorCode = searchParams.get("error_code");
 
     if (err === "auth_callback_failed") {
-      setError("Konfirmasi email gagal. Coba daftar ulang.");
+      setError(
+        "Konfirmasi atau login gagal. Coba ulangi lagi, atau gunakan metode login lain."
+      );
+    }
+
+    if (errorCode === "otp_expired") {
+      setError("Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru.");
     }
   }, [searchParams]);
+
+  async function handleGoogleLogin() {
+    setLoadingGoogle(true);
+    setError("");
+
+    const sb = createClient();
+    const siteUrl = getSiteUrl();
+
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${siteUrl}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoadingGoogle(false);
+    }
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -67,7 +104,7 @@ function LoginForm() {
       return;
     }
 
-    setLoading(true);
+    setLoadingEmail(true);
     setError("");
 
     const sb = createClient();
@@ -83,13 +120,15 @@ function LoginForm() {
           ? "Email atau password salah. Coba cek lagi pelan-pelan ya."
           : error.message
       );
-      setLoading(false);
+      setLoadingEmail(false);
       return;
     }
 
     router.push("/dashboard");
     router.refresh();
   }
+
+  const loading = loadingEmail || loadingGoogle;
 
   return (
     <AuthShell
@@ -106,6 +145,14 @@ function LoginForm() {
         bottomText="Noto membantu membaca, mencatat, dan menata perjalanan finansialmu."
       >
         <form onSubmit={handleLogin} className="flex flex-col gap-4" noValidate>
+          <GoogleAuthButton
+            label="Lanjut dengan Google"
+            loading={loadingGoogle}
+            onClick={handleGoogleLogin}
+          />
+
+          <AuthDivider label="atau masuk dengan email" />
+
           <AuthTextInput
             id="email"
             label="Email"
@@ -143,7 +190,7 @@ function LoginForm() {
             disabled={loading}
             className="mt-1 min-h-[50px] w-full touch-manipulation rounded-2xl bg-gradient-to-br from-amber to-amber-deep py-3 text-[15px] font-bold text-white shadow-glow transition hover:-translate-y-px hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber active:translate-y-0 active:brightness-95 disabled:pointer-events-none disabled:opacity-60"
           >
-            {loading ? "Sedang masuk…" : "Masuk"}
+            {loadingEmail ? "Sedang masuk…" : "Masuk"}
           </button>
 
           <p className="text-muted text-center text-[14px]">
@@ -164,8 +211,8 @@ function LoginForm() {
               className="mt-0.5 shrink-0 text-amber-text dark:text-amber"
             />
             <p className="text-muted text-[12.5px] leading-5">
-              Data finansialmu tetap berada di akun pribadimu. Gunakan email dan
-              password yang aman.
+              Data finansialmu tetap berada di akun pribadimu. Gunakan metode login
+              yang paling aman dan nyaman.
             </p>
           </div>
         </div>

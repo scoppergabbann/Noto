@@ -15,6 +15,8 @@ import {
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthTextInput } from "@/components/auth/AuthTextInput";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { AuthDivider } from "@/components/auth/AuthDivider";
 import { createClient } from "@/lib/supabase/client";
 
 const registerFeatures = [
@@ -35,15 +37,43 @@ const registerFeatures = [
   },
 ];
 
+function getSiteUrl() {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000")
+  );
+}
+
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+
+  async function handleGoogleRegister() {
+    setLoadingGoogle(true);
+    setError("");
+
+    const sb = createClient();
+    const siteUrl = getSiteUrl();
+
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${siteUrl}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoadingGoogle(false);
+    }
+  }
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -66,23 +96,18 @@ export default function RegisterPage() {
       return;
     }
 
-    setLoading(true);
+    setLoadingEmail(true);
     setError("");
 
     const sb = createClient();
-
-    const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
-
-    const redirectTo = `${siteUrl}/auth/callback`;
+    const siteUrl = getSiteUrl();
 
     const { error } = await sb.auth.signUp({
       email: trimmedEmail,
       password,
       options: {
         data: { full_name: trimmedName },
-        emailRedirectTo: redirectTo,
+        emailRedirectTo: `${siteUrl}/auth/callback`,
       },
     });
 
@@ -92,12 +117,14 @@ export default function RegisterPage() {
           ? "Email ini sudah terdaftar. Coba masuk ke akunmu."
           : error.message
       );
-      setLoading(false);
+      setLoadingEmail(false);
       return;
     }
 
     setDone(true);
   }
+
+  const loading = loadingEmail || loadingGoogle;
 
   if (done) {
     return (
@@ -154,6 +181,14 @@ export default function RegisterPage() {
         bottomText="Satu akun untuk mencatat dan membaca perjalanan finansialmu."
       >
         <form onSubmit={handleRegister} className="flex flex-col gap-4" noValidate>
+          <GoogleAuthButton
+            label="Daftar dengan Google"
+            loading={loadingGoogle}
+            onClick={handleGoogleRegister}
+          />
+
+          <AuthDivider label="atau daftar dengan email" />
+
           <AuthTextInput
             id="name"
             label="Nama lengkap"
@@ -202,7 +237,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="mt-1 min-h-[50px] w-full touch-manipulation rounded-2xl bg-gradient-to-br from-amber to-amber-deep py-3 text-[15px] font-bold text-white shadow-glow transition hover:-translate-y-px hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber active:translate-y-0 active:brightness-95 disabled:pointer-events-none disabled:opacity-60"
           >
-            {loading ? "Membuat akun…" : "Daftar sekarang"}
+            {loadingEmail ? "Membuat akun…" : "Daftar sekarang"}
           </button>
 
           <p className="text-muted text-center text-[14px]">
@@ -223,7 +258,8 @@ export default function RegisterPage() {
               className="mt-0.5 shrink-0 text-amber-text dark:text-amber"
             />
             <p className="text-muted text-[12.5px] leading-5">
-              Setelah daftar, kamu perlu konfirmasi email untuk mengaktifkan akun Noto.
+              Setelah daftar dengan email, kamu perlu konfirmasi email untuk mengaktifkan akun Noto.
+              Kalau daftar dengan Google, kamu bisa langsung masuk.
             </p>
           </div>
         </div>
