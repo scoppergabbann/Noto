@@ -22,6 +22,8 @@ import {
   fromRetirementPlan,
   toRetirementFund,
   fromRetirementFund,
+  toAssetTransfer,
+  fromAssetTransfer,
 } from "./mappers";
 import type {
   GoalRow,
@@ -32,9 +34,10 @@ import type {
   GoldAssetRow,
   StockHoldingRow,
   OtherAssetRow,
+  TransactionRow,
   RetirementPlanRow,
   RetirementFundRow,
-  TransactionRow,
+  AssetTransferRow,
 } from "./types";
 import type {
   Goal,
@@ -48,6 +51,7 @@ import type {
   Transaction,
   RetirementPlan,
   RetirementFund,
+  AssetTransfer,
 } from "@/types";
 
 export const goalsRepo = makeRepo<GoalRow, Goal>("goals", toGoal, fromGoal);
@@ -97,3 +101,65 @@ export const retirementFundsRepo = makeRepo<RetirementFundRow, RetirementFund>(
   toRetirementFund,
   fromRetirementFund
 );
+export const assetTransfersRepo = makeRepo<AssetTransferRow, AssetTransfer>(
+  "asset_transfers",
+  toAssetTransfer,
+  fromAssetTransfer
+);
+
+/**
+ * Transfer atomik antar goal:
+ * Kurangi usedAmount dari asal, tambah ke tujuan, insert log ke asset_transfers.
+ */
+export async function executeTransfer(
+  fromGoal: { id: string; usedAmount: number },
+  toGoal: { id: string; usedAmount: number },
+  amount: number,
+  date: string,
+  note: string
+): Promise<{ transfer: AssetTransfer }> {
+  const sb = (await import("@/lib/supabase/client")).createClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const newFromAmount = Math.max(0, fromGoal.usedAmount - amount);
+  const newToAmount = toGoal.usedAmount + amount;
+  const now = new Date().toISOString();
+
+  const [fromRes, toRes, transferRes] = await Promise.all([
+    sb
+      .from("goals")
+      .update({ used_amount: newFromAmount, updated_at: now })
+      .eq("id", fromGoal.id)
+      .eq("user_id", user.id)
+      .select("id")
+      .single(),
+    sb
+      .from("goals")
+      .update({ used_amount: newToAmount, updated_at: now })
+      .eq("id", toGoal.id)
+      .eq("user_id", user.id)
+      .select("id")
+      .single(),
+    sb
+      .from("asset_transfers")
+      .insert({
+        user_id: user.id,
+        from_goal_id: fromGoal.id,
+        to_goal_id: toGoal.id,
+        amount,
+        date,
+        note: note || null,
+      })
+      .select()
+      .single(),
+  ]);
+
+  if (fromRes.error) throw new Error("Gagal update asal: " + fromRes.error.message);
+  if (toRes.error) throw new Error("Gagal update tujuan: " + toRes.error.message);
+  if (transferRes.error) throw new Error("Gagal simpan transfer: " + transferRes.error.message);
+
+  return { transfer: toAssetTransfer(transferRes.data as AssetTransferRow) };
+}

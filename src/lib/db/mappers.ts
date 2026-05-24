@@ -8,6 +8,9 @@ import type {
   StockHolding,
   OtherAsset,
   Transaction,
+  RetirementPlan,
+  RetirementFund,
+  AssetTransfer,
 } from "@/types";
 import type {
   GoalRow,
@@ -18,7 +21,10 @@ import type {
   GoldAssetRow,
   StockHoldingRow,
   OtherAssetRow,
+  RetirementPlanRow,
+  RetirementFundRow,
   TransactionRow,
+  AssetTransferRow,
 } from "./types";
 
 export const toGoal = (r: GoalRow): Goal => ({
@@ -221,10 +227,27 @@ export const fromTransaction = (t: Omit<Transaction, "id">, userId: string) => (
   updated_at: new Date().toISOString(),
 });
 
-// ---- Retirement ----
-import type { RetirementPlan, RetirementFund } from "@/types";
-import type { RetirementPlanRow, RetirementFundRow } from "./types";
+// ---- Asset Transfers ----
+export const toAssetTransfer = (r: AssetTransferRow): AssetTransfer => ({
+  id: r.id,
+  fromGoalId: r.from_goal_id,
+  toGoalId: r.to_goal_id,
+  amount: Number(r.amount),
+  date: r.date,
+  note: r.note ?? "",
+  createdAt: r.created_at,
+});
 
+export const fromAssetTransfer = (t: Omit<AssetTransfer, "id" | "createdAt">, userId: string) => ({
+  user_id: userId,
+  from_goal_id: t.fromGoalId,
+  to_goal_id: t.toGoalId,
+  amount: t.amount,
+  date: t.date,
+  note: t.note || null,
+});
+
+// ---- Retirement ----
 export const toRetirementPlan = (r: RetirementPlanRow): RetirementPlan => ({
   id: r.id,
   label: r.label,

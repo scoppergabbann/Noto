@@ -11,8 +11,6 @@ import {
   useStocksStore,
   useAssetsStore,
   useTransactionsStore,
-  useRetirementPlansStore,
-  useRetirementFundsStore,
 } from "./index";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,14 +24,12 @@ export function DataLoader({ userId }: { userId: string }) {
   const fetchStocks = useStocksStore((s) => s.fetch);
   const fetchAssets = useAssetsStore((s) => s.fetch);
   const fetchTransactions = useTransactionsStore((s) => s.fetch);
-  const fetchRetirementPlans = useRetirementPlansStore((s) => s.fetch);
-  const fetchRetirementFunds = useRetirementFundsStore((s) => s.fetch);
 
   useEffect(() => {
     if (!userId) return;
 
     async function loadAll() {
-      // Fix JWT issued at future
+      // Fix JWT issued at future — pastikan session valid dulu
       const sb = createClient();
       const { error: sessionErr } = await sb.auth.getSession();
       if (sessionErr) await sb.auth.refreshSession();
@@ -48,8 +44,6 @@ export function DataLoader({ userId }: { userId: string }) {
         fetchStocks(),
         fetchAssets(),
         fetchTransactions(),
-        fetchRetirementPlans(),
-        fetchRetirementFunds(),
       ]);
     }
 
@@ -65,8 +59,6 @@ export function DataLoader({ userId }: { userId: string }) {
     fetchStocks,
     fetchAssets,
     fetchTransactions,
-    fetchRetirementPlans,
-    fetchRetirementFunds,
   ]);
 
   return null;

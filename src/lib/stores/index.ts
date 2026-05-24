@@ -11,6 +11,7 @@ import {
   transactionsRepo,
   retirementPlansRepo,
   retirementFundsRepo,
+  assetTransfersRepo,
 } from "@/lib/db";
 import type {
   Goal,
@@ -24,6 +25,7 @@ import type {
   Transaction,
   RetirementPlan,
   RetirementFund,
+  AssetTransfer,
 } from "@/types";
 
 export const useGoalsStore = createSupabaseStore<Goal>(goalsRepo, "goals");
@@ -45,4 +47,8 @@ export const useRetirementPlansStore = createSupabaseStore<RetirementPlan>(
 export const useRetirementFundsStore = createSupabaseStore<RetirementFund>(
   retirementFundsRepo,
   "retirement-funds"
+);
+export const useAssetTransfersStore = createSupabaseStore<AssetTransfer>(
+  assetTransfersRepo,
+  "asset-transfers"
 );

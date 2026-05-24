@@ -144,3 +144,13 @@ export interface RetirementFund {
   monthlyContribution: number;
   notes?: string;
 }
+
+export interface AssetTransfer {
+  id: string;
+  fromGoalId: string;
+  toGoalId: string;
+  amount: number;
+  date: string; // "YYYY-MM-DD"
+  note?: string;
+  createdAt: string;
+}

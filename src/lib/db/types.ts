@@ -117,6 +117,17 @@ export interface TransactionRow {
   updated_at: string;
 }
 
+export interface AssetTransferRow {
+  id: string;
+  user_id: string;
+  from_goal_id: string;
+  to_goal_id: string;
+  amount: number;
+  date: string;
+  note: string | null;
+  created_at: string;
+}
+
 export interface RetirementPlanRow {
   id: string;
   user_id: string;
