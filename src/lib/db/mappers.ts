@@ -170,17 +170,34 @@ export const toStockHolding = (r: StockHoldingRow): StockHolding => ({
   ticker: r.ticker,
   name: r.name,
   exchange: r.exchange,
+
+  // New stock journal fields
+  broker: r.broker ?? "",
+  targetPrice: Number(r.target_price ?? 0),
+  buyReason: r.buy_reason ?? "",
+  exitPlan: r.exit_plan ?? "",
+  conviction: Number(r.conviction ?? 3),
+
   lots: Number(r.lots),
   avgPrice: Number(r.avg_price),
   currentPrice: Number(r.current_price),
   dividendReceived: Number(r.dividend_received),
   notes: r.notes ?? "",
 });
+
 export const fromStockHolding = (s: Omit<StockHolding, "id">, userId: string) => ({
   user_id: userId,
   ticker: s.ticker.toUpperCase(),
   name: s.name,
   exchange: s.exchange,
+
+  // New stock journal fields
+  broker: s.broker || null,
+  target_price: s.targetPrice || 0,
+  buy_reason: s.buyReason || null,
+  exit_plan: s.exitPlan || null,
+  conviction: s.conviction || 3,
+
   lots: s.lots,
   avg_price: s.avgPrice,
   current_price: s.currentPrice,

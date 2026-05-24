@@ -85,6 +85,13 @@ export interface StockHoldingRow {
   ticker: string;
   name: string;
   exchange: string;
+
+  broker: string | null;
+  target_price: number | null;
+  buy_reason: string | null;
+  exit_plan: string | null;
+  conviction: number | null;
+
   lots: number;
   avg_price: number;
   current_price: number;
