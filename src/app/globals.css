@@ -4,51 +4,119 @@
 
 /* Safe area insets untuk iOS notch dan home indicator */
 :root {
-  --sat: env(safe-area-inset-top);
-  --sab: env(safe-area-inset-bottom);
-  --sal: env(safe-area-inset-left);
-  --sar: env(safe-area-inset-right);
+  --ink: #17120c;
+  --ink-body: #322a21;
+  --ink-muted: #675d51;
+  --ink-subtle: #7f7468;
+
+  --surface-base: #f6f3ed;
+  --surface-raised: #fffefa;
+  --surface-soft: #fbf7ef;
+  --surface-sunken: #f0ebe2;
+
+  --border-soft: rgba(42, 30, 18, 0.09);
+  --border-medium: rgba(42, 30, 18, 0.14);
+
+  --shadow-soft:
+    0 1px 2px rgba(42, 30, 18, 0.04),
+    0 10px 30px rgba(42, 30, 18, 0.08);
+
+  --shadow-hover:
+    0 2px 8px rgba(42, 30, 18, 0.06),
+    0 22px 54px rgba(42, 30, 18, 0.13);
+
+  --c-green: #087a52;
+  --c-red: #b4232c;
+  --c-indigo: #4f46e5;
+  --c-amber: #d97706;
 }
 
 @layer base {
   :root {
-    /* Dark-theme ink scale (applied via .dark .text-* helpers below) */
-    --ink: #15181e;
-    --ink-body: #2c313a;
-    --ink-muted: #525a67;
-    --ink-subtle: #646b78;
-    /* Theme-adaptive semantic colors (AA on the active surface) */
-    --c-green: #0a7d54;
-    --c-red: #b82c2c;
+    /*
+      Noto Light Mode
+      Warm editorial finance:
+      - bukan putih polos
+      - bukan SaaS abu kebiruan
+      - lebih cream, calm, premium
+    */
+    --ink: #18130c;
+    --ink-body: #332a20;
+    --ink-muted: #6f6254;
+    --ink-subtle: #8a7d6d;
+
+    --surface-base: #f5f1e8;
+    --surface-raised: #fffdf8;
+    --surface-soft: #f8f3e9;
+    --surface-sunken: #eee7da;
+
+    --border-soft: rgba(40, 28, 16, 0.08);
+    --border-medium: rgba(40, 28, 16, 0.12);
+
+    --shadow-soft:
+      0 1px 2px rgba(40, 28, 16, 0.04),
+      0 10px 30px rgba(40, 28, 16, 0.07);
+
+    --shadow-hover:
+      0 2px 8px rgba(40, 28, 16, 0.06),
+      0 22px 54px rgba(40, 28, 16, 0.12);
+
+    /* Semantic colors: AA on warm light surfaces */
+    --c-green: #087a52;
+    --c-red: #b4232c;
     --c-indigo: #4f46e5;
+    --c-amber: #d97706;
   }
+
   html.dark {
     --ink: #f4f6fa;
     --ink-body: #d3d8e0;
-    --ink-muted: #a3acba; /* ~7:1 on night.raised — AA */
-    --ink-subtle: #8b94a3; /* ~5.1:1 — AA */
-    --c-green: #34d399; /* brighter for dark surfaces — AA */
+    --ink-muted: #a3acba;
+    --ink-subtle: #8b94a3;
+
+    --surface-base: #0a0c11;
+    --surface-raised: #171b24;
+    --surface-soft: #121722;
+    --surface-sunken: #10141d;
+
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --border-medium: rgba(255, 255, 255, 0.12);
+
+    --shadow-soft:
+      0 1px 2px rgba(0, 0, 0, 0.18),
+      0 16px 42px rgba(0, 0, 0, 0.24);
+
+    --shadow-hover:
+      0 2px 8px rgba(0, 0, 0, 0.22),
+      0 22px 60px rgba(0, 0, 0, 0.34);
+
+    --c-green: #34d399;
     --c-red: #fb7185;
     --c-indigo: #a5b4fc;
+    --c-amber: #f59e0b;
   }
 
-  body {
-    color: var(--ink-body);
-    font-feature-settings: "cv11", "ss01";
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    min-height: 100vh;
-    background: #f3f4f7;
-    background-image:
-      radial-gradient(1100px 600px at 88% -12%, rgba(99, 102, 241, 0.1), transparent 55%),
-      radial-gradient(820px 520px at -6% 2%, rgba(15, 157, 107, 0.08), transparent 52%);
-    background-attachment: fixed;
-  }
+body {
+  color: var(--ink-body);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  background:
+    radial-gradient(900px 520px at 88% -12%, rgba(247, 147, 26, 0.08), transparent 58%),
+    radial-gradient(720px 480px at -8% 4%, rgba(184, 92, 0, 0.045), transparent 54%),
+    linear-gradient(180deg, #f6f3ed 0%, #f1eee7 52%, #ece7dc 100%);
+  background-attachment: fixed;
+}
+
   html.dark body {
-    background: #0a0c11;
-    background-image:
+    background:
       radial-gradient(1100px 600px at 88% -12%, rgba(99, 102, 241, 0.14), transparent 55%),
-      radial-gradient(820px 520px at -6% 2%, rgba(15, 157, 107, 0.1), transparent 52%);
+      radial-gradient(820px 520px at -6% 2%, rgba(15, 157, 107, 0.1), transparent 52%),
+      linear-gradient(180deg, #0a0c11 0%, #080a0f 100%);
+    background-attachment: fixed;
   }
 
   /* Accessible focus ring across all interactive elements */
@@ -56,63 +124,6 @@
     outline: 2px solid #f59425;
     outline-offset: 2px;
     border-radius: 8px;
-  }
-}
-
-@layer components {
-  /* Dark-mode brightening for legacy semantic text classes (keeps /10 bg tints intact).
-     Ensures text-brand-green / text-brand-red stay AA on dark surfaces. */
-  html.dark .text-brand-green {
-    color: #34d399;
-  }
-  html.dark .text-brand-red {
-    color: #fb7185;
-  }
-  html.dark .text-brand-indigo {
-    color: #a5b4fc;
-  }
-
-  /* Ink scale helpers — theme-aware via CSS vars */
-  .text-heading {
-    color: var(--ink);
-  }
-  .text-body {
-    color: var(--ink-body);
-  }
-  .text-muted {
-    color: var(--ink-muted);
-  }
-  .text-subtle {
-    color: var(--ink-subtle);
-  }
-
-  /* Card: soft glassmorphism with smooth depth */
-  .card {
-    @apply rounded-[18px] border p-4 transition-all duration-200 sm:rounded-xl3 sm:p-6;
-    border-color: rgba(16, 18, 24, 0.07);
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(16px) saturate(1.1);
-    -webkit-backdrop-filter: blur(16px) saturate(1.1);
-    box-shadow:
-      0 1px 2px rgba(16, 18, 24, 0.04),
-      0 8px 24px rgba(16, 18, 24, 0.05);
-  }
-  html.dark .card {
-    border-color: rgba(255, 255, 255, 0.08);
-    background: rgba(27, 31, 40, 0.6);
-  }
-  .hoverable {
-    @apply hover:-translate-y-0.5;
-  }
-  .hoverable:hover {
-    box-shadow:
-      0 2px 8px rgba(16, 18, 24, 0.06),
-      0 20px 48px rgba(16, 18, 24, 0.1);
-  }
-
-  /* Touch target helper */
-  .touch-target {
-    @apply min-h-[44px] min-w-[44px];
   }
 
   /* Remove tap highlight on mobile */
@@ -122,14 +133,135 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Prevent horizontal scroll globally */
-  body {
-    overflow-x: hidden;
-  }
-
   /* Smooth scroll */
   html {
     scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /*
+    Theme-aware semantic text helpers
+  */
+  .text-heading {
+    color: var(--ink);
+  }
+
+  .bg-surface-base {
+  background-color: var(--surface-base) !important;
+  }
+
+  .bg-surface-raised {
+    background-color: var(--surface-raised) !important;
+  }
+
+  .bg-surface-soft {
+    background-color: var(--surface-soft) !important;
+  }
+
+  .bg-surface-sunken {
+    background-color: var(--surface-sunken) !important;
+  }
+
+  html.dark .bg-surface-base {
+    background-color: #0a0c11 !important;
+  }
+
+  html.dark .bg-surface-raised {
+    background-color: #171b24 !important;
+  }
+
+  html.dark .bg-surface-soft {
+    background-color: #121722 !important;
+  }
+
+  html.dark .bg-surface-sunken {
+    background-color: #10141d !important;
+  }
+
+  .text-body {
+    color: var(--ink-body);
+  }
+
+  .text-muted {
+    color: var(--ink-muted);
+  }
+
+  .text-subtle {
+    color: var(--ink-subtle);
+  }
+
+  html.dark .text-brand-green {
+    color: #34d399;
+  }
+
+  html.dark .text-brand-red {
+    color: #fb7185;
+  }
+
+  html.dark .text-brand-indigo {
+    color: #a5b4fc;
+  }
+
+  /*
+    Card
+    Light mode: warm paper glass
+    Dark mode: existing dark glass
+  */
+.card {
+  @apply rounded-[18px] border p-4 transition-all duration-200 sm:rounded-xl3 sm:p-6;
+  border-color: var(--border-soft);
+  background: rgba(255, 254, 250, 0.9);
+  backdrop-filter: blur(16px) saturate(1.05);
+  -webkit-backdrop-filter: blur(16px) saturate(1.05);
+  box-shadow: var(--shadow-soft);
+}
+
+html.dark .card {
+  border-color: var(--border-soft);
+  background: rgba(27, 31, 40, 0.6);
+  box-shadow: var(--shadow-soft);
+}
+
+  html.dark .card {
+    border-color: var(--border-soft);
+    background: rgba(27, 31, 40, 0.6);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .hoverable {
+    @apply hover:-translate-y-0.5;
+  }
+
+  .hoverable:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  /*
+    Optional utility for warm light surfaces.
+    Berguna kalau ada komponen yang sebelumnya terlalu putih.
+  */
+  .surface-raised {
+    background: var(--surface-raised);
+  }
+
+  .surface-soft {
+    background: var(--surface-soft);
+  }
+
+  .surface-sunken {
+    background: var(--surface-sunken);
+  }
+
+  .border-soft {
+    border-color: var(--border-soft);
+  }
+
+  /*
+    Mobile touch helper
+  */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
   }
 }
 
@@ -139,26 +271,33 @@
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .stagger > * {
   animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
 }
+
 .stagger > *:nth-child(1) {
   animation-delay: 0.04s;
 }
+
 .stagger > *:nth-child(2) {
   animation-delay: 0.1s;
 }
+
 .stagger > *:nth-child(3) {
   animation-delay: 0.16s;
 }
+
 .stagger > *:nth-child(4) {
   animation-delay: 0.22s;
 }
+
 .stagger > *:nth-child(5) {
   animation-delay: 0.28s;
 }
