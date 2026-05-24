@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   Sparkles,
   WalletCards,
+  Moon, 
+  Sun
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -54,10 +56,45 @@ function LoginForm() {
     router.refresh();
   }
 
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const saved = JSON.parse(localStorage.getItem("noto-theme") || "{}");
+    const dark = Boolean(saved?.state?.isDark);
+
+    setIsDark(dark);
+    root.classList.toggle("dark", dark);
+  }, []);
+
+  function toggleTheme() {
+    const next = !isDark;
+
+    setIsDark(next);
+    document.documentElement.classList.toggle("dark", next);
+
+    localStorage.setItem(
+      "noto-theme",
+      JSON.stringify({
+        state: {
+          isDark: next,
+        },
+      })
+    );
+  }
+
   return (
-    <div className="grid min-h-screen grid-cols-1 bg-[#f4f5f8] text-ink dark:bg-[#07090f] lg:grid-cols-[1.05fr_.95fr]">
+    <div className="grid min-h-screen grid-cols-1 bg-[#f4f5f8] text-ink transition-colors dark:bg-[#07090f] lg:grid-cols-[1.05fr_.95fr]">
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+        className="fixed right-4 top-4 z-50 grid h-11 w-11 place-items-center rounded-2xl border border-black/[.08] bg-white/80 text-slate-700 shadow-sm backdrop-blur transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber dark:border-white/10 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15"
+      >
+        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
       {/* Brand panel */}
-      <section className="relative hidden overflow-hidden border-r border-black/[.06] bg-[#080b11] px-10 py-10 dark:border-white/[.06] lg:flex lg:flex-col lg:justify-between">
+      <section className="relative hidden overflow-hidden border-r border-black/[.06] bg-[#fffaf1] px-10 py-10 transition-colors dark:border-white/[.06] dark:bg-[#080b11] lg:flex lg:flex-col lg:justify-between">
         <div className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-amber/20 blur-[90px]" />
         <div className="pointer-events-none absolute bottom-10 right-0 h-96 w-96 rounded-full bg-orange-500/10 blur-[110px]" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.08]">
@@ -80,13 +117,13 @@ function LoginForm() {
             Personal finance workspace
           </div>
 
-          <h1 className="font-serif text-[52px] font-semibold leading-[1.02] tracking-[-0.04em] text-white">
+          <h1 className="font-serif text-[52px] font-semibold leading-[1.02] tracking-[-0.04em] text-slate-950 dark:text-white">
             Noto urip,
             <br />
             <em className="italic text-amber">noto finansial.</em>
           </h1>
 
-          <p className="mt-5 max-w-md text-[16px] leading-7 text-slate-300">
+          <p className="mt-5 max-w-md text-[16px] leading-7 text-slate-700 dark:text-slate-300">
             Catat cashflow, tabungan, aset, utang, saham, emas, dan perjalanan
             finansialmu dalam satu tempat yang lebih rapi dan tenang.
           </p>
@@ -114,20 +151,20 @@ function LoginForm() {
               return (
                 <div
                   key={item.title}
-                  className="rounded-2xl border border-white/10 bg-white/[.04] p-4 backdrop-blur"
+                  className="rounded-2xl border border-black/[.08] bg-white/70 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[.04]"
                 >
                   <div className="mb-3 grid h-9 w-9 place-items-center rounded-xl bg-amber/15 text-amber">
                     <Icon size={17} />
                   </div>
-                  <div className="text-[13px] font-bold text-white">{item.title}</div>
-                  <div className="mt-0.5 text-[12px] text-slate-400">{item.desc}</div>
+                  <div className="text-[13px] font-bold text-slate-950 dark:text-white">{item.title}</div>
+                  <div className="mt-0.5 text-[12px] text-slate-600 dark:text-slate-400">{item.desc}</div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="relative z-10 text-[12.5px] text-slate-500">
+        <div className="relative z-10 text-[12.5px] text-slate-500 dark:text-slate-500">
           © {new Date().getFullYear()} Noto. Catatan hidup dan finansialmu.
         </div>
       </section>
