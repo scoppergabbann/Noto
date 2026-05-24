@@ -1,283 +1,640 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { TrendingUp, TrendingDown, Lightbulb, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { useEffect, useMemo } from "react";
+import {
+  Wallet,
+  Landmark,
+  CreditCard,
+  HandCoins,
+  Gem,
+  TrendingUp,
+  Briefcase,
+  PiggyBank,
+  Scale,
+  Activity,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { DonutChart } from "@/components/charts/DonutChart";
-import { CashFlowChart } from "@/components/charts/CashFlowChart";
-import { useTransactionsStore } from "@/lib/stores";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
-import { expenseCategories } from "@/data/mock";
 import {
-  availableMonths,
-  monthLabel,
-  txInMonth,
-  byCategory,
-  cashflowSeries,
-  monthInsight,
-} from "@/lib/analytics";
+  useGoalsStore,
+  useReceivablesStore,
+  useDebtsStore,
+  useCardsStore,
+  useGoldStore,
+  useStocksStore,
+  useAssetsStore,
+  useRetirementFundsStore,
+  useTransactionsStore,
+} from "@/lib/stores";
+import { currentGoldValue, stockMarketValue } from "@/lib/finance";
+import { availableMonths, txInMonth, sumByType, monthLabel } from "@/lib/analytics";
 import { rpShort } from "@/lib/format";
 
-const catColor = (name: string) =>
-  expenseCategories.find((c) => c.name === name)?.color ?? "#64748b";
-const catEmoji = (name: string) => expenseCategories.find((c) => c.name === name)?.emoji ?? "📦";
+const COLORS = {
+  cash: "#f59e0b",
+  receivable: "#38bdf8",
+  stock: "#22c55e",
+  gold: "#facc15",
+  pension: "#8b5cf6",
+  other: "#94a3b8",
+  debt: "#ef4444",
+  card: "#fb7185",
+};
+
+function safeNumber(n: number) {
+  return Number.isFinite(n) ? n : 0;
+}
+
+function pct(value: number, total: number) {
+  if (!total || total <= 0) return 0;
+  return Math.round((value / total) * 100);
+}
 
 export default function SummaryPage() {
-  const { items, loading, error, fetch } = useTransactionsStore();
+  const goalsStore = useGoalsStore();
+  const receivablesStore = useReceivablesStore();
+  const debtsStore = useDebtsStore();
+  const cardsStore = useCardsStore();
+  const goldStore = useGoldStore();
+  const stocksStore = useStocksStore();
+  const assetsStore = useAssetsStore();
+  const retirementFundsStore = useRetirementFundsStore();
+  const transactionsStore = useTransactionsStore();
 
-  const months = useMemo(() => availableMonths(items), [items]);
-  const [month, setMonth] = useState<string>("");
-  const activeMonth = month || months[months.length - 1] || "";
+  useEffect(() => {
+    goalsStore.fetch();
+    receivablesStore.fetch();
+    debtsStore.fetch();
+    cardsStore.fetch();
+    goldStore.fetch();
+    stocksStore.fetch();
+    assetsStore.fetch();
+    retirementFundsStore.fetch();
+    transactionsStore.fetch();
+  }, [
+    goalsStore.fetch,
+    receivablesStore.fetch,
+    debtsStore.fetch,
+    cardsStore.fetch,
+    goldStore.fetch,
+    stocksStore.fetch,
+    assetsStore.fetch,
+    retirementFundsStore.fetch,
+    transactionsStore.fetch,
+  ]);
 
-  const insight = useMemo(() => monthInsight(items, activeMonth), [items, activeMonth]);
-  const monthTx = useMemo(() => txInMonth(items, activeMonth), [items, activeMonth]);
-  const expenseCats = useMemo(
-    () => byCategory(monthTx, "expense").map((c) => ({ ...c, color: catColor(c.name) })),
-    [monthTx]
-  );
-  const flow = useMemo(() => cashflowSeries(items, 6), [items]);
-  const recent = useMemo(
-    () => [...monthTx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5),
-    [monthTx]
-  );
+  const loading =
+    goalsStore.loading ||
+    receivablesStore.loading ||
+    debtsStore.loading ||
+    cardsStore.loading ||
+    goldStore.loading ||
+    stocksStore.loading ||
+    assetsStore.loading ||
+    retirementFundsStore.loading ||
+    transactionsStore.loading;
 
-  if (loading) return <LoadingState label="Memuat data ringkasan…" />;
-  if (error) return <ErrorState message={error} onRetry={fetch} />;
+  const error =
+    goalsStore.error ||
+    receivablesStore.error ||
+    debtsStore.error ||
+    cardsStore.error ||
+    goldStore.error ||
+    stocksStore.error ||
+    assetsStore.error ||
+    retirementFundsStore.error ||
+    transactionsStore.error;
+
+  const retryAll = () => {
+    goalsStore.fetch();
+    receivablesStore.fetch();
+    debtsStore.fetch();
+    cardsStore.fetch();
+    goldStore.fetch();
+    stocksStore.fetch();
+    assetsStore.fetch();
+    retirementFundsStore.fetch();
+    transactionsStore.fetch();
+  };
+
+  const summary = useMemo(() => {
+    const cashValue = goalsStore.items.reduce((s, g) => s + safeNumber(g.usedAmount), 0);
+
+    const receivableValue = receivablesStore.items.reduce(
+      (s, r) => s + Math.max(0, safeNumber(r.total) - safeNumber(r.paid)),
+      0
+    );
+
+    const debtValue = debtsStore.items.reduce(
+      (s, d) => s + Math.max(0, safeNumber(d.total) - safeNumber(d.paid)),
+      0
+    );
+
+    const creditCardValue = cardsStore.items.reduce(
+      (s, c) => s + Math.max(0, safeNumber(c.spent) - safeNumber(c.paid)),
+      0
+    );
+
+    const goldValue = goldStore.items.reduce(
+      (s, g) =>
+        s +
+        currentGoldValue(
+          safeNumber(g.boughtGrams),
+          safeNumber(g.soldGrams),
+          safeNumber(g.currentPricePerGram)
+        ),
+      0
+    );
+
+    const stockValue = stocksStore.items.reduce(
+      (s, h) => s + stockMarketValue(safeNumber(h.lots), safeNumber(h.currentPrice)),
+      0
+    );
+
+    const otherAssetValue = assetsStore.items.reduce(
+      (s, a) => s + safeNumber(a.currentValue),
+      0
+    );
+
+    const pensionValue = retirementFundsStore.items.reduce(
+      (s, f) => s + safeNumber(f.currentValue),
+      0
+    );
+
+    const totalAssets =
+      cashValue +
+      receivableValue +
+      goldValue +
+      stockValue +
+      pensionValue +
+      otherAssetValue;
+
+    const totalLiabilities = debtValue + creditCardValue;
+    const netWorth = totalAssets - totalLiabilities;
+
+    const assetBreakdown = [
+      { name: "Tabungan", value: cashValue, color: COLORS.cash },
+      { name: "Piutang", value: receivableValue, color: COLORS.receivable },
+      { name: "Saham", value: stockValue, color: COLORS.stock },
+      { name: "Emas", value: goldValue, color: COLORS.gold },
+      { name: "Pensiun", value: pensionValue, color: COLORS.pension },
+      { name: "Aset Lainnya", value: otherAssetValue, color: COLORS.other },
+    ].filter((x) => x.value > 0);
+
+    const liabilityBreakdown = [
+      { name: "Utang & Cicilan", value: debtValue, color: COLORS.debt },
+      { name: "Credit Card", value: creditCardValue, color: COLORS.card },
+    ].filter((x) => x.value > 0);
+
+    return {
+      cashValue,
+      receivableValue,
+      debtValue,
+      creditCardValue,
+      goldValue,
+      stockValue,
+      otherAssetValue,
+      pensionValue,
+      totalAssets,
+      totalLiabilities,
+      netWorth,
+      assetBreakdown,
+      liabilityBreakdown,
+    };
+  }, [
+    goalsStore.items,
+    receivablesStore.items,
+    debtsStore.items,
+    cardsStore.items,
+    goldStore.items,
+    stocksStore.items,
+    assetsStore.items,
+    retirementFundsStore.items,
+  ]);
+
+  const cashflow = useMemo(() => {
+    const months = availableMonths(transactionsStore.items);
+    const activeMonth = months[months.length - 1] || "";
+    const monthTx = activeMonth ? txInMonth(transactionsStore.items, activeMonth) : [];
+
+    const income = sumByType(monthTx, "income");
+    const expense = sumByType(monthTx, "expense");
+    const saved = income - expense;
+    const savingsRate = income > 0 ? Math.round((saved / income) * 100) : 0;
+
+    return {
+      activeMonth,
+      income,
+      expense,
+      saved,
+      savingsRate,
+    };
+  }, [transactionsStore.items]);
+
+  const health = useMemo(() => {
+    const { totalAssets, totalLiabilities, netWorth } = summary;
+    const liabilityRatio = totalAssets > 0 ? totalLiabilities / totalAssets : 0;
+
+    if (netWorth <= 0) {
+      return {
+        tone: "red" as const,
+        label: "perlu perhatian",
+        title: "Kekayaan bersih masih negatif",
+        description:
+          "Kewajibanmu masih lebih besar daripada aset. Fokus utama saat ini adalah menekan utang dan membangun aset likuid.",
+      };
+    }
+
+    if (liabilityRatio <= 0.25) {
+      return {
+        tone: "green" as const,
+        label: "sehat",
+        title: "Kondisi finansial terlihat sehat",
+        description:
+          "Asetmu jauh lebih besar daripada kewajiban. Pertahankan arus kas positif dan lanjutkan membangun aset produktif.",
+      };
+    }
+
+    if (liabilityRatio <= 0.5) {
+      return {
+        tone: "amber" as const,
+        label: "cukup aman",
+        title: "Kondisi finansial cukup aman",
+        description:
+          "Aset masih lebih besar daripada kewajiban, tapi porsi kewajiban mulai perlu dipantau agar tidak menekan cashflow.",
+      };
+    }
+
+    return {
+      tone: "red" as const,
+      label: "waspada",
+      title: "Kewajiban cukup besar",
+      description:
+        "Porsi kewajiban cukup tinggi dibanding aset. Prioritaskan pelunasan utang berbunga dan jaga dana darurat.",
+    };
+  }, [summary]);
+
+  const assetRows = [
+    {
+      label: "Tabungan",
+      value: summary.cashValue,
+      icon: Wallet,
+      color: COLORS.cash,
+      desc: `${goalsStore.items.length} goal`,
+    },
+    {
+      label: "Piutang",
+      value: summary.receivableValue,
+      icon: HandCoins,
+      color: COLORS.receivable,
+      desc: `${receivablesStore.items.length} catatan`,
+    },
+    {
+      label: "Saham",
+      value: summary.stockValue,
+      icon: TrendingUp,
+      color: COLORS.stock,
+      desc: `${stocksStore.items.length} holding`,
+    },
+    {
+      label: "Emas",
+      value: summary.goldValue,
+      icon: Gem,
+      color: COLORS.gold,
+      desc: `${goldStore.items.length} aset`,
+    },
+    {
+      label: "Pensiun",
+      value: summary.pensionValue,
+      icon: PiggyBank,
+      color: COLORS.pension,
+      desc: `${retirementFundsStore.items.length} sumber dana`,
+    },
+    {
+      label: "Aset Lainnya",
+      value: summary.otherAssetValue,
+      icon: Briefcase,
+      color: COLORS.other,
+      desc: `${assetsStore.items.length} aset`,
+    },
+  ];
+
+  const liabilityRows = [
+    {
+      label: "Utang & Cicilan",
+      value: summary.debtValue,
+      icon: Landmark,
+      color: COLORS.debt,
+      desc: `${debtsStore.items.length} catatan`,
+    },
+    {
+      label: "Credit Card",
+      value: summary.creditCardValue,
+      icon: CreditCard,
+      color: COLORS.card,
+      desc: `${cardsStore.items.length} kartu`,
+    },
+  ];
+
+  if (loading) return <LoadingState label="Memuat ringkasan finansial…" />;
+  if (error) return <ErrorState message={error} onRetry={retryAll} />;
 
   return (
     <>
       <PageHeader
-        eyebrow={`Financial Summary · ${activeMonth ? monthLabel(activeMonth) : "—"}`}
+        eyebrow="Financial Overview"
         title={
           <>
-            Ringkasan <em className="italic text-amber-text dark:text-amber">keuanganmu</em>.
+            Peta besar <em className="italic text-amber-text dark:text-amber">finansialmu</em>.
           </>
         }
       />
 
-      {/* Month selector */}
-      {months.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {months.map((m) => (
-            <button
-              key={m}
-              onClick={() => setMonth(m)}
-              className={`rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
-                m === activeMonth
-                  ? "bg-gradient-to-br from-amber to-amber-deep text-white shadow-glow"
-                  : "card text-muted hover:text-heading"
-              }`}
-            >
-              {monthLabel(m)}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Stats */}
+      {/* Top summary */}
       <section className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Pemasukan</div>
-          <div className="mt-2 font-serif text-[18px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[22px] sm:text-[28px]">
-            {rpShort(insight.income)}
+          <div className="text-muted text-[13px] font-semibold">Kekayaan Bersih</div>
+          <div
+            className={`mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px] ${
+              summary.netWorth >= 0
+                ? "text-pos-strong dark:text-pos-dark"
+                : "text-neg-strong dark:text-neg-dark"
+            }`}
+          >
+            {summary.netWorth >= 0 ? "" : "-"}
+            {rpShort(Math.abs(summary.netWorth))}
           </div>
         </Card>
+
         <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Pengeluaran</div>
-          <div className="mt-2 font-serif text-[18px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[22px] sm:text-[28px]">
-            {rpShort(insight.expense)}
-          </div>
-          {insight.expenseChange !== null && (
-            <div className="mt-2">
-              <Badge tone={insight.expenseChange <= 0 ? "green" : "red"}>
-                {insight.expenseChange <= 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
-                {Math.abs(insight.expenseChange)}% vs lalu
-              </Badge>
-            </div>
-          )}
-        </Card>
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Ditabung</div>
-          <div className="text-heading mt-2 font-serif text-[18px] font-semibold tabular-nums sm:text-[22px] sm:text-[28px]">
-            {rpShort(insight.saved)}
+          <div className="text-muted text-[13px] font-semibold">Total Aset</div>
+          <div className="text-heading mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px]">
+            {rpShort(summary.totalAssets)}
           </div>
         </Card>
+
         <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Savings Rate</div>
-          <div className="text-heading mt-2 font-serif text-[18px] font-semibold tabular-nums sm:text-[22px] sm:text-[28px]">
-            {insight.savingsRate}%
+          <div className="text-muted text-[13px] font-semibold">Total Kewajiban</div>
+          <div className="mt-2 font-serif text-[22px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[28px]">
+            {rpShort(summary.totalLiabilities)}
+          </div>
+        </Card>
+
+        <Card hoverable>
+          <div className="text-muted text-[13px] font-semibold">Financial Health</div>
+          <div className="text-heading mt-2 font-serif text-[22px] font-semibold sm:text-[28px]">
+            {health.label}
           </div>
           <div className="mt-2">
-            <Badge
-              tone={
-                insight.savingsRate >= 20 ? "green" : insight.savingsRate >= 10 ? "amber" : "red"
-              }
-            >
-              {insight.savingsRate >= 20 ? "sehat" : insight.savingsRate >= 10 ? "cukup" : "tipis"}
-            </Badge>
+            <Badge tone={health.tone}>{health.label}</Badge>
           </div>
         </Card>
       </section>
 
       {/* Insight banner */}
-      {insight.topCategory && (
-        <Card className="mb-5 flex items-start gap-3.5 !bg-amber-soft/60 dark:!bg-amber/[0.07]">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber/15 text-amber-text dark:text-amber">
-            <Lightbulb size={20} />
-          </span>
-          <div className="text-body text-[13.5px] leading-relaxed">
-            Bulan ini pengeluaran terbesarmu di{" "}
-            <strong className="text-heading font-bold">{insight.topCategory.name}</strong> sebesar{" "}
-            <strong className="text-heading font-bold">{rpShort(insight.topCategory.value)}</strong>
-            .
-            {insight.expenseChange !== null && insight.expenseChange > 10 && (
-              <>
-                {" "}
-                Total belanja naik{" "}
-                <strong className="font-bold text-neg-strong dark:text-neg-dark">
-                  {insight.expenseChange}%
-                </strong>{" "}
-                dari bulan lalu.
-              </>
-            )}
-            {insight.savingsRate >= 20 && (
-              <>
-                {" "}
-                Kamu berhasil menabung{" "}
-                <strong className="font-bold text-pos-strong dark:text-pos-dark">
-                  {insight.savingsRate}%
-                </strong>{" "}
-                — bagus! 🎉
-              </>
-            )}
-          </div>
-        </Card>
-      )}
+      <Card
+        className={`mb-5 flex items-start gap-3.5 ${
+          health.tone === "green"
+            ? "!bg-pos-soft/60 dark:!bg-pos/[0.07]"
+            : health.tone === "amber"
+              ? "!bg-amber-soft/60 dark:!bg-amber/[0.07]"
+              : "!bg-neg-soft/60 dark:!bg-neg/[0.07]"
+        }`}
+      >
+        <span
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${
+            health.tone === "green"
+              ? "bg-pos/15 text-pos-strong dark:text-pos-dark"
+              : health.tone === "amber"
+                ? "bg-amber/15 text-amber-text dark:text-amber"
+                : "bg-neg/15 text-neg-strong dark:text-neg-dark"
+          }`}
+        >
+          {health.tone === "green" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+        </span>
+        <div>
+          <div className="text-heading text-[14px] font-bold">{health.title}</div>
+          <p className="text-body mt-0.5 text-[13.5px] leading-relaxed">{health.description}</p>
+        </div>
+      </Card>
 
       {/* Charts */}
-      <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.5fr]">
+      <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_.8fr]">
         <Card>
           <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
-            Pengeluaran per Kategori
+            Komposisi Aset
           </h2>
           <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
-            Total {rpShort(insight.expense)}
+            Total {rpShort(summary.totalAssets)}
           </p>
-          {expenseCats.length > 0 ? (
-            <>
-              <div className="relative mx-auto h-[180px] w-full max-w-[220px]">
-                <DonutChart data={expenseCats} formatValue={(v) => rpShort(v)} innerRadius={54} />
+
+          {summary.assetBreakdown.length > 0 ? (
+            <div className="grid grid-cols-1 items-center gap-5 md:grid-cols-[260px_1fr]">
+              <div className="relative mx-auto h-[210px] w-full max-w-[260px]">
+                <DonutChart
+                  data={summary.assetBreakdown}
+                  formatValue={(v) => rpShort(v)}
+                  innerRadius={62}
+                />
               </div>
-              <ul className="mt-4 space-y-2">
-                {expenseCats.slice(0, 5).map((c) => (
-                  <li key={c.name} className="flex items-center gap-2.5 text-[13.5px]">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.color }} />
-                    <span className="text-body font-medium">
-                      {catEmoji(c.name)} {c.name}
-                    </span>
+
+              <ul className="space-y-2.5">
+                {summary.assetBreakdown.map((a) => (
+                  <li key={a.name} className="flex items-center gap-2.5 text-[13.5px]">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: a.color }} />
+                    <span className="text-body font-medium">{a.name}</span>
                     <span className="text-muted ml-auto font-semibold tabular-nums">
-                      {rpShort(c.value)}
+                      {rpShort(a.value)} · {pct(a.value, summary.totalAssets)}%
                     </span>
                   </li>
                 ))}
               </ul>
-            </>
+            </div>
           ) : (
             <p className="text-subtle py-12 text-center text-[14px]">
-              Belum ada pengeluaran bulan ini.
+              Belum ada aset yang tercatat.
             </p>
           )}
         </Card>
 
         <Card>
           <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
-            Arus Kas Bulanan
+            Komposisi Kewajiban
           </h2>
-          <p className="text-muted mb-4 mt-0.5 text-[13.5px] font-medium">
-            {flow.length} bulan terakhir
+          <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
+            Total {rpShort(summary.totalLiabilities)}
           </p>
-          <div className="mb-3 flex items-center gap-3 text-[12.5px] font-semibold">
-            <span className="text-muted flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-pos" />
-              Masuk
-            </span>
-            <span className="text-muted flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-neg" />
-              Keluar
-            </span>
-          </div>
-          <CashFlowChart data={flow} />
+
+          {summary.liabilityBreakdown.length > 0 ? (
+            <>
+              <div className="relative mx-auto h-[180px] w-full max-w-[220px]">
+                <DonutChart
+                  data={summary.liabilityBreakdown}
+                  formatValue={(v) => rpShort(v)}
+                  innerRadius={54}
+                />
+              </div>
+
+              <ul className="mt-4 space-y-2">
+                {summary.liabilityBreakdown.map((l) => (
+                  <li key={l.name} className="flex items-center gap-2.5 text-[13.5px]">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: l.color }} />
+                    <span className="text-body font-medium">{l.name}</span>
+                    <span className="text-muted ml-auto font-semibold tabular-nums">
+                      {rpShort(l.value)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <div className="py-12 text-center">
+              <div className="mb-2 text-[32px]">✨</div>
+              <p className="text-muted text-[14px]">Belum ada kewajiban tercatat.</p>
+            </div>
+          )}
         </Card>
       </section>
 
-      {/* Recent transactions preview — full CRUD di /transactions */}
-      <Card>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
-            Transaksi Terbaru
-          </h2>
-          <Link
-            href="/transactions"
-            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[13.5px] font-bold text-amber-text transition hover:bg-amber-soft dark:text-amber dark:hover:bg-amber/10"
-          >
-            Lihat semua <ArrowUpRight size={15} strokeWidth={2.5} />
-          </Link>
-        </div>
+      {/* Detail cards */}
+      <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+              Detail Aset
+            </h2>
+            <Badge tone="green">{assetRows.filter((a) => a.value > 0).length} kategori</Badge>
+          </div>
 
-        {recent.length > 0 ? (
-          <ul>
-            {recent.map((t) => {
-              const inc = t.type === "income";
+          <ul className="space-y-2">
+            {assetRows.map((row) => {
+              const Icon = row.icon;
+
               return (
                 <li
-                  key={t.id}
-                  className="flex items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
+                  key={row.label}
+                  className="flex items-center gap-3 rounded-xl border border-black/[.05] p-3 dark:border-white/5"
                 >
                   <span
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[17px]"
-                    style={{
-                      background: inc ? "rgba(15,157,107,.12)" : `${catColor(t.category)}1f`,
-                    }}
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+                    style={{ background: `${row.color}22`, color: row.color }}
                   >
-                    {inc ? "💰" : catEmoji(t.category)}
+                    <Icon size={18} />
                   </span>
+
                   <div className="min-w-0 flex-1">
                     <div className="text-heading truncate text-[14px] font-semibold">
-                      {t.category}
+                      {row.label}
                     </div>
-                    <div className="text-subtle truncate text-[12.5px]">
-                      {t.note || "—"} · {t.date}
-                    </div>
+                    <div className="text-subtle text-[12.5px]">{row.desc}</div>
                   </div>
-                  <span
-                    className={`shrink-0 font-serif text-[14.5px] font-bold tabular-nums ${
-                      inc
-                        ? "text-pos-strong dark:text-pos-dark"
-                        : "text-neg-strong dark:text-neg-dark"
-                    }`}
-                  >
-                    {inc ? "+" : "−"}
-                    {rpShort(t.amount)}
-                  </span>
+
+                  <div className="text-right">
+                    <div className="text-heading font-serif text-[15px] font-bold tabular-nums">
+                      {rpShort(row.value)}
+                    </div>
+                    {summary.totalAssets > 0 && (
+                      <div className="text-subtle text-[11.5px]">
+                        {pct(row.value, summary.totalAssets)}%
+                      </div>
+                    )}
+                  </div>
                 </li>
               );
             })}
           </ul>
-        ) : (
-          <div className="py-10 text-center">
-            <div className="mb-2 text-[22px] sm:text-[36px]">🧾</div>
-            <p className="text-muted text-[14px]">Belum ada transaksi bulan ini.</p>
-            <Link
-              href="/transactions"
-              className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-amber-text dark:text-amber"
-            >
-              Catat di halaman Transaksi <ArrowUpRight size={14} />
-            </Link>
+        </Card>
+
+        <Card>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+              Detail Kewajiban
+            </h2>
+            <Badge tone={summary.totalLiabilities > 0 ? "red" : "green"}>
+              {summary.totalLiabilities > 0 ? "ada kewajiban" : "bersih"}
+            </Badge>
           </div>
-        )}
+
+          <ul className="space-y-2">
+            {liabilityRows.map((row) => {
+              const Icon = row.icon;
+
+              return (
+                <li
+                  key={row.label}
+                  className="flex items-center gap-3 rounded-xl border border-black/[.05] p-3 dark:border-white/5"
+                >
+                  <span
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+                    style={{ background: `${row.color}22`, color: row.color }}
+                  >
+                    <Icon size={18} />
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="text-heading truncate text-[14px] font-semibold">
+                      {row.label}
+                    </div>
+                    <div className="text-subtle text-[12.5px]">{row.desc}</div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="font-serif text-[15px] font-bold tabular-nums text-neg-strong dark:text-neg-dark">
+                      {rpShort(row.value)}
+                    </div>
+                    {summary.totalLiabilities > 0 && (
+                      <div className="text-subtle text-[11.5px]">
+                        {pct(row.value, summary.totalLiabilities)}%
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      </section>
+
+      {/* Cashflow snapshot */}
+      <Card>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+              Snapshot Cashflow
+            </h2>
+            <p className="text-muted mt-0.5 text-[13.5px]">
+              {cashflow.activeMonth ? monthLabel(cashflow.activeMonth) : "Belum ada transaksi"}
+            </p>
+          </div>
+          <Activity className="text-muted" size={20} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {[
+            ["Pemasukan", rpShort(cashflow.income), "text-pos-strong dark:text-pos-dark"],
+            ["Pengeluaran", rpShort(cashflow.expense), "text-neg-strong dark:text-neg-dark"],
+            [
+              "Ditabung",
+              `${cashflow.saved >= 0 ? "" : "-"}${rpShort(Math.abs(cashflow.saved))}`,
+              cashflow.saved >= 0
+                ? "text-pos-strong dark:text-pos-dark"
+                : "text-neg-strong dark:text-neg-dark",
+            ],
+            ["Savings Rate", `${cashflow.savingsRate}%`, "text-heading"],
+          ].map(([label, value, cls]) => (
+            <div key={label} className="rounded-xl bg-surface-sunken p-3 dark:bg-white/5">
+              <div className="text-subtle text-[12px] font-semibold">{label}</div>
+              <div className={`mt-1 font-serif text-[17px] font-bold tabular-nums ${cls}`}>
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
       </Card>
     </>
   );
