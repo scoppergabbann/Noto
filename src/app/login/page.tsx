@@ -38,7 +38,9 @@ const loginFeatures = [
 function getSiteUrl() {
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+    (typeof window !== "undefined"
+      ? window.location.origin
+      : "http://localhost:3000");
 
   try {
     const url = new URL(raw);
@@ -60,56 +62,31 @@ function LoginForm() {
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState("");
 
-useEffect(() => {
-  const code = searchParams.get("code");
-  const err = searchParams.get("error");
-  const errorCode = searchParams.get("error_code");
+  useEffect(() => {
+    const err = searchParams.get("error");
+    const errorCode = searchParams.get("error_code");
 
-  async function handleOAuthCodeOnLoginPage() {
-    if (!code) return;
-
-    setLoadingGoogle(true);
-    setError("");
-
-    const sb = createClient();
-    const { error } = await sb.auth.exchangeCodeForSession(code);
-
-    if (error) {
+    if (err === "auth_callback_failed") {
       setError(
-        "Login Google gagal diproses. Coba ulangi lagi dari tombol Google."
+        "Login gagal diproses. Coba ulangi lagi, atau gunakan metode login lain."
       );
-      setLoadingGoogle(false);
-
-      // Bersihkan URL agar code lama tidak diproses berulang.
-      router.replace("/login");
-      return;
     }
 
-    router.replace("/dashboard");
-    router.refresh();
-  }
-
-  handleOAuthCodeOnLoginPage();
-
-  if (err === "auth_callback_failed") {
-    setError(
-      "Konfirmasi atau login gagal. Coba ulangi lagi, atau gunakan metode login lain."
-    );
-  }
-
-  if (errorCode === "otp_expired") {
-    setError("Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru.");
-  }
-}, [searchParams, router]);
+    if (errorCode === "otp_expired") {
+      setError(
+        "Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru."
+      );
+    }
+  }, [searchParams]);
 
   async function handleGoogleLogin() {
     setLoadingGoogle(true);
     setError("");
 
-    const sb = createClient();
+    const supabase = createClient();
     const siteUrl = getSiteUrl();
 
-    const { error } = await sb.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${siteUrl}/auth/callback`,
@@ -140,9 +117,9 @@ useEffect(() => {
     setLoadingEmail(true);
     setError("");
 
-    const sb = createClient();
+    const supabase = createClient();
 
-    const { error } = await sb.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: trimmedEmail,
       password,
     });
@@ -206,7 +183,7 @@ useEffect(() => {
             placeholder="••••••••"
             autoComplete="current-password"
             showPassword={showPassword}
-            onTogglePassword={() => setShowPassword((v) => !v)}
+            onTogglePassword={() => setShowPassword((value) => !value)}
           />
 
           {error && (
@@ -244,8 +221,8 @@ useEffect(() => {
               className="mt-0.5 shrink-0 text-amber-text dark:text-amber"
             />
             <p className="text-muted text-[12.5px] leading-5">
-              Data finansialmu tetap berada di akun pribadimu. Gunakan metode login
-              yang paling aman dan nyaman.
+              Data finansialmu tetap berada di akun pribadimu. Gunakan metode
+              login yang paling aman dan nyaman.
             </p>
           </div>
         </div>
