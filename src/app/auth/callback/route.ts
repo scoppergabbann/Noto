@@ -3,12 +3,15 @@ import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+
+  const nextParam = requestUrl.searchParams.get("next");
+  const next = nextParam?.startsWith("/") ? nextParam : "/dashboard";
 
   if (code) {
     const cookieStore = await cookies();
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,9 +22,11 @@ export async function GET(request: NextRequest) {
           },
           setAll(toSet: { name: string; value: string; options: CookieOptions }[]) {
             try {
-              toSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+              toSet.forEach(({ name, value, options }) => {
+                cookieStore.set(name, value, options);
+              });
             } catch {
-              /* read-only in middleware */
+              // Safe fallback for environments where cookies are read-only.
             }
           },
         },
@@ -29,11 +34,13 @@ export async function GET(request: NextRequest) {
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(new URL(next, requestUrl.origin));
     }
   }
 
-  // Error — redirect ke login dengan pesan
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+  return NextResponse.redirect(
+    new URL("/login?error=auth_callback_failed", requestUrl.origin)
+  );
 }

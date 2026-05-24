@@ -71,10 +71,11 @@ export default function RegisterPage() {
 
     const sb = createClient();
 
-    const redirectTo =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback`
-        : "/auth/callback";
+    const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+
+    const redirectTo = `${siteUrl}/auth/callback`;
 
     const { error } = await sb.auth.signUp({
       email: trimmedEmail,
