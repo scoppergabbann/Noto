@@ -1,9 +1,46 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-export const metadata: Metadata = { title: "Noto" };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+  axes: ["opsz"],
+});
+
+export const metadata: Metadata = {
+  title: "Noto · Financial Planner",
+  description: "Noto urip, noto finansial.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f3f4f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0c11" },
+  ],
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html
+      lang="id"
+      suppressHydrationWarning
+      className={`${jakarta.variable} ${fraunces.variable}`}
+    >
       <body className="font-sans">
         <script
           dangerouslySetInnerHTML={{
