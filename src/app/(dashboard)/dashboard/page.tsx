@@ -74,13 +74,25 @@ export default function DashboardPage() {
 
   if (goalsLoading) return <LoadingState label="Memuat dashboard…" />;
 
+  function getTodayLabel() {
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+    }).format(new Date());
+  }
+
+  const todayLabel = getTodayLabel();
+
   return (
     <>
       {/* ── Header ── */}
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
         <div>
           <p className="text-subtle mb-2 text-[12.5px] font-bold uppercase tracking-[.14em]">
-            Kamis, 21 Mei 2026
+              {todayLabel}
           </p>
           <h1 className="text-heading font-serif text-[20px] font-semibold leading-[1.08] tracking-tight sm:text-[28px] sm:text-[36px]">
             Halo {userName},
