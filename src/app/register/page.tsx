@@ -37,11 +37,19 @@ const registerFeatures = [
   },
 ];
 
-function getSiteUrl() {
-  return (
+function getAuthCallbackUrl() {
+  const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000")
-  );
+    (typeof window !== "undefined"
+      ? window.location.origin
+      : "http://localhost:3000");
+
+  try {
+    const url = new URL(raw);
+    return `${url.origin}/auth/callback`;
+  } catch {
+    return "http://localhost:3000/auth/callback";
+  }
 }
 
 export default function RegisterPage() {
@@ -59,13 +67,13 @@ export default function RegisterPage() {
     setLoadingGoogle(true);
     setError("");
 
-    const sb = createClient();
-    const siteUrl = getSiteUrl();
+    const supabase = createClient();
+    const redirectTo = getAuthCallbackUrl();
 
-    const { error } = await sb.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${siteUrl}/auth/callback`,
+        redirectTo,
       },
     });
 
@@ -99,15 +107,17 @@ export default function RegisterPage() {
     setLoadingEmail(true);
     setError("");
 
-    const sb = createClient();
-    const siteUrl = getSiteUrl();
+    const supabase = createClient();
+    const redirectTo = getAuthCallbackUrl();
 
-    const { error } = await sb.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: trimmedEmail,
       password,
       options: {
-        data: { full_name: trimmedName },
-        emailRedirectTo: `${siteUrl}/auth/callback`,
+        data: {
+          full_name: trimmedName,
+        },
+        emailRedirectTo: redirectTo,
       },
     });
 
@@ -146,8 +156,10 @@ export default function RegisterPage() {
 
             <p className="text-muted mb-6 text-[15px] leading-7">
               Kami mengirim link konfirmasi ke{" "}
-              <strong className="text-heading font-semibold">{email}</strong>. Klik link
-              tersebut untuk mengaktifkan akun Noto.
+              <strong className="text-heading font-semibold">
+                {email}
+              </strong>
+              . Klik link tersebut untuk mengaktifkan akun Noto.
             </p>
 
             <Link
@@ -158,7 +170,8 @@ export default function RegisterPage() {
             </Link>
 
             <p className="text-subtle mt-5 text-[12.5px] leading-5">
-              Tidak menemukan email? Cek folder spam atau coba daftar ulang beberapa saat lagi.
+              Tidak menemukan email? Cek folder spam atau coba daftar ulang
+              beberapa saat lagi.
             </p>
           </div>
         </AuthCard>
@@ -219,7 +232,7 @@ export default function RegisterPage() {
             placeholder="Min. 6 karakter"
             autoComplete="new-password"
             showPassword={showPassword}
-            onTogglePassword={() => setShowPassword((v) => !v)}
+            onTogglePassword={() => setShowPassword((value) => !value)}
             helper="Gunakan minimal 6 karakter agar akunmu lebih aman."
           />
 
@@ -258,8 +271,9 @@ export default function RegisterPage() {
               className="mt-0.5 shrink-0 text-amber-text dark:text-amber"
             />
             <p className="text-muted text-[12.5px] leading-5">
-              Setelah daftar dengan email, kamu perlu konfirmasi email untuk mengaktifkan akun Noto.
-              Kalau daftar dengan Google, kamu bisa langsung masuk.
+              Setelah daftar dengan email, kamu perlu konfirmasi email untuk
+              mengaktifkan akun Noto. Kalau daftar dengan Google, kamu bisa
+              langsung masuk.
             </p>
           </div>
         </div>
