@@ -9,12 +9,14 @@ export function Modal({
   title,
   children,
   footer,
+  size = "md",
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  size?: "sm" | "md" | "lg";
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -67,6 +69,12 @@ export function Modal({
 
   if (!open) return null;
 
+  const sizeClass = {
+  sm: "sm:max-w-[420px]",
+  md: "sm:max-w-[480px]",
+  lg: "sm:max-w-[620px]",
+}[size];
+
   return (
   <div
     className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-6"
@@ -87,8 +95,8 @@ export function Modal({
         "rounded-t-[24px] border-t border-black/[.06] bg-white px-5 pb-8 pt-5",
         "dark:border-white/10 dark:bg-[#16171c]",
 
-        // Desktop: real centered modal
-        "sm:max-h-[90vh] sm:max-w-[480px]",
+         // Desktop: real centered modal
+        `sm:max-h-[90vh] ${sizeClass}`,
         "sm:rounded-[22px] sm:border sm:border-black/[.08] sm:p-6 sm:shadow-softlg",
 
         // Animation
