@@ -36,10 +36,16 @@ const loginFeatures = [
 ];
 
 function getSiteUrl() {
-  return (
+  const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000")
-  );
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+
+  try {
+    const url = new URL(raw);
+    return url.origin;
+  } catch {
+    return "http://localhost:3000";
+  }
 }
 
 function LoginForm() {
@@ -54,20 +60,28 @@ function LoginForm() {
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const err = searchParams.get("error");
-    const errorCode = searchParams.get("error_code");
+useEffect(() => {
+  const code = searchParams.get("code");
+  const err = searchParams.get("error");
+  const errorCode = searchParams.get("error_code");
 
-    if (err === "auth_callback_failed") {
-      setError(
-        "Konfirmasi atau login gagal. Coba ulangi lagi, atau gunakan metode login lain."
-      );
-    }
+  // Rescue kalau OAuth callback nyasar ke /login?code=...
+  // Kita lempar lagi ke route callback yang memang tugasnya exchange code.
+  if (code) {
+    router.replace(`/auth/callback?${searchParams.toString()}`);
+    return;
+  }
 
-    if (errorCode === "otp_expired") {
-      setError("Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru.");
-    }
-  }, [searchParams]);
+  if (err === "auth_callback_failed") {
+    setError(
+      "Konfirmasi atau login gagal. Coba ulangi lagi, atau gunakan metode login lain."
+    );
+  }
+
+  if (errorCode === "otp_expired") {
+    setError("Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru.");
+  }
+}, [searchParams, router]);
 
   async function handleGoogleLogin() {
     setLoadingGoogle(true);
