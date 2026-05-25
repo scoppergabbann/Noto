@@ -66,6 +66,7 @@ type MarketQuote = {
 type AggregatedStockHolding = StockHolding & {
   recordCount: number;
   sourceIds: string[];
+  sourcePositions: StockHolding[];
   marketSource: "yahoo" | "manual";
   marketTime: number | null;
   quoteChangePercent: number | null;
@@ -197,27 +198,28 @@ function aggregateStockHoldings(
 
     if (!existing) {
       map.set(key, {
-        ...item,
-        id: item.id,
-        ticker,
-        exchange,
-        lots: itemLots,
-        avgPrice: Number(item.avgPrice || 0),
-        currentPrice,
-        broker: item.broker || "",
-        dividendReceived: Number(item.dividendReceived || 0),
-        targetPrice: Number(item.targetPrice || 0),
-        conviction: Number(item.conviction || 0),
-        recordCount: 1,
-        sourceIds: [item.id],
-        marketSource,
-        marketTime: quote?.marketTime ?? null,
-        quoteChangePercent:
-          typeof quote?.changePercent === "number" ? round1(quote.changePercent) : null,
-        _brokerList: item.broker ? [item.broker] : [],
-        _weightedConvictionTotal: Number(item.conviction || 0) * itemLots,
-        _convictionLots: itemLots,
-      });
+      ...item,
+      id: item.id,
+      ticker,
+      exchange,
+      lots: itemLots,
+      avgPrice: Number(item.avgPrice || 0),
+      currentPrice,
+      broker: item.broker || "",
+      dividendReceived: Number(item.dividendReceived || 0),
+      targetPrice: Number(item.targetPrice || 0),
+      conviction: Number(item.conviction || 0),
+      recordCount: 1,
+      sourceIds: [item.id],
+      sourcePositions: [item],
+      marketSource,
+      marketTime: quote?.marketTime ?? null,
+      quoteChangePercent:
+        typeof quote?.changePercent === "number" ? round1(quote.changePercent) : null,
+      _brokerList: item.broker ? [item.broker] : [],
+      _weightedConvictionTotal: Number(item.conviction || 0) * itemLots,
+      _convictionLots: itemLots,
+    });
 
       continue;
     }
@@ -254,6 +256,7 @@ function aggregateStockHoldings(
       notes: existing.notes || item.notes,
       recordCount: existing.recordCount + 1,
       sourceIds: [...existing.sourceIds, item.id],
+      sourcePositions: [...existing.sourcePositions, item],
       marketSource: existing.marketSource === "yahoo" || marketSource === "yahoo" ? "yahoo" : "manual",
       marketTime: quote?.marketTime ?? existing.marketTime ?? null,
       quoteChangePercent:
@@ -439,6 +442,107 @@ function AverageDownSimulator({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function PositionHistory({
+  positions,
+  currentPrice,
+  onEdit,
+  onDelete,
+}: {
+  positions: StockHolding[];
+  currentPrice: number;
+  onEdit: (position: StockHolding) => void;
+  onDelete: (id: string) => void;
+}) {
+  if (positions.length === 0) return null;
+
+  return (
+    <div className="rounded-xl border border-black/[.06] bg-surface-sunken p-3.5 dark:border-white/10 dark:bg-white/[.04]">
+      <div className="mb-3">
+        <div className="text-heading text-[13px] font-bold">Riwayat Posisi</div>
+        <div className="text-subtle text-[11.5px]">
+          Posisi asli yang digabung menjadi Avg Buy emiten ini.
+        </div>
+      </div>
+
+      <div className="space-y-2.5">
+        {positions.map((position) => {
+          const shares = Number(position.lots || 0) * 100;
+          const cost = stockCostBasis(position.lots, position.avgPrice);
+          const market = stockMarketValue(position.lots, currentPrice);
+          const upl = market - cost;
+          const uplPct = stockUnrealizedPct(position.avgPrice, currentPrice);
+          const isUp = upl >= 0;
+
+          return (
+            <div
+              key={position.id}
+              className="rounded-xl border border-black/[.05] bg-white/70 p-3 dark:border-white/10 dark:bg-white/[.04]"
+            >
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-heading text-[13px] font-bold">
+                      {position.ticker}
+                    </span>
+
+                    {position.broker && (
+                      <span className="rounded-md bg-surface-sunken px-2 py-0.5 text-[11px] font-semibold text-subtle dark:bg-white/5">
+                        {position.broker}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 text-[12.5px] sm:grid-cols-4">
+                    <div>
+                      <div className="text-subtle font-semibold">Lot / Lembar</div>
+                      <div className="text-heading mt-0.5 font-bold">
+                        {Number(position.lots || 0).toLocaleString("id-ID")} lot ·{" "}
+                        {shares.toLocaleString("id-ID")} lbr
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-subtle font-semibold">Avg Buy</div>
+                      <div className="text-heading mt-0.5 font-bold">
+                        {formatPrice(position.avgPrice)}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-subtle font-semibold">Modal</div>
+                      <div className="text-heading mt-0.5 font-bold">{rpShort(cost)}</div>
+                    </div>
+
+                    <div>
+                      <div className="text-subtle font-semibold">P&L</div>
+                      <div
+                        className={`mt-0.5 font-bold ${
+                          isUp
+                            ? "text-pos-strong dark:text-pos-dark"
+                            : "text-neg-strong dark:text-neg-dark"
+                        }`}
+                      >
+                        {isUp ? "+" : "-"}
+                        {rpShort(Math.abs(upl))} · {isUp ? "+" : ""}
+                        {uplPct}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <RowActions
+                  onEdit={() => onEdit(position)}
+                  onDelete={() => onDelete(position.id)}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1256,7 +1360,17 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                         </div>
                       </div>
 
-                      <RowActions onEdit={() => openEdit(h)} onDelete={() => setDeleteId(h.id)} />
+                      {h.recordCount === 1 ? (
+                        <RowActions onEdit={() => openEdit(h)} onDelete={() => setDeleteId(h.id)} />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setExpandedCard(expanded ? null : h.id)}
+                          className="rounded-xl border border-black/[.06] px-3 py-2 text-[12px] font-bold text-muted transition hover:bg-surface-sunken hover:text-heading dark:border-white/10 dark:hover:bg-white/5"
+                        >
+                          Detail
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/5 pt-4 text-[13px] dark:border-white/5 sm:grid-cols-3">
@@ -1410,6 +1524,13 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                             dari total modal dibagi total lembar.
                           </div>
                         )}
+
+                        <PositionHistory
+                          positions={h.sourcePositions}
+                          currentPrice={h.currentPrice}
+                          onEdit={openEdit}
+                          onDelete={setDeleteId}
+                        />
 
                         {h.buyReason || h.exitPlan || h.notes ? (
                           <>
