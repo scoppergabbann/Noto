@@ -2,96 +2,123 @@
 
 import {
   Area,
-  Line,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  ComposedChart,
 } from "recharts";
-import { netWorthSeries } from "@/data/mock";
+import { rpShort } from "@/lib/format";
 
-interface TooltipProps {
-  active?: boolean;
-  payload?: { name: string; value: number; color: string }[];
-  label?: string;
-}
+export type NetWorthChartPoint = {
+  month: string;
+  asset: number;
+  liability: number;
+};
 
-function ChartTooltip({ active, payload, label }: TooltipProps) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl border border-black/[.06] bg-white/95 px-3 py-2.5 shadow-softlg backdrop-blur dark:border-white/10 dark:bg-night-raised2/95">
-      <div className="text-heading mb-1.5 text-[12px] font-bold">{label} 2026</div>
-      {payload.map((p) => (
-        <div key={p.name} className="flex items-center gap-2 text-[12.5px]">
-          <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-          <span className="text-muted">{p.name === "asset" ? "Aset" : "Utang"}</span>
-          <span className="text-heading ml-auto font-semibold tabular-nums">Rp{p.value}jt</span>
+export function NetWorthChart({ data }: { data: NetWorthChartPoint[] }) {
+  if (!data.length) {
+    return (
+      <div className="grid min-h-[220px] place-items-center rounded-2xl bg-surface-sunken px-6 text-center dark:bg-white/[.04]">
+        <div>
+          <div className="mb-2 text-[32px]" aria-hidden="true">
+            📊
+          </div>
+          <p className="text-heading font-semibold">Belum ada data kekayaan</p>
+          <p className="text-muted mt-1 text-[13.5px] leading-relaxed">
+            Tambahkan data aset dan kewajiban agar grafik bisa terbentuk.
+          </p>
         </div>
-      ))}
-    </div>
-  );
-}
+      </div>
+    );
+  }
 
-export function NetWorthChart() {
   return (
     <div className="h-[240px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={netWorthSeries} margin={{ top: 8, right: 4, left: -16, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
           <defs>
-            <linearGradient id="assetFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0f9d6b" stopOpacity={0.22} />
+            <linearGradient id="assetGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0f9d6b" stopOpacity={0.26} />
               <stop offset="100%" stopColor="#0f9d6b" stopOpacity={0} />
             </linearGradient>
+
+            <linearGradient id="liabilityGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#d83a3a" stopOpacity={0.2} />
+              <stop offset="100%" stopColor="#d83a3a" stopOpacity={0} />
+            </linearGradient>
           </defs>
+
           <CartesianGrid
             stroke="currentColor"
             strokeOpacity={0.08}
             vertical={false}
-            className="text-ink-subtle"
+            className="text-subtle"
           />
+
           <XAxis
             dataKey="month"
             tickLine={false}
             axisLine={false}
-            tick={{ fontSize: 12.5, fontWeight: 600 }}
+            tick={{ fontSize: 12, fontWeight: 700 }}
             stroke="currentColor"
             className="text-subtle"
-            dy={6}
+            dy={8}
           />
+
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fontSize: 12, fontWeight: 600 }}
+            tick={{ fontSize: 11, fontWeight: 700 }}
             stroke="currentColor"
             className="text-subtle"
-            tickFormatter={(v) => `${v}jt`}
-            width={48}
+            width={54}
+            tickFormatter={(value) => rpShort(Number(value))}
           />
+
           <Tooltip
-            content={<ChartTooltip />}
-            cursor={{ stroke: "#f59425", strokeWidth: 1, strokeDasharray: "4 4" }}
+            formatter={(value: number, name: string) => [
+              rpShort(Number(value)),
+              name === "asset" ? "Aset" : "Utang",
+            ]}
+            contentStyle={{
+              borderRadius: 14,
+              border: "1px solid rgba(255,255,255,.10)",
+              background: "rgba(15,17,23,.94)",
+              color: "#fff",
+              boxShadow: "0 18px 50px rgba(0,0,0,.25)",
+            }}
+            labelStyle={{
+              color: "#fff",
+              fontWeight: 700,
+              marginBottom: 6,
+            }}
           />
+
           <Area
             type="monotone"
             dataKey="asset"
+            name="asset"
             stroke="#0f9d6b"
-            strokeWidth={2.5}
-            fill="url(#assetFill)"
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 0 }}
+            strokeWidth={3}
+            fill="url(#assetGrad)"
+            dot={{ r: 5, strokeWidth: 0 }}
+            activeDot={{ r: 6, strokeWidth: 0 }}
           />
-          <Line
+
+          <Area
             type="monotone"
             dataKey="liability"
+            name="liability"
             stroke="#d83a3a"
-            strokeWidth={2.5}
-            strokeDasharray="5 5"
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 0 }}
+            strokeWidth={3}
+            strokeDasharray="6 6"
+            fill="url(#liabilityGrad)"
+            dot={{ r: 5, strokeWidth: 0 }}
+            activeDot={{ r: 6, strokeWidth: 0 }}
           />
-        </ComposedChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
