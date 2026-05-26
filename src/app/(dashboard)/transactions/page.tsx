@@ -215,7 +215,7 @@ function TransactionItem({
             <div className="shrink-0 text-right">
               <div
                 className={[
-                  "font-serif text-[18px] font-bold leading-5 tabular-nums",
+                  "font-serif text-[16.5px] font-bold leading-5 tabular-nums sm:text-[18px]",
                   inc
                     ? "text-pos-strong dark:text-pos-dark"
                     : "text-neg-strong dark:text-neg-dark",
@@ -238,7 +238,7 @@ function TransactionItem({
               type="button"
               onClick={() => onEdit(tx)}
               className={[
-                "inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 text-[12.5px] font-bold",
+                "inline-flex min-h-[34px] items-center gap-1.5 rounded-xl px-2.5 text-[12px] font-bold",
                 "text-muted transition hover:bg-white hover:text-heading",
                 "dark:hover:bg-white/10",
               ].join(" ")}
