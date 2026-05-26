@@ -11,12 +11,14 @@ import {
   CheckCircle2,
   Sparkles,
   ArrowRight,
+  Pencil,
+  Trash2,
+  CalendarDays,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { RowActions } from "@/components/ui/RowActions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 import { TransactionForm, type TxDraft } from "@/components/forms/TransactionForm";
@@ -38,11 +40,9 @@ import type { Transaction } from "@/types";
 
 const allCats = [...expenseCategories, ...incomeCategories];
 
-const catEmoji = (name: string) =>
-  allCats.find((c) => c.name === name)?.emoji ?? "💸";
+const catEmoji = (name: string) => allCats.find((c) => c.name === name)?.emoji ?? "💸";
 
-const catColor = (name: string) =>
-  allCats.find((c) => c.name === name)?.color ?? "#64748b";
+const catColor = (name: string) => allCats.find((c) => c.name === name)?.color ?? "#64748b";
 
 type CategoryChange = {
   category: string;
@@ -55,6 +55,19 @@ type CategoryChange = {
   status: "warning" | "positive" | "new" | "stable";
   message: string;
 };
+
+function formatDate(date: string) {
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) return date;
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+  }).format(parsed);
+}
 
 function buildCategoryTotalMap(transactions: Transaction[], type: Transaction["type"]) {
   const map = new Map<string, number>();
@@ -148,6 +161,111 @@ function statusIcon(status: CategoryChange["status"]) {
   return <Lightbulb size={13} />;
 }
 
+function TransactionItem({
+  tx,
+  onEdit,
+  onDelete,
+}: {
+  tx: Transaction;
+  onEdit: (tx: Transaction) => void;
+  onDelete: (id: string) => void;
+}) {
+  const inc = tx.type === "income";
+  const emoji = catEmoji(tx.category);
+  const color = catColor(tx.category);
+
+  return (
+    <li
+      className={[
+        "rounded-2xl border border-black/[.06] bg-surface-sunken/70 p-3.5",
+        "transition hover:bg-white/80 dark:border-white/[.06] dark:bg-white/[.035] dark:hover:bg-white/[.055]",
+      ].join(" ")}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-[21px]"
+          style={{
+            background: inc ? "rgba(15,157,107,.14)" : `${color}26`,
+          }}
+          aria-hidden="true"
+        >
+          {emoji}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-heading truncate text-[15px] font-bold leading-5">
+                {tx.category}
+              </div>
+
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <Badge tone={inc ? "green" : "red"}>
+                  {inc ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                  {inc ? "masuk" : "keluar"}
+                </Badge>
+
+                <span className="text-subtle inline-flex items-center gap-1 text-[12px] font-medium">
+                  <CalendarDays size={12} />
+                  {formatDate(tx.date)}
+                </span>
+              </div>
+            </div>
+
+            <div className="shrink-0 text-right">
+              <div
+                className={[
+                  "font-serif text-[18px] font-bold leading-5 tabular-nums",
+                  inc
+                    ? "text-pos-strong dark:text-pos-dark"
+                    : "text-neg-strong dark:text-neg-dark",
+                ].join(" ")}
+              >
+                {inc ? "+" : "−"}
+                {rpShort(tx.amount)}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-2 min-w-0">
+            <p className="text-muted line-clamp-2 text-[13px] leading-5">
+              {tx.note?.trim() ? tx.note : "Tidak ada catatan."}
+            </p>
+          </div>
+
+          <div className="mt-3 flex items-center justify-end gap-2 border-t border-black/[.05] pt-2.5 dark:border-white/[.05]">
+            <button
+              type="button"
+              onClick={() => onEdit(tx)}
+              className={[
+                "inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 text-[12.5px] font-bold",
+                "text-muted transition hover:bg-white hover:text-heading",
+                "dark:hover:bg-white/10",
+              ].join(" ")}
+            >
+              <Pencil size={14} />
+              Edit
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onDelete(tx.id)}
+              className={[
+                "inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 text-[12.5px] font-bold",
+                "text-neg-strong transition hover:bg-neg-soft",
+                "dark:text-neg-dark dark:hover:bg-neg/15",
+              ].join(" ")}
+            >
+              <Trash2 size={14} />
+              Hapus
+            </button>
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 export default function TransactionsPage() {
   const { items, loading, error, fetch, add, update, remove } = useTransactionsStore();
 
@@ -208,10 +326,9 @@ export default function TransactionsPage() {
 
     if (search.trim()) {
       const q = search.toLowerCase();
+
       list = list.filter(
-        (t) =>
-          t.category.toLowerCase().includes(q) ||
-          t.note?.toLowerCase().includes(q)
+        (t) => t.category.toLowerCase().includes(q) || t.note?.toLowerCase().includes(q)
       );
     }
 
@@ -256,14 +373,13 @@ export default function TransactionsPage() {
         }
       />
 
-      {/* Month selector */}
       {months.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
           {months.map((m) => (
             <button
               key={m}
               onClick={() => setMonth(m)}
-              className={`rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
+              className={`shrink-0 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
                 m === activeMonth
                   ? "bg-gradient-to-br from-amber to-amber-deep text-white shadow-glow"
                   : "card text-muted hover:text-heading"
@@ -275,19 +391,18 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {/* Stats */}
       <section className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Pemasukan</div>
           <div className="mt-2 font-serif text-[22px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[28px]">
-            {rpShort(insight.income)}
+            {rpShort(totalIn)}
           </div>
         </Card>
 
         <Card hoverable>
           <div className="text-muted text-[13px] font-semibold">Pengeluaran</div>
           <div className="mt-2 font-serif text-[22px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[28px]">
-            {rpShort(insight.expense)}
+            {rpShort(totalOut)}
           </div>
           {insight.expenseChange !== null && (
             <div className="mt-2">
@@ -325,11 +440,7 @@ export default function TransactionsPage() {
           <div className="mt-2">
             <Badge
               tone={
-                insight.savingsRate >= 20
-                  ? "green"
-                  : insight.savingsRate >= 10
-                    ? "amber"
-                    : "red"
+                insight.savingsRate >= 20 ? "green" : insight.savingsRate >= 10 ? "amber" : "red"
               }
             >
               {insight.savingsRate >= 20
@@ -342,7 +453,6 @@ export default function TransactionsPage() {
         </Card>
       </section>
 
-      {/* Main insight banner */}
       {insight.topCategory && (
         <Card className="mb-5 flex items-start gap-3.5 !bg-amber-soft/60 dark:!bg-amber/[0.07]">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber/15 text-amber-text dark:text-amber">
@@ -351,10 +461,7 @@ export default function TransactionsPage() {
 
           <div className="text-body text-[13.5px] leading-relaxed">
             Bulan ini pengeluaran terbesarmu di{" "}
-            <strong className="text-heading font-bold">
-              {insight.topCategory.name}
-            </strong>{" "}
-            sebesar{" "}
+            <strong className="text-heading font-bold">{insight.topCategory.name}</strong> sebesar{" "}
             <strong className="text-heading font-bold">
               {rpShort(insight.topCategory.value)}
             </strong>
@@ -385,7 +492,6 @@ export default function TransactionsPage() {
         </Card>
       )}
 
-      {/* Monthly Intelligence */}
       <Card className="mb-5">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -401,9 +507,7 @@ export default function TransactionsPage() {
 
           {previousMonth && (
             <Badge tone={importantChanges.length > 0 ? "amber" : "green"}>
-              {importantChanges.length > 0
-                ? `${importantChanges.length} insight`
-                : "stabil"}
+              {importantChanges.length > 0 ? `${importantChanges.length} insight` : "stabil"}
             </Badge>
           )}
         </div>
@@ -454,9 +558,7 @@ export default function TransactionsPage() {
 
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-wrap items-center gap-2">
-                      <span className="text-heading font-semibold">
-                        {item.category}
-                      </span>
+                      <span className="text-heading font-semibold">{item.category}</span>
                       <Badge tone={statusTone(item.status)}>
                         {statusIcon(item.status)}
                         {item.status === "warning"
@@ -467,9 +569,7 @@ export default function TransactionsPage() {
                       </Badge>
                     </div>
 
-                    <p className="text-body text-[13.5px] leading-relaxed">
-                      {item.message}
-                    </p>
+                    <p className="text-body text-[13.5px] leading-relaxed">{item.message}</p>
 
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[12.5px] font-semibold tabular-nums text-muted">
                       <span>{rpShort(item.previous)}</span>
@@ -496,24 +596,19 @@ export default function TransactionsPage() {
         )}
       </Card>
 
-      {/* Charts */}
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.5fr]">
         <Card>
           <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
             Pengeluaran per Kategori
           </h2>
           <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
-            Total {rpShort(insight.expense)}
+            Total {rpShort(totalOut)}
           </p>
 
           {expenseCats.length > 0 ? (
             <>
               <div className="relative mx-auto h-[180px] w-full max-w-[220px]">
-                <DonutChart
-                  data={expenseCats}
-                  formatValue={(v) => rpShort(v)}
-                  innerRadius={54}
-                />
+                <DonutChart data={expenseCats} formatValue={(v) => rpShort(v)} innerRadius={54} />
               </div>
 
               <ul className="mt-4 space-y-2">
@@ -545,7 +640,7 @@ export default function TransactionsPage() {
             Arus Kas Bulanan
           </h2>
           <p className="text-muted mb-4 mt-0.5 text-[13.5px] font-medium">
-            {flow.length} bulan terakhir
+            {flow.length} bulan tercatat
           </p>
 
           <div className="mb-3 flex items-center gap-3 text-[12.5px] font-semibold">
@@ -563,17 +658,16 @@ export default function TransactionsPage() {
         </Card>
       </section>
 
-      {/* Filter + search */}
       <Card className="mb-5">
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 rounded-xl bg-surface-sunken p-1 dark:bg-white/[.04]">
             {(["all", "income", "expense"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTypeFilter(t)}
-                className={`rounded-lg px-3 py-1.5 text-[12.5px] font-semibold transition ${
+                className={`min-h-[38px] flex-1 rounded-lg px-3 py-1.5 text-[12.5px] font-bold transition ${
                   typeFilter === t
-                    ? "bg-ink text-white dark:bg-white dark:text-ink"
+                    ? "bg-white text-heading shadow-sm dark:bg-white/[.10] dark:text-white"
                     : "text-muted hover:text-heading"
                 }`}
               >
@@ -591,26 +685,31 @@ export default function TransactionsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari kategori atau catatan…"
-              className="text-heading w-full rounded-xl border border-black/[.07] bg-surface-sunken py-2.5 pl-9 pr-4 text-[14px] outline-none transition focus:border-amber focus:ring-2 focus:ring-amber/20 dark:border-white/10 dark:bg-white/5"
+              className="text-heading min-h-[44px] w-full rounded-xl border border-black/[.07] bg-surface-sunken py-2.5 pl-9 pr-4 text-[14px] outline-none transition focus:border-amber focus:ring-2 focus:ring-amber/20 dark:border-white/10 dark:bg-white/5"
             />
           </div>
         </div>
       </Card>
 
-      {/* Transactions list */}
       <Card>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-heading font-serif text-[18px] font-semibold">
-            {activeMonth ? monthLabel(activeMonth) : "Semua"}
-          </h2>
-          <span className="text-subtle text-[13px] font-medium">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-heading font-serif text-[18px] font-semibold">
+              {activeMonth ? monthLabel(activeMonth) : "Semua"}
+            </h2>
+            <p className="text-muted mt-0.5 text-[12.5px]">
+              Riwayat transaksi yang kamu catat.
+            </p>
+          </div>
+
+          <span className="shrink-0 rounded-full bg-surface-sunken px-3 py-1.5 text-[12px] font-bold text-muted dark:bg-white/[.05]">
             {filtered.length} transaksi
           </span>
         </div>
 
         {filtered.length === 0 ? (
           <div className="py-14 text-center">
-            <div className="mb-3 text-[22px] sm:text-[40px]">🧾</div>
+            <div className="mb-3 text-[34px]">🧾</div>
             <div className="text-heading mb-1 font-serif text-[17px] font-semibold">
               Belum ada transaksi
             </div>
@@ -622,56 +721,10 @@ export default function TransactionsPage() {
             </Button>
           </div>
         ) : (
-          <ul>
-            {filtered.map((t) => {
-              const inc = t.type === "income";
-
-              return (
-                <li
-                  key={t.id}
-                  className="flex items-center gap-3.5 border-b border-black/5 py-3 last:border-0 dark:border-white/5"
-                >
-                  <span
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[18px]"
-                    style={{
-                      background: inc
-                        ? "rgba(15,157,107,.12)"
-                        : `${catColor(t.category)}1f`,
-                    }}
-                  >
-                    {catEmoji(t.category)}
-                  </span>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-heading truncate text-[14.5px] font-semibold">
-                        {t.category}
-                      </span>
-                      <Badge tone={inc ? "green" : "red"}>
-                        {inc ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                        {inc ? "masuk" : "keluar"}
-                      </Badge>
-                    </div>
-                    <div className="text-subtle truncate text-[12.5px]">
-                      {t.note || "—"} · {t.date}
-                    </div>
-                  </div>
-
-                  <span
-                    className={`shrink-0 font-serif text-[15px] font-bold tabular-nums ${
-                      inc
-                        ? "text-pos-strong dark:text-pos-dark"
-                        : "text-neg-strong dark:text-neg-dark"
-                    }`}
-                  >
-                    {inc ? "+" : "−"}
-                    {rpShort(t.amount)}
-                  </span>
-
-                  <RowActions onEdit={() => openEdit(t)} onDelete={() => setDeleteId(t.id)} />
-                </li>
-              );
-            })}
+          <ul className="space-y-2.5">
+            {filtered.map((t) => (
+              <TransactionItem key={t.id} tx={t} onEdit={openEdit} onDelete={setDeleteId} />
+            ))}
           </ul>
         )}
       </Card>
