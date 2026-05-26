@@ -243,14 +243,24 @@ export const otherAssets: OtherAsset[] = [
 import type { Transaction } from "@/types";
 
 export const expenseCategories = [
+  // Pengeluaran harian
   { name: "Makan & Minum", color: "#6366f1", emoji: "🍜" },
   { name: "Transport", color: "#0ea5e9", emoji: "🚌" },
   { name: "Tagihan", color: "#f59425", emoji: "🧾" },
   { name: "Hiburan", color: "#0f9d6b", emoji: "🎬" },
   { name: "Belanja", color: "#d83a3a", emoji: "🛍️" },
   { name: "Kesehatan", color: "#a855f7", emoji: "💊" },
+
+  // Alokasi finansial
+  { name: "Tabungan", color: "#92d05d", emoji: "🏦" },
+  { name: "Dana Darurat", color: "#16a34a", emoji: "🛡️" },
+  { name: "Investasi Saham", color: "#071e49", emoji: "📈" },
+  { name: "Investasi Emas", color: "#f5b041", emoji: "🟡" },
+  { name: "Dana Pensiun", color: "#22c55e", emoji: "🌿" },
+
+  // Fallback
   { name: "Lainnya", color: "#64748b", emoji: "📦" },
-];
+];;
 
 export const incomeCategories = [
   { name: "Gaji", color: "#0f9d6b", emoji: "💼" },
