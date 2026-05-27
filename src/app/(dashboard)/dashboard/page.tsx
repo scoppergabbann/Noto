@@ -15,6 +15,11 @@ import { useTransactionsStore } from "@/lib/stores";
 import { progressPct, healthScore, stockMarketValue  } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
+import {
+  generateCurrentMonthNetWorthSnapshot,
+  generateNetWorthSnapshotsFromCashMovements,
+  getNetWorthSnapshots,
+} from '@/lib/actions/net-worth-snapshot'
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TABLES = {
@@ -227,67 +232,6 @@ function getTodayLabel() {
   }).format(new Date());
 }
 
-function getSnapshotStorageKey(userId: string) {
-  return `noto-net-worth-snapshots:${userId}`;
-}
-
-function readSnapshots(userId: string): NetWorthChartPoint[] {
-  if (typeof window === "undefined") return [];
-
-  try {
-    const raw = window.localStorage.getItem(getSnapshotStorageKey(userId));
-    if (!raw) return [];
-
-    const parsed = JSON.parse(raw);
-
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed
-      .filter(
-        (item) =>
-          typeof item?.month === "string" &&
-          typeof item?.asset === "number" &&
-          typeof item?.liability === "number"
-      )
-      .slice(-24);
-  } catch {
-    return [];
-  }
-}
-
-function saveSnapshots(userId: string, snapshots: NetWorthChartPoint[]) {
-  if (typeof window === "undefined") return;
-
-  window.localStorage.setItem(
-    getSnapshotStorageKey(userId),
-    JSON.stringify(snapshots.slice(-24))
-  );
-}
-
-function upsertMonthSnapshot({
-  userId,
-  month,
-  asset,
-  liability,
-}: {
-  userId: string;
-  month: string;
-  asset: number;
-  liability: number;
-}) {
-  const existing = readSnapshots(userId);
-  const nextPoint = { month, asset, liability };
-
-  const next = existing.some((item) => item.month === month)
-    ? existing.map((item) => (item.month === month ? nextPoint : item))
-    : [...existing, nextPoint];
-
-  const sorted = next.sort((a, b) => a.month.localeCompare(b.month));
-  saveSnapshots(userId, sorted);
-
-  return sorted;
-}
-
 async function selectUserRows(table: string, userId: string) {
   const supabase = createClient();
 
@@ -312,7 +256,24 @@ export default function DashboardPage() {
   const [txOpen, setTxOpen] = useState(false);
   const [netWorthSeries, setNetWorthSeries] = useState<NetWorthChartPoint[]>([]);
 
+  const loadNetWorthSnapshots = useCallback(async () => {
+  try {
+    await generateNetWorthSnapshotsFromCashMovements();
+    await generateCurrentMonthNetWorthSnapshot();
+
+    const snapshots = await getNetWorthSnapshots();
+
+    setNetWorthSeries(snapshots);
+  } catch (error) {
+    console.error("[dashboard] gagal load net worth snapshots:", error);
+  }
+}, []);
+
+  
+
   const realtimeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+
 
   const loadDashboardData = useCallback(
     async (currentUserId?: string) => {
@@ -391,9 +352,9 @@ export default function DashboardPage() {
 
       setUserName(String(name).split(" ")[0]);
       setUserId(user.id);
-      setNetWorthSeries(readSnapshots(user.id));
 
       await loadDashboardData(user.id);
+      await loadNetWorthSnapshots();
     }
 
     init();
@@ -493,29 +454,11 @@ export default function DashboardPage() {
 
   const debtRatio = totalAsset > 0 ? Math.round((totalDebt / totalAsset) * 100) : 0;
 
-  const latestTransactionMonth = [...transactions]
-    .map((tx) => getMonthKey(tx.date))
-    .filter(Boolean)
-    .sort()
-    .at(-1);
+ useEffect(() => {
+  if (!userId || loading) return;
 
-  const activeSnapshotMonth =
-    latestTransactionMonth ??
-    getMonthKey(new Date().toISOString()) ??
-    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
-
-  useEffect(() => {
-    if (!userId || loading) return;
-
-    const next = upsertMonthSnapshot({
-      userId,
-      month: activeSnapshotMonth,
-      asset: totalAsset,
-      liability: totalDebt,
-    });
-
-    setNetWorthSeries(next);
-  }, [activeSnapshotMonth, loading, totalAsset, totalDebt, userId]);
+  loadNetWorthSnapshots();
+}, [userId, loading, totalAsset, totalDebt, loadNetWorthSnapshots]);
 
   const visibleNetWorthSeries = netWorthSeries.map((point) => ({
     ...point,

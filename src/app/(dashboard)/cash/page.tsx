@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { RowActions } from "@/components/ui/RowActions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { CashMovementForm } from "@/components/forms/CashMovementForm";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 import { GoalForm, type GoalDraft } from "./GoalForm";
 import { TransferForm, type TransferDraft } from "./TransferForm";
@@ -19,7 +20,7 @@ import { rpShort } from "@/lib/format";
 import type { Goal } from "@/types";
 
 // Tab: "goals" | "history"
-type Tab = "goals" | "history";
+type Tab = "goals" | "movements" | "history";
 
 export default function CashPage() {
   const { items, loading, error, fetch, add, update, remove } = useGoalsStore();
@@ -30,6 +31,7 @@ export default function CashPage() {
   const [tab, setTab] = useState<Tab>("goals");
   const [formOpen, setFormOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
+  const [cashMovementOpen, setCashMovementOpen] = useState(false);
   const [editing, setEditing] = useState<Goal | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -104,6 +106,18 @@ useEffect(() => {
         }
         action={
           <div className="flex items-center gap-2">
+            {goals.length > 0 && (
+              <Button
+                variant="secondary"
+                onClick={() => setCashMovementOpen(true)}
+                aria-label="Tambah atau tarik dana"
+              >
+                <Plus size={16} strokeWidth={2.2} />
+                <span className="hidden sm:inline">Tambah Dana</span>
+                <span className="sm:hidden">Dana</span>
+              </Button>
+            )}
+
             {goals.length >= 2 && (
               <Button
                 variant="secondary"
@@ -114,6 +128,7 @@ useEffect(() => {
                 <span className="hidden sm:inline">Transfer</span>
               </Button>
             )}
+
             <Button onClick={openNew}>
               <Plus size={17} strokeWidth={2.4} />
               <span className="hidden sm:inline">Tambah goal</span>
@@ -148,7 +163,7 @@ useEffect(() => {
 
       {/* Tab switcher */}
       <div className="mb-4 flex gap-1 rounded-xl bg-surface-sunken p-1 dark:bg-white/5">
-        {(["goals", "history"] as Tab[]).map((t) => (
+        {(["goals", "movements", "history"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -162,7 +177,12 @@ useEffect(() => {
               <>
                 Goals <Badge tone="indigo">{goals.length}</Badge>
               </>
-            ) : (
+            )  : t === "movements" ? (
+              <>
+                <Plus size={15} className="shrink-0" aria-hidden="true" />
+                Mutasi Dana
+              </>
+            )  : (
               <>
                 <Clock size={15} className="shrink-0" aria-hidden="true" />
                 Riwayat Transfer <Badge tone="indigo">{transfers.length}</Badge>
@@ -274,6 +294,48 @@ useEffect(() => {
         </>
       )}
 
+      {/* ---- Tab: Mutasi Dana ---- */}
+      {tab === "movements" && (
+        <Card>
+          <div className="mb-5">
+            <h2 className="text-heading font-serif text-[18px] font-semibold">
+              Mutasi Dana
+            </h2>
+            <p className="text-muted mt-1 text-[13.5px] leading-relaxed">
+              Catat uang masuk atau keluar dari goal agar histori cash terbaca per bulan.
+            </p>
+          </div>
+
+          {goals.length === 0 ? (
+            <div className="py-10 text-center sm:py-14">
+              <div className="mb-3 text-[40px]" aria-hidden="true">
+                🎯
+              </div>
+              <div className="text-heading mb-1 font-serif text-[18px] font-semibold">
+                Belum ada goal
+              </div>
+              <div className="text-muted mx-auto mb-5 max-w-xs text-[14px]">
+                Buat goal terlebih dahulu sebelum menambahkan mutasi dana.
+              </div>
+              <Button onClick={openNew} className="mx-auto">
+                <Plus size={17} strokeWidth={2.4} /> Tambah goal
+              </Button>
+            </div>
+          ) : (
+            <CashMovementForm
+              goals={goals.map((goal) => ({
+                id: goal.id,
+                item: goal.item,
+              }))}
+              onSuccess={async () => {
+                await fetch();
+                setCashMovementOpen(false);
+              }}
+            />
+          )}
+        </Card>
+      )}
+
       {/* ---- Tab: Riwayat Transfer ---- */}
       {tab === "history" && (
         <Card>
@@ -370,6 +432,42 @@ useEffect(() => {
         goals={goals}
         loading={loading}
       />
+
+      {cashMovementOpen && (
+      <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 px-4 backdrop-blur-sm">
+        <div className="w-full max-w-lg rounded-3xl bg-white p-4 shadow-softlg dark:bg-night-raised">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-heading font-serif text-[18px] font-semibold">
+                Tambah / Tarik Dana
+              </h2>
+              <p className="text-muted mt-1 text-[13px]">
+                Catat dana masuk atau keluar dari goal.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCashMovementOpen(false)}
+              className="rounded-xl px-3 py-1.5 text-[13px] font-bold text-muted transition hover:bg-surface-sunken hover:text-heading"
+            >
+              Tutup
+            </button>
+          </div>
+
+          <CashMovementForm
+            goals={goals.map((goal) => ({
+              id: goal.id,
+              item: goal.item,
+            }))}
+            onSuccess={async () => {
+              await fetch();
+              setCashMovementOpen(false);
+            }}
+          />
+        </div>
+      </div>
+    )}
 
       <ConfirmDialog
         open={!!deleteId}
