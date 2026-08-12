@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Plus, TrendingUp, AlertCircle, CheckCircle, Trash2, Save } from "lucide-react";
+import { Plus, TrendingUp, AlertCircle, CheckCircle, Pencil, Trash2, Save } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -60,6 +60,12 @@ const DEFAULT_PLAN: Omit<RetirementPlan, "id"> = {
   notes: "",
 };
 
+function toPlanDraft(plan: RetirementPlan): Omit<RetirementPlan, "id"> {
+  const { id: _id, ...rest } = plan;
+  void _id;
+  return rest;
+}
+
 // ---- Helper: save status toast ----
 function SaveStatus({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
   if (status === "idle") return null;
@@ -99,6 +105,7 @@ export default function RetirementPage() {
     error: fundsError,
     fetch: fetchFunds,
     add: addFund,
+    update: updateFund,
     remove: removeFund,
   } = useRetirementFundsStore();
 
@@ -113,6 +120,7 @@ export default function RetirementPage() {
 
   // ---- Fund form ----
   const [addingFund, setAddingFund] = useState(false);
+  const [editingFundId, setEditingFundId] = useState<string | null>(null);
   const [deleteFundId, setDeleteFundId] = useState<string | null>(null);
   const [fundDraft, setFundDraft] = useState<Omit<RetirementFund, "id">>({
     planId: "",
@@ -123,6 +131,19 @@ export default function RetirementPage() {
     notes: "",
   });
 
+  function resetFundForm() {
+    setFundDraft({
+      planId: "",
+      name: "",
+      type: "savings",
+      currentValue: 0,
+      monthlyContribution: 0,
+      notes: "",
+    });
+    setEditingFundId(null);
+    setAddingFund(false);
+  }
+
   useEffect(() => {
   fetchPlans();
   fetchFunds();
@@ -130,20 +151,12 @@ export default function RetirementPage() {
 
   // ---- Sync store → local form (hanya sekali saat data datang) ----
   const storedPlan = plans[0] ?? null;
-
-  useEffect(() => {
-    if (storedPlan && !isDirty) {
-      // Ada data dari Supabase → pakai data user
-      const { id: _id, ...rest } = storedPlan;
-      void _id;
-      setLocalPlan(rest);
-    }
-    // Kalau belum ada plan dan !isDirty, biarkan DEFAULT_PLAN tampil
-  }, [storedPlan, isDirty]);
+  const storedPlanDraft = storedPlan ? toPlanDraft(storedPlan) : DEFAULT_PLAN;
+  const lp = isDirty ? localPlan : storedPlanDraft;
 
   // ---- Handler perubahan parameter ----
   function handleChange(patch: Partial<Omit<RetirementPlan, "id">>) {
-    setLocalPlan((prev) => ({ ...prev, ...patch }));
+    setLocalPlan((prev) => ({ ...(isDirty ? prev : lp), ...patch }));
     setIsDirty(true);
   }
 
@@ -168,8 +181,8 @@ export default function RetirementPage() {
     }
   }, [storedPlan, localPlan, updatePlan, addPlan, fetchPlans]);
 
-  // ---- Add fund ----
-  async function handleAddFund() {
+  // ---- Add / edit fund ----
+  async function handleSaveFund() {
     if (!fundDraft.name.trim()) return;
     const planId = storedPlan?.id ?? "";
     if (!planId) {
@@ -177,17 +190,36 @@ export default function RetirementPage() {
       await handleSave();
       return;
     }
-    await addFund({ ...fundDraft, planId });
+
+    if (editingFundId) {
+      await updateFund(editingFundId, { ...fundDraft, planId });
+    } else {
+      await addFund({ ...fundDraft, planId });
+    }
+
     await fetchFunds();
+    resetFundForm();
+  }
+
+  function openNewFundForm() {
+    setEditingFundId(null);
     setFundDraft({
-      planId: "",
+      planId: storedPlan?.id ?? "",
       name: "",
       type: "savings",
       currentValue: 0,
       monthlyContribution: 0,
       notes: "",
     });
-    setAddingFund(false);
+    setAddingFund(true);
+  }
+
+  function openEditFundForm(fund: RetirementFund) {
+    const { id: _id, ...draft } = fund;
+    void _id;
+    setEditingFundId(fund.id);
+    setFundDraft(draft);
+    setAddingFund(true);
   }
 
   // ---- Linked assets (dari store lain) ----
@@ -207,7 +239,6 @@ export default function RetirementPage() {
   const monthlyContribTotal = planFunds.reduce((s, f) => s + f.monthlyContribution, 0);
   const totalCurrentSavings = manualTotal + linkedAssets.total;
 
-  const lp = localPlan; // alias untuk keterbacaan
   const yearsToRetirement = Math.max(0, lp.retirementAge - lp.currentAge);
 
   const target = useMemo(
@@ -222,10 +253,11 @@ export default function RetirementPage() {
     [lp, yearsToRetirement]
   );
 
-  const projected = useMemo(
-    () =>
-      projectedFund(totalCurrentSavings, monthlyContribTotal, yearsToRetirement, lp.expectedReturn),
-    [totalCurrentSavings, monthlyContribTotal, yearsToRetirement, lp.expectedReturn]
+  const projected = projectedFund(
+    totalCurrentSavings,
+    monthlyContribTotal,
+    yearsToRetirement,
+    lp.expectedReturn
   );
 
   const gap = fundGap(target, projected);
@@ -513,7 +545,7 @@ export default function RetirementPage() {
               <h2 className="text-heading font-serif text-[18px] font-semibold">
                 Sumber Dana Pensiun
               </h2>
-              <Button size="sm" onClick={() => setAddingFund(true)} disabled={addingFund}>
+              <Button size="sm" onClick={openNewFundForm} disabled={addingFund}>
                 <Plus size={15} strokeWidth={2.5} /> Tambah
               </Button>
             </div>
@@ -526,7 +558,9 @@ export default function RetirementPage() {
                     Simpan parameter dulu sebelum tambah sumber dana.
                   </p>
                 )}
-                <div className="text-heading mb-3 text-[13px] font-bold">Sumber Dana Baru</div>
+                <div className="text-heading mb-3 text-[13px] font-bold">
+                  {editingFundId ? "Edit Sumber Dana" : "Sumber Dana Baru"}
+                </div>
                 <div className="flex flex-col gap-3">
                   <Input
                     label="Nama"
@@ -559,12 +593,12 @@ export default function RetirementPage() {
                     onChange={(v) => setFundDraft({ ...fundDraft, monthlyContribution: v })}
                   />
                   <div className="grid grid-cols-2 gap-2">
-                    <Button onClick={handleAddFund} className="w-full">
-                      Simpan
+                    <Button onClick={handleSaveFund} className="w-full">
+                      {editingFundId ? "Update" : "Simpan"}
                     </Button>
                     <Button
                       variant="secondary"
-                      onClick={() => setAddingFund(false)}
+                      onClick={resetFundForm}
                       className="w-full"
                     >
                       Batal
@@ -609,6 +643,13 @@ export default function RetirementPage() {
                         {rpShort(f.currentValue)}
                       </div>
                     </div>
+                    <button
+                      onClick={() => openEditFundForm(f)}
+                      aria-label={`Edit ${f.name}`}
+                      className="grid h-11 w-11 shrink-0 touch-manipulation place-items-center rounded-xl text-ink-faint transition hover:bg-black/[.05] hover:text-ink dark:hover:bg-white/10 dark:hover:text-slate-100"
+                    >
+                      <Pencil size={16} />
+                    </button>
                     <button
                       onClick={() => setDeleteFundId(f.id)}
                       aria-label={`Hapus ${f.name}`}
