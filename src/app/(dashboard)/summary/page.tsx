@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Wallet,
   Landmark,
@@ -10,14 +10,17 @@ import {
   TrendingUp,
   Briefcase,
   PiggyBank,
-  Scale,
   Activity,
   AlertCircle,
   CheckCircle,
+  Info,
+  Scale,
+  type LucideIcon,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
+import { Select } from "@/components/ui/Select";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
 import {
@@ -56,6 +59,69 @@ function pct(value: number, total: number) {
   return Math.round((value / total) * 100);
 }
 
+function FormulaHint({ formula }: { formula: string }) {
+  return (
+    <span className="group/formula relative inline-flex">
+      <Info className="text-subtle" size={15} strokeWidth={2.4} />
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute right-0 top-6 z-50 w-[240px] rounded-xl border border-white/10 bg-ink/95 px-3 py-2 text-left text-[12px] font-semibold leading-relaxed text-white opacity-0 shadow-softlg backdrop-blur transition group-hover/formula:opacity-100 dark:bg-white/95 dark:text-ink"
+      >
+        <span className="mb-0.5 block text-[11px] uppercase tracking-[.08em] opacity-70">
+          Rumus
+        </span>
+        {formula}
+      </span>
+    </span>
+  );
+}
+
+function AuditMetricCard({
+  label,
+  value,
+  formula,
+  icon: Icon,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  formula: string;
+  icon: LucideIcon;
+  tone?: "neutral" | "green" | "red" | "amber" | "purple";
+}) {
+  const toneClass =
+    tone === "green"
+      ? "text-pos-strong dark:text-pos-dark"
+      : tone === "red"
+        ? "text-neg-strong dark:text-neg-dark"
+        : tone === "amber"
+          ? "text-amber-text dark:text-amber"
+          : tone === "purple"
+            ? "text-purple-500 dark:text-purple-300"
+            : "text-heading";
+
+  return (
+    <Card hoverable>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-muted text-[13px] font-semibold">{label}</div>
+          <div
+            className={`mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px] ${toneClass}`}
+          >
+            {value}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <FormulaHint formula={formula} />
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-soft text-amber-text dark:bg-amber/15 dark:text-amber">
+            <Icon size={17} strokeWidth={2.3} />
+          </span>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function SummaryPage() {
   const goalsStore = useGoalsStore();
   const receivablesStore = useReceivablesStore();
@@ -66,27 +132,38 @@ export default function SummaryPage() {
   const assetsStore = useAssetsStore();
   const retirementFundsStore = useRetirementFundsStore();
   const transactionsStore = useTransactionsStore();
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+
+  const fetchGoals = goalsStore.fetch;
+  const fetchReceivables = receivablesStore.fetch;
+  const fetchDebts = debtsStore.fetch;
+  const fetchCards = cardsStore.fetch;
+  const fetchGold = goldStore.fetch;
+  const fetchStocks = stocksStore.fetch;
+  const fetchAssets = assetsStore.fetch;
+  const fetchRetirementFunds = retirementFundsStore.fetch;
+  const fetchTransactions = transactionsStore.fetch;
 
   useEffect(() => {
-    goalsStore.fetch();
-    receivablesStore.fetch();
-    debtsStore.fetch();
-    cardsStore.fetch();
-    goldStore.fetch();
-    stocksStore.fetch();
-    assetsStore.fetch();
-    retirementFundsStore.fetch();
-    transactionsStore.fetch();
+    fetchGoals();
+    fetchReceivables();
+    fetchDebts();
+    fetchCards();
+    fetchGold();
+    fetchStocks();
+    fetchAssets();
+    fetchRetirementFunds();
+    fetchTransactions();
   }, [
-    goalsStore.fetch,
-    receivablesStore.fetch,
-    debtsStore.fetch,
-    cardsStore.fetch,
-    goldStore.fetch,
-    stocksStore.fetch,
-    assetsStore.fetch,
-    retirementFundsStore.fetch,
-    transactionsStore.fetch,
+    fetchGoals,
+    fetchReceivables,
+    fetchDebts,
+    fetchCards,
+    fetchGold,
+    fetchStocks,
+    fetchAssets,
+    fetchRetirementFunds,
+    fetchTransactions,
   ]);
 
   const loading =
@@ -112,15 +189,15 @@ export default function SummaryPage() {
     transactionsStore.error;
 
   const retryAll = () => {
-    goalsStore.fetch();
-    receivablesStore.fetch();
-    debtsStore.fetch();
-    cardsStore.fetch();
-    goldStore.fetch();
-    stocksStore.fetch();
-    assetsStore.fetch();
-    retirementFundsStore.fetch();
-    transactionsStore.fetch();
+    fetchGoals();
+    fetchReceivables();
+    fetchDebts();
+    fetchCards();
+    fetchGold();
+    fetchStocks();
+    fetchAssets();
+    fetchRetirementFunds();
+    fetchTransactions();
   };
 
   const summary = useMemo(() => {
@@ -177,15 +254,22 @@ export default function SummaryPage() {
 
     const totalLiabilities = debtValue + creditCardValue;
     const netWorth = totalAssets - totalLiabilities;
+    const investmentValue = stockValue + goldValue + pensionValue;
+    const liquidInvestmentValue = cashValue + investmentValue;
+    const debtRatio = totalAssets > 0 ? Math.round((totalLiabilities / totalAssets) * 100) : 0;
+    const productiveAssetRatio =
+      totalAssets > 0 ? Math.round((investmentValue / totalAssets) * 100) : 0;
+    const receivableRatio =
+      totalAssets > 0 ? Math.round((receivableValue / totalAssets) * 100) : 0;
 
     const assetBreakdown = [
-      { name: "Tabungan", value: cashValue, color: COLORS.cash },
+      { name: "Cash", value: cashValue, color: COLORS.cash },
+      { name: "Investasi", value: investmentValue, color: COLORS.pension },
       { name: "Piutang", value: receivableValue, color: COLORS.receivable },
-      { name: "Saham", value: stockValue, color: COLORS.stock },
-      { name: "Emas", value: goldValue, color: COLORS.gold },
-      { name: "Pensiun", value: pensionValue, color: COLORS.pension },
       { name: "Aset Lainnya", value: otherAssetValue, color: COLORS.other },
-    ].filter((x) => x.value > 0);
+    ]
+      .filter((x) => x.value > 0)
+      .sort((a, b) => b.value - a.value);
 
     const liabilityBreakdown = [
       { name: "Utang & Cicilan", value: debtValue, color: COLORS.debt },
@@ -201,6 +285,11 @@ export default function SummaryPage() {
       stockValue,
       otherAssetValue,
       pensionValue,
+      investmentValue,
+      liquidInvestmentValue,
+      debtRatio,
+      productiveAssetRatio,
+      receivableRatio,
       totalAssets,
       totalLiabilities,
       netWorth,
@@ -220,7 +309,7 @@ export default function SummaryPage() {
 
   const cashflow = useMemo(() => {
     const months = availableMonths(transactionsStore.items);
-    const activeMonth = months[months.length - 1] || "";
+    const activeMonth = selectedMonth ?? months[months.length - 1] ?? "";
     const monthTx = activeMonth ? txInMonth(transactionsStore.items, activeMonth) : [];
 
     const income = sumByType(monthTx, "income");
@@ -235,7 +324,12 @@ export default function SummaryPage() {
       saved,
       savingsRate,
     };
-  }, [transactionsStore.items]);
+  }, [selectedMonth, transactionsStore.items]);
+
+  const availableCashflowMonths = useMemo(
+    () => availableMonths(transactionsStore.items),
+    [transactionsStore.items]
+  );
 
   const health = useMemo(() => {
     const { totalAssets, totalLiabilities, netWorth } = summary;
@@ -342,12 +436,9 @@ export default function SummaryPage() {
     },
   ];
 
-  const months = availableMonths(transactionsStore.items);
-  const activeMonth = months[months.length - 1] || "";
-
-  const monthTx = activeMonth
-  ? txInMonth(transactionsStore.items, activeMonth)
-  : [];
+  const monthTx = cashflow.activeMonth
+    ? txInMonth(transactionsStore.items, cashflow.activeMonth)
+    : [];
 
   if (loading) return <LoadingState label="Memuat ringkasan finansial…" />;
   if (error) return <ErrorState message={error} onRetry={retryAll} />;
@@ -364,44 +455,62 @@ export default function SummaryPage() {
       />
 
       {/* Top summary */}
-      <section className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Kekayaan Bersih</div>
-          <div
-            className={`mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px] ${
-              summary.netWorth >= 0
-                ? "text-pos-strong dark:text-pos-dark"
-                : "text-neg-strong dark:text-neg-dark"
-            }`}
-          >
-            {summary.netWorth >= 0 ? "" : "-"}
-            {rpShort(Math.abs(summary.netWorth))}
-          </div>
-        </Card>
+      <section className="stagger mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <AuditMetricCard
+          label="Kekayaan Bersih"
+          value={`${summary.netWorth >= 0 ? "" : "-"}${rpShort(Math.abs(summary.netWorth))}`}
+          icon={Wallet}
+          tone={summary.netWorth >= 0 ? "green" : "red"}
+          formula="Total aset - total kewajiban."
+        />
 
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Total Aset</div>
-          <div className="text-heading mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px]">
-            {rpShort(summary.totalAssets)}
-          </div>
-        </Card>
+        <AuditMetricCard
+          label="Likuid + Investasi"
+          value={rpShort(summary.liquidInvestmentValue)}
+          icon={PiggyBank}
+          tone="green"
+          formula="Cash/tabungan + saham + emas + dana pensiun."
+        />
 
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Total Kewajiban</div>
-          <div className="mt-2 font-serif text-[22px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[28px]">
-            {rpShort(summary.totalLiabilities)}
-          </div>
-        </Card>
+        <AuditMetricCard
+          label="Total Kewajiban"
+          value={rpShort(summary.totalLiabilities)}
+          icon={Landmark}
+          tone={summary.totalLiabilities > 0 ? "red" : "green"}
+          formula="Sisa utang/cicilan + tagihan kartu kredit belum dibayar."
+        />
 
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Financial Health</div>
-          <div className="text-heading mt-2 font-serif text-[22px] font-semibold sm:text-[28px]">
-            {health.label}
-          </div>
-          <div className="mt-2">
-            <Badge tone={health.tone}>{health.label}</Badge>
-          </div>
-        </Card>
+        <AuditMetricCard
+          label="Debt Ratio"
+          value={`${summary.debtRatio}%`}
+          icon={Activity}
+          tone={summary.debtRatio <= 35 ? "green" : summary.debtRatio <= 50 ? "amber" : "red"}
+          formula="Total kewajiban / total aset x 100%."
+        />
+      </section>
+
+      <section className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <AuditMetricCard
+          label="Aset Produktif"
+          value={`${summary.productiveAssetRatio}%`}
+          icon={TrendingUp}
+          tone="purple"
+          formula="Saham + emas + dana pensiun, dibandingkan total aset."
+        />
+        <AuditMetricCard
+          label="Piutang"
+          value={`${rpShort(summary.receivableValue)} (${summary.receivableRatio}%)`}
+          icon={HandCoins}
+          tone="amber"
+          formula="Total piutang yang belum dibayar. Dipisah karena belum tentu likuid."
+        />
+        <AuditMetricCard
+          label="Savings Rate"
+          value={`${cashflow.savingsRate}%`}
+          icon={Scale}
+          tone={cashflow.savingsRate >= 20 ? "green" : cashflow.savingsRate >= 0 ? "amber" : "red"}
+          formula="Ditabung / pemasukan bulan terpilih x 100%."
+        />
       </section>
 
       {/* Insight banner */}
@@ -510,7 +619,7 @@ export default function SummaryPage() {
       </section>
 
       {/* Alur Cashflow */}
-        <Card className="mb-5">
+      <Card className="mb-5">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
@@ -520,6 +629,20 @@ export default function SummaryPage() {
               Dari pemasukan, tabungan, sampai pengeluaran per kategori.
             </p>
           </div>
+          {availableCashflowMonths.length > 0 && (
+            <Select
+              aria-label="Pilih bulan cashflow"
+              className="min-h-10 w-[150px] py-2 text-[13.5px]"
+              value={cashflow.activeMonth}
+              onChange={(event) => setSelectedMonth(event.target.value)}
+            >
+              {availableCashflowMonths.map((month) => (
+                <option key={month} value={month}>
+                  {monthLabel(month)}
+                </option>
+              ))}
+            </Select>
+          )}
         </div>
 
         <CashFlowSankey transactions={monthTx} />
