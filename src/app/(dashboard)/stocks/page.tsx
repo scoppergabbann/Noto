@@ -29,6 +29,9 @@ import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { CurrencyInput } from "@/components/ui/CurrencyInput";
+import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
 import { RowActions } from "@/components/ui/RowActions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -72,6 +75,22 @@ type AggregatedStockHolding = StockHolding & {
   quoteChangePercent: number | null;
 };
 
+type ProfitLossCalculatorDraft = {
+  buyPrice: number;
+  sellPrice: number;
+  lots: number;
+  buyFeePct: number;
+  sellFeePct: number;
+};
+
+const DEFAULT_CALCULATOR: ProfitLossCalculatorDraft = {
+  buyPrice: 0,
+  sellPrice: 0,
+  lots: 1,
+  buyFeePct: 0.15,
+  sellFeePct: 0.15,
+};
+
 function round1(n: number) {
   if (!Number.isFinite(n)) return 0;
   return Math.round(n * 10) / 10;
@@ -79,6 +98,36 @@ function round1(n: number) {
 
 function formatPrice(n: number) {
   return `Rp${Math.round(Number(n || 0)).toLocaleString("id-ID")}`;
+}
+
+function formatPercent(n: number) {
+  if (!Number.isFinite(n)) return "0%";
+  return `${round1(n).toLocaleString("id-ID")}%`;
+}
+
+function calculateStockTradePL(draft: ProfitLossCalculatorDraft) {
+  const lots = Math.max(0, Number(draft.lots || 0));
+  const shares = lots * 100;
+  const buyGross = Math.max(0, Number(draft.buyPrice || 0)) * shares;
+  const sellGross = Math.max(0, Number(draft.sellPrice || 0)) * shares;
+  const buyFee = buyGross * (Math.max(0, Number(draft.buyFeePct || 0)) / 100);
+  const sellFee = sellGross * (Math.max(0, Number(draft.sellFeePct || 0)) / 100);
+  const buyTotal = buyGross + buyFee;
+  const sellNet = sellGross - sellFee;
+  const profitLoss = sellNet - buyTotal;
+  const profitLossPct = buyTotal > 0 ? (profitLoss / buyTotal) * 100 : 0;
+
+  return {
+    shares,
+    buyGross,
+    sellGross,
+    buyFee,
+    sellFee,
+    buyTotal,
+    sellNet,
+    profitLoss,
+    profitLossPct,
+  };
 }
 
 function formatMarketTime(timestamp: number | null) {
@@ -547,6 +596,145 @@ function PositionHistory({
   );
 }
 
+function StockProfitLossCalculatorModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const [draft, setDraft] = useState<ProfitLossCalculatorDraft>(DEFAULT_CALCULATOR);
+  const result = calculateStockTradePL(draft);
+  const isProfit = result.profitLoss >= 0;
+
+  function patch(next: Partial<ProfitLossCalculatorDraft>) {
+    setDraft((prev) => ({ ...prev, ...next }));
+  }
+
+  function reset() {
+    setDraft(DEFAULT_CALCULATOR);
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Kalkulator Keuntungan/Rugi Saham"
+      size="lg"
+      footer={
+        <>
+          <Button variant="secondary" onClick={reset}>
+            Reset
+          </Button>
+          <Button onClick={onClose}>Selesai</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <CurrencyInput
+            label="Harga beli / lembar"
+            value={draft.buyPrice}
+            onChange={(value) => patch({ buyPrice: value })}
+          />
+          <CurrencyInput
+            label="Harga jual / lembar"
+            value={draft.sellPrice}
+            onChange={(value) => patch({ sellPrice: value })}
+          />
+          <Input
+            label="Lot"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            value={draft.lots || ""}
+            onChange={(event) => patch({ lots: Number(event.target.value) })}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Fee beli (%)"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.01"
+              value={draft.buyFeePct}
+              onChange={(event) => patch({ buyFeePct: Number(event.target.value) })}
+            />
+            <Input
+              label="Fee jual (%)"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.01"
+              value={draft.sellFeePct}
+              onChange={(event) => patch({ sellFeePct: Number(event.target.value) })}
+            />
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-black/[.06] bg-surface-sunken p-3.5 dark:border-white/10 dark:bg-white/5">
+          <div className="text-subtle mb-3 text-[12px] font-bold uppercase tracking-wide">
+            Rumus
+          </div>
+          <p className="text-body text-[13.5px] leading-relaxed">
+            P/L = [(Harga Jual x Lot x 100) - Fee Jual] - [(Harga Beli x Lot x
+            100) + Fee Beli].
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          {[
+            ["Jumlah lembar", `${result.shares.toLocaleString("id-ID")} lembar`],
+            ["Nilai beli bruto", formatPrice(result.buyGross)],
+            ["Fee beli", formatPrice(result.buyFee)],
+            ["Total modal beli", formatPrice(result.buyTotal)],
+            ["Nilai jual bruto", formatPrice(result.sellGross)],
+            ["Fee jual", formatPrice(result.sellFee)],
+            ["Hasil jual bersih", formatPrice(result.sellNet)],
+            ["P/L %", formatPercent(result.profitLossPct)],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-xl bg-surface-sunken p-3 dark:bg-white/5">
+              <div className="text-subtle text-[12px] font-semibold">{label}</div>
+              <div className="text-heading mt-0.5 font-serif text-[15px] font-semibold tabular-nums">
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={[
+            "rounded-2xl border p-4",
+            isProfit
+              ? "border-pos/15 bg-pos-soft/60 dark:bg-pos/[0.08]"
+              : "border-neg/15 bg-neg-soft/60 dark:bg-neg/[0.08]",
+          ].join(" ")}
+        >
+          <div className="text-subtle text-[12px] font-bold uppercase tracking-wide">
+            Hasil Profit / Loss
+          </div>
+          <div
+            className={[
+              "mt-1 font-serif text-[28px] font-semibold tabular-nums",
+              isProfit
+                ? "text-pos-strong dark:text-pos-dark"
+                : "text-neg-strong dark:text-neg-dark",
+            ].join(" ")}
+          >
+            {isProfit ? "+" : ""}
+            {formatPrice(result.profitLoss)}
+          </div>
+          <p className="text-body mt-1 text-[13.5px] leading-relaxed">
+            {isProfit
+              ? "Hasil positif berarti transaksi ini menghasilkan keuntungan."
+              : "Hasil negatif berarti transaksi ini menghasilkan kerugian."}
+          </p>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export default function StocksPage() {
   const {
   items,
@@ -559,6 +747,7 @@ export default function StocksPage() {
 } = useStocksStore();
 
   const [formOpen, setFormOpen] = useState(false);
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [editing, setEditing] = useState<StockHolding | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -794,9 +983,14 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
           </>
         }
         action={
-          <Button onClick={openNew}>
-            <Plus size={17} strokeWidth={2.5} /> Tambah saham
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" onClick={() => setCalculatorOpen(true)}>
+              <Calculator size={17} strokeWidth={2.5} /> Kalkulator
+            </Button>
+            <Button onClick={openNew}>
+              <Plus size={17} strokeWidth={2.5} /> Tambah saham
+            </Button>
+          </div>
         }
       />
 
@@ -1588,6 +1782,11 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
           )}
         </>
       )}
+
+      <StockProfitLossCalculatorModal
+        open={calculatorOpen}
+        onClose={() => setCalculatorOpen(false)}
+      />
 
       <StockForm
         open={formOpen}
