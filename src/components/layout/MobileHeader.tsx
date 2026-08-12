@@ -5,6 +5,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { PrivacyToggle } from "./PrivacyToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { navGroups } from "./nav-config";
 import { createClient } from "@/lib/supabase/client";
@@ -53,6 +54,7 @@ export function MobileHeader() {
         </Link>
 
         <div className="flex items-center gap-1">
+          <PrivacyToggle />
           <ThemeToggle />
 
           <button

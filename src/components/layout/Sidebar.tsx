@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navGroups } from "./nav-config";
+import { PrivacyToggle } from "./PrivacyToggle";
 import { createClient } from "@/lib/supabase/client";
 
 export function Sidebar({
@@ -38,7 +39,7 @@ export function Sidebar({
       <Link
         href="/dashboard"
         aria-label="Kembali ke dashboard Noto"
-        className="mb-5 flex items-center px-2"
+        className="mb-3 flex items-center px-2"
       >
         <img
           src="/logo-noto-header-transparent.png"
@@ -46,6 +47,14 @@ export function Sidebar({
           className="h-10 w-auto object-contain"
         />
       </Link>
+
+      <div className="mb-5 flex items-center gap-2 px-2">
+        <PrivacyToggle />
+        <div className="min-w-0">
+          <div className="text-heading text-[12.5px] font-bold">Privacy mode</div>
+          <div className="text-subtle text-[11.5px]">Sembunyikan nominal</div>
+        </div>
+      </div>
 
       {/* Nav groups */}
       <nav aria-label="Menu navigasi" className="flex-1 space-y-5">

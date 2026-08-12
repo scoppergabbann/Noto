@@ -7,6 +7,12 @@ interface ThemeState {
   setDark: (v: boolean) => void;
 }
 
+interface PrivacyState {
+  hideMoney: boolean;
+  toggleMoney: () => void;
+  setHideMoney: (v: boolean) => void;
+}
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
@@ -15,5 +21,16 @@ export const useThemeStore = create<ThemeState>()(
       setDark: (v) => set({ isDark: v }),
     }),
     { name: "noto-theme" }
+  )
+);
+
+export const usePrivacyStore = create<PrivacyState>()(
+  persist(
+    (set) => ({
+      hideMoney: false,
+      toggleMoney: () => set((s) => ({ hideMoney: !s.hideMoney })),
+      setHideMoney: (v) => set({ hideMoney: v }),
+    }),
+    { name: "noto-privacy" }
   )
 );

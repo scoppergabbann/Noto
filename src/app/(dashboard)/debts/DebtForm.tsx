@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { CurrencyInput } from "@/components/ui/CurrencyInput";
 import { monthlyInstallment } from "@/lib/finance";
-import { rpShort } from "@/lib/format";
+import { maskMoney, rpShort } from "@/lib/format";
 import type { Debt } from "@/types";
 
 export type DebtDraft = Omit<Debt, "id">;
@@ -154,8 +154,12 @@ export function DebtForm({
           {hasInterest && (
             <div className="mt-2.5 rounded-lg bg-neg-soft px-3 py-2 text-[12.5px] text-neg-strong dark:bg-neg/10 dark:text-neg-dark">
               {d.interestType === "flat"
-                ? `Bunga dihitung dari pokok awal Rp${d.total.toLocaleString("id-ID")} setiap bulan.`
-                : `Bunga dihitung dari sisa pokok Rp${(d.total - d.paid).toLocaleString("id-ID")} (menurun seiring pembayaran).`}
+                ? `Bunga dihitung dari pokok awal ${maskMoney(
+                    `Rp${d.total.toLocaleString("id-ID")}`
+                  )} setiap bulan.`
+                : `Bunga dihitung dari sisa pokok ${maskMoney(
+                    `Rp${(d.total - d.paid).toLocaleString("id-ID")}`
+                  )} (menurun seiring pembayaran).`}
             </div>
           )}
         </div>

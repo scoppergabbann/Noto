@@ -10,6 +10,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { goldValueSeries } from "@/data/mock";
+import { maskMoney } from "@/lib/format";
 
 export function GoldValueChart() {
   return (
@@ -42,7 +43,7 @@ export function GoldValueChart() {
               boxShadow: "0 8px 24px rgba(0,0,0,.12)",
               fontSize: 13,
             }}
-            formatter={(v: number) => [`Rp${v}jt`, "Nilai"]}
+            formatter={(v: number) => [maskMoney(`Rp${v}jt`), "Nilai"]}
           />
           <Area
             type="monotone"

@@ -47,7 +47,7 @@ import {
   portfolioWeightedReturn,
   stockPortfolioWeight,
 } from "@/lib/finance";
-import { rpShort } from "@/lib/format";
+import { maskMoney, rpShort } from "@/lib/format";
 import type { StockHolding } from "@/types";
 
 type SortKey = "return" | "value" | "loss" | "weight";
@@ -97,7 +97,7 @@ function round1(n: number) {
 }
 
 function formatPrice(n: number) {
-  return `Rp${Math.round(Number(n || 0)).toLocaleString("id-ID")}`;
+  return maskMoney(`Rp${Math.round(Number(n || 0)).toLocaleString("id-ID")}`);
 }
 
 function formatPercent(n: number) {
