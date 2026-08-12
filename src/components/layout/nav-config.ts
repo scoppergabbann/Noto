@@ -65,6 +65,6 @@ export const navItems: NavItem[] = navGroups.flatMap((g) => g.items);
 export const mobileNavItems: NavItem[] = [
   navItems.find((n) => n.href === "/dashboard")!,
   navItems.find((n) => n.href === "/transactions")!,
-  navItems.find((n) => n.href === "/cards")!,
+  navItems.find((n) => n.href === "/stocks")!,
   navItems.find((n) => n.href === "/summary")!,
 ];
