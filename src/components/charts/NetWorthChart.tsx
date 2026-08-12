@@ -2,8 +2,9 @@
 
 import {
   Area,
-  AreaChart,
   CartesianGrid,
+  ComposedChart,
+  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -15,6 +16,7 @@ export type NetWorthChartPoint = {
   month: string;
   asset: number;
   liability: number;
+  netWorth?: number;
 };
 
 export function NetWorthChart({ data }: { data: NetWorthChartPoint[] }) {
@@ -37,10 +39,10 @@ export function NetWorthChart({ data }: { data: NetWorthChartPoint[] }) {
   return (
     <div className="h-[240px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
+        <ComposedChart data={data} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
           <defs>
             <linearGradient id="assetGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0f9d6b" stopOpacity={0.26} />
+              <stop offset="0%" stopColor="#0f9d6b" stopOpacity={0.12} />
               <stop offset="100%" stopColor="#0f9d6b" stopOpacity={0} />
             </linearGradient>
 
@@ -80,7 +82,11 @@ export function NetWorthChart({ data }: { data: NetWorthChartPoint[] }) {
           <Tooltip
             formatter={(value: number, name: string) => [
               rpShort(Number(value)),
-              name === "asset" ? "Aset" : "Utang",
+              name === "asset"
+                ? "Aset"
+                : name === "liability"
+                  ? "Utang"
+                  : "Kekayaan bersih",
             ]}
             contentStyle={{
               borderRadius: 14,
@@ -101,10 +107,10 @@ export function NetWorthChart({ data }: { data: NetWorthChartPoint[] }) {
             dataKey="asset"
             name="asset"
             stroke="#0f9d6b"
-            strokeWidth={3}
+            strokeWidth={2}
             fill="url(#assetGrad)"
-            dot={{ r: 5, strokeWidth: 0 }}
-            activeDot={{ r: 6, strokeWidth: 0 }}
+            dot={false}
+            activeDot={{ r: 5, strokeWidth: 0 }}
           />
 
           <Area
@@ -112,13 +118,23 @@ export function NetWorthChart({ data }: { data: NetWorthChartPoint[] }) {
             dataKey="liability"
             name="liability"
             stroke="#d83a3a"
-            strokeWidth={3}
+            strokeWidth={2}
             strokeDasharray="6 6"
             fill="url(#liabilityGrad)"
-            dot={{ r: 5, strokeWidth: 0 }}
+            dot={false}
+            activeDot={{ r: 5, strokeWidth: 0 }}
+          />
+
+          <Line
+            type="monotone"
+            dataKey="netWorth"
+            name="netWorth"
+            stroke="#a855f7"
+            strokeWidth={3}
+            dot={{ r: 4, strokeWidth: 0 }}
             activeDot={{ r: 6, strokeWidth: 0 }}
           />
-        </AreaChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

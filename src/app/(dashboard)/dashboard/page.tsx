@@ -450,9 +450,20 @@ export default function DashboardPage() {
   const totalAsset = cashTotal + goldTotal + otherTotal + receivableTotal + retirementTotal + stockTotal;
   const totalDebt = debtTotal + creditCardTotal;
   const netWorth = totalAsset - totalDebt;
+  const investmentTotal = stockTotal + goldTotal + retirementTotal;
+  const liquidInvestmentTotal = cashTotal + investmentTotal;
   const health = healthScore(totalAsset, totalDebt);
 
   const debtRatio = totalAsset > 0 ? Math.round((totalDebt / totalAsset) * 100) : 0;
+  const liquidCoverageRatio =
+    totalDebt > 0 ? Math.round((liquidInvestmentTotal / totalDebt) * 100) : 100;
+
+  const healthInsight =
+    totalDebt === 0
+      ? "Belum ada utang aktif. Fokus berikutnya: tambah aset produktif dan jaga cash tetap cukup."
+      : debtRatio <= 35
+        ? "Utang masih di area aman. Kamu bisa lanjut memperbesar investasi tanpa mengabaikan cash cadangan."
+        : "Utang mulai berat dibanding aset. Prioritaskan pelunasan utang berbunga sebelum menambah risiko investasi.";
 
  useEffect(() => {
   if (!userId || loading) return;
@@ -462,21 +473,22 @@ export default function DashboardPage() {
 
   const visibleNetWorthSeries = netWorthSeries.map((point) => ({
     ...point,
+    netWorth: point.asset - point.liability,
     month: formatMonthFromKey(point.month),
   }));
 
   const metricSpark = netWorthSeries.map((point) => point.asset - point.liability);
-  const assetSpark = netWorthSeries.map((point) => point.asset);
+  const assetSpark = [cashTotal, liquidInvestmentTotal];
   const debtSpark = netWorthSeries.map((point) => point.liability);
 
   const composition = [
-  { name: "Tabungan", value: cashTotal, color: "#92d05d" },
-  { name: "Piutang", value: receivableTotal, color: "#38bdf8" },
-  { name: "Emas", value: goldTotal, color: "#f5b041" },
-  { name: "Saham", value: stockTotal, color: "#071e49" },
-  { name: "Aset Lain", value: otherTotal, color: "#f59425" },
-  { name: "Dana Pensiun", value: retirementTotal, color: "#a855f7" },
-].filter((c) => c.value > 0);
+    { name: "Cash", value: cashTotal, color: "#0f9d6b" },
+    { name: "Investasi", value: investmentTotal, color: "#a855f7" },
+    { name: "Piutang", value: receivableTotal, color: "#38bdf8" },
+    { name: "Aset Lain", value: otherTotal, color: "#f59425" },
+  ]
+    .filter((c) => c.value > 0)
+    .sort((a, b) => b.value - a.value);
 
   const topGoals = [...goals]
     .sort(
@@ -533,19 +545,21 @@ export default function DashboardPage() {
           trendGood={netWorth >= 0}
           caption={`${netWorthSeries.length || 1} bulan tercatat`}
           spark={metricSpark.length ? metricSpark : [netWorth]}
+          formula="Total aset - total utang. Total aset mencakup cash, investasi, piutang, dan aset lain."
         />
 
         <MetricCard
           id="as"
-          label="Total Aset"
-          value={rpShort(totalAsset)}
+          label="Likuid + Investasi"
+          value={rpShort(liquidInvestmentTotal)}
           icon={PiggyBank}
           trend="aktual"
           trendDir="up"
           trendGood
-          caption="tabungan, piutang, emas, aset"
-          spark={assetSpark.length ? assetSpark : [totalAsset]}
+          caption="cash, saham, emas, pensiun"
+          spark={assetSpark}
           sparkColor="#0f9d6b"
+          formula="Cash/tabungan + saham + emas + dana pensiun. Piutang dan aset lain tidak masuk kartu ini."
         />
 
         <MetricCard
@@ -559,6 +573,7 @@ export default function DashboardPage() {
           caption="utang + kartu kredit"
           spark={debtSpark.length ? debtSpark : [totalDebt]}
           sparkColor="#d83a3a"
+          formula="Sisa utang/cicilan + tagihan kartu kredit yang belum dibayar."
         />
       </section>
 
@@ -575,6 +590,10 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-3 text-[12.5px] font-semibold">
+              <span className="text-muted flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-purple-500" />
+                Bersih
+              </span>
               <span className="text-muted flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-pos" />
                 Aset
@@ -655,6 +674,15 @@ export default function DashboardPage() {
                     <strong className="text-heading font-bold">35%</strong>.
                   </>
                 )}
+                {totalDebt > 0 && (
+                  <>
+                    {" "}
+                    Likuid + investasimu setara{" "}
+                    <strong className="text-heading font-bold">{liquidCoverageRatio}%</strong>{" "}
+                    dari total utang.
+                  </>
+                )}{" "}
+                {healthInsight}
               </p>
             </div>
           </div>

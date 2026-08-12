@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownRight, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Info, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sparkline } from "@/components/charts/Sparkline";
 
@@ -12,6 +12,7 @@ export function MetricCard({
   caption,
   spark,
   sparkColor = "#0f9d6b",
+  formula,
   hero = false,
   id,
 }: {
@@ -24,6 +25,7 @@ export function MetricCard({
   caption?: string;
   spark?: number[];
   sparkColor?: string;
+  formula?: string;
   hero?: boolean;
   id: string;
 }) {
@@ -111,6 +113,16 @@ export function MetricCard({
       {spark && (
         <div className="relative z-10 mt-3 h-9 w-full opacity-90 sm:h-10">
           <Sparkline data={spark} color={hero ? "#a5b4fc" : sparkColor} id={id} />
+        </div>
+      )}
+
+      {formula && (
+        <div className="pointer-events-none absolute inset-x-4 bottom-4 z-20 translate-y-2 rounded-xl border border-white/10 bg-ink/95 px-3 py-2 text-[12px] font-semibold leading-relaxed text-white opacity-0 shadow-softlg backdrop-blur transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white/95 dark:text-ink">
+          <div className="mb-0.5 flex items-center gap-1.5 text-[11px] uppercase tracking-[.08em] opacity-70">
+            <Info size={12} strokeWidth={2.5} />
+            Rumus
+          </div>
+          {formula}
         </div>
       )}
     </div>
