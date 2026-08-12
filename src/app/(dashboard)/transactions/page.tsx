@@ -14,6 +14,7 @@ import {
   Pencil,
   Trash2,
   CalendarDays,
+  Info,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -161,6 +162,71 @@ function statusIcon(status: CategoryChange["status"]) {
   return <Lightbulb size={13} />;
 }
 
+function FormulaHint({ formula }: { formula: string }) {
+  return (
+    <span className="group/formula relative inline-flex">
+      <Info className="text-subtle" size={15} strokeWidth={2.4} />
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute right-0 top-6 z-50 w-[230px] rounded-xl border border-white/10 bg-ink/95 px-3 py-2 text-left text-[12px] font-semibold leading-relaxed text-white opacity-0 shadow-softlg backdrop-blur transition group-hover/formula:opacity-100 dark:bg-white/95 dark:text-ink"
+      >
+        <span className="mb-0.5 block text-[11px] uppercase tracking-[.08em] opacity-70">
+          Rumus
+        </span>
+        {formula}
+      </span>
+    </span>
+  );
+}
+
+function TransactionMetricCard({
+  label,
+  value,
+  formula,
+  tone = "neutral",
+  children,
+}: {
+  label: string;
+  value: string;
+  formula: string;
+  tone?: "neutral" | "green" | "red";
+  children?: React.ReactNode;
+}) {
+  const toneClass =
+    tone === "green"
+      ? "text-pos-strong dark:text-pos-dark"
+      : tone === "red"
+        ? "text-neg-strong dark:text-neg-dark"
+        : "text-heading";
+
+  return (
+    <Card hoverable>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-muted text-[13px] font-semibold">{label}</div>
+          <div
+            className={`mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px] ${toneClass}`}
+          >
+            {value}
+          </div>
+        </div>
+        <FormulaHint formula={formula} />
+      </div>
+      {children}
+    </Card>
+  );
+}
+
+function defaultDateForMonth(activeMonth: string) {
+  if (!activeMonth) return undefined;
+
+  const today = new Date();
+  const todayKey = today.toISOString().slice(0, 7);
+  if (activeMonth === todayKey) return today.toISOString().slice(0, 10);
+
+  return `${activeMonth}-01`;
+}
+
 function TransactionItem({
   tx,
   onEdit,
@@ -277,7 +343,7 @@ export default function TransactionsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const months = useMemo(() => availableMonths(items), [items]);
-  const activeMonth = month || months[months.length - 1] || "";
+  const activeMonth = month === "all" ? "" : month || months[months.length - 1] || "";
   const previousMonth = useMemo(() => getPreviousMonth(months, activeMonth), [months, activeMonth]);
 
   const monthTx = useMemo(
@@ -290,7 +356,23 @@ export default function TransactionsPage() {
     [items, previousMonth]
   );
 
-  const insight = useMemo(() => monthInsight(items, activeMonth), [items, activeMonth]);
+  const insight = useMemo(() => {
+    if (activeMonth) return monthInsight(items, activeMonth);
+
+    const income = sumByType(items, "income");
+    const expense = sumByType(items, "expense");
+    const saved = income - expense;
+    const topCategory = byCategory(items, "expense")[0] ?? null;
+
+    return {
+      income,
+      expense,
+      saved,
+      savingsRate: income > 0 ? Math.round((saved / income) * 100) : 0,
+      topCategory,
+      expenseChange: null,
+    };
+  }, [activeMonth, items]);
 
   const expenseCats = useMemo(
     () =>
@@ -338,6 +420,9 @@ export default function TransactionsPage() {
   const totalIn = sumByType(monthTx, "income");
   const totalOut = sumByType(monthTx, "expense");
   const net = totalIn - totalOut;
+  const transactionCount = monthTx.length;
+  const averageExpense = totalOut > 0 ? Math.round(totalOut / Math.max(1, monthTx.filter((t) => t.type === "expense").length)) : 0;
+  const formDefaultDate = defaultDateForMonth(activeMonth);
 
   function openNew() {
     setEditing(null);
@@ -375,6 +460,16 @@ export default function TransactionsPage() {
 
       {months.length > 0 && (
         <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
+          <button
+            onClick={() => setMonth("all")}
+            className={`shrink-0 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
+              month === "all"
+                ? "bg-gradient-to-br from-amber to-amber-deep text-white shadow-glow"
+                : "card text-muted hover:text-heading"
+            }`}
+          >
+            Semua
+          </button>
           {months.map((m) => (
             <button
               key={m}
@@ -392,18 +487,19 @@ export default function TransactionsPage() {
       )}
 
       <section className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Pemasukan</div>
-          <div className="mt-2 font-serif text-[22px] font-semibold tabular-nums text-pos-strong dark:text-pos-dark sm:text-[28px]">
-            {rpShort(totalIn)}
-          </div>
-        </Card>
+        <TransactionMetricCard
+          label="Pemasukan"
+          value={rpShort(totalIn)}
+          tone="green"
+          formula="Total transaksi bertipe pemasukan pada periode aktif."
+        />
 
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Pengeluaran</div>
-          <div className="mt-2 font-serif text-[22px] font-semibold tabular-nums text-neg-strong dark:text-neg-dark sm:text-[28px]">
-            {rpShort(totalOut)}
-          </div>
+        <TransactionMetricCard
+          label="Pengeluaran"
+          value={rpShort(totalOut)}
+          tone="red"
+          formula="Total transaksi bertipe pengeluaran pada periode aktif."
+        >
           {insight.expenseChange !== null && (
             <div className="mt-2">
               <Badge tone={insight.expenseChange <= 0 ? "green" : "red"}>
@@ -416,27 +512,20 @@ export default function TransactionsPage() {
               </Badge>
             </div>
           )}
-        </Card>
+        </TransactionMetricCard>
 
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Selisih</div>
-          <div
-            className={`mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px] ${
-              net >= 0
-                ? "text-pos-strong dark:text-pos-dark"
-                : "text-neg-strong dark:text-neg-dark"
-            }`}
-          >
-            {net >= 0 ? "+" : ""}
-            {rpShort(net)}
-          </div>
-        </Card>
+        <TransactionMetricCard
+          label="Selisih"
+          value={`${net >= 0 ? "+" : ""}${rpShort(net)}`}
+          tone={net >= 0 ? "green" : "red"}
+          formula="Pemasukan - pengeluaran pada periode aktif."
+        />
 
-        <Card hoverable>
-          <div className="text-muted text-[13px] font-semibold">Savings Rate</div>
-          <div className="text-heading mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px]">
-            {insight.savingsRate}%
-          </div>
+        <TransactionMetricCard
+          label="Savings Rate"
+          value={`${insight.savingsRate}%`}
+          formula="Selisih / pemasukan x 100%."
+        >
           <div className="mt-2">
             <Badge
               tone={
@@ -450,7 +539,21 @@ export default function TransactionsPage() {
                   : "tipis"}
             </Badge>
           </div>
-        </Card>
+        </TransactionMetricCard>
+      </section>
+
+      <section className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <TransactionMetricCard
+          label="Jumlah Transaksi"
+          value={`${transactionCount}`}
+          formula="Jumlah transaksi pada periode aktif setelah filter bulan."
+        />
+        <TransactionMetricCard
+          label="Rata-rata Pengeluaran"
+          value={rpShort(averageExpense)}
+          tone={averageExpense > 0 ? "red" : "neutral"}
+          formula="Total pengeluaran / jumlah transaksi pengeluaran pada periode aktif."
+        />
       </section>
 
       {insight.topCategory && (
@@ -734,6 +837,7 @@ export default function TransactionsPage() {
         onClose={() => setFormOpen(false)}
         onSubmit={handleSubmit}
         initial={editing}
+        defaultDate={formDefaultDate}
       />
 
       <ConfirmDialog

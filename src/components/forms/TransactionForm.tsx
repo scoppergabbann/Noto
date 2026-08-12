@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -22,30 +22,69 @@ const empty: TxDraft = {
   note: "",
 };
 
+function emptyDraft(date = today()): TxDraft {
+  return {
+    ...empty,
+    date,
+  };
+}
+
 export function TransactionForm({
   open,
   onClose,
   onSubmit,
   initial,
+  defaultDate,
 }: {
   open: boolean;
   onClose: () => void;
   onSubmit: (d: TxDraft) => void;
   initial?: Transaction | null;
+  defaultDate?: string;
 }) {
-  const [d, setD] = useState<TxDraft>(empty);
-  const [err, setErr] = useState("");
+  const formKey = `${open ? "open" : "closed"}:${initial?.id ?? "new"}:${defaultDate ?? ""}`;
+  const initialDraft = initial
+    ? (({ id: _id, ...rest }) => {
+        void _id;
+        return rest;
+      })(initial)
+    : emptyDraft(defaultDate);
 
-  useEffect(() => {
-    if (initial) {
-      const { id: _id, ...rest } = initial;
-      void _id;
-      setD(rest);
-    } else {
-      setD(empty);
-    }
-    setErr("");
-  }, [initial, open]);
+  const [formState, setFormState] = useState<{
+    key: string;
+    draft: TxDraft;
+    err: string;
+  }>(() => ({
+    key: formKey,
+    draft: initialDraft,
+    err: "",
+  }));
+
+  const activeState =
+    formState.key === formKey ? formState : { key: formKey, draft: initialDraft, err: "" };
+
+  if (formState.key !== formKey) {
+    setFormState(activeState);
+  }
+
+  const d = activeState.draft;
+  const err = activeState.err;
+
+  function setD(next: TxDraft | ((current: TxDraft) => TxDraft)) {
+    setFormState((current) => {
+      const base = current.key === formKey ? current : activeState;
+      const draft = typeof next === "function" ? next(base.draft) : next;
+
+      return { ...base, draft };
+    });
+  }
+
+  function setErr(next: string) {
+    setFormState((current) => {
+      const base = current.key === formKey ? current : activeState;
+      return { ...base, err: next };
+    });
+  }
 
   const cats = d.type === "expense" ? expenseCategories : incomeCategories;
 
