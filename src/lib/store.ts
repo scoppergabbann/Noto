@@ -9,7 +9,11 @@ interface ThemeState {
 
 interface PrivacyState {
   hideMoney: boolean;
-  toggleMoney: () => void;
+  pin: string | null;
+  visibleUntil: number | null;
+  lockMoney: () => void;
+  setPin: (pin: string) => void;
+  unlockFor: (minutes: number) => void;
   setHideMoney: (v: boolean) => void;
 }
 
@@ -27,8 +31,16 @@ export const useThemeStore = create<ThemeState>()(
 export const usePrivacyStore = create<PrivacyState>()(
   persist(
     (set) => ({
-      hideMoney: false,
-      toggleMoney: () => set((s) => ({ hideMoney: !s.hideMoney })),
+      hideMoney: true,
+      pin: null,
+      visibleUntil: null,
+      lockMoney: () => set({ hideMoney: true, visibleUntil: null }),
+      setPin: (pin) => set({ pin }),
+      unlockFor: (minutes) =>
+        set({
+          hideMoney: false,
+          visibleUntil: Date.now() + minutes * 60 * 1000,
+        }),
       setHideMoney: (v) => set({ hideMoney: v }),
     }),
     { name: "noto-privacy" }

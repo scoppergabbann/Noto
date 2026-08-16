@@ -4,12 +4,21 @@ export function isMoneyHidden(): boolean {
 
   try {
     const raw = window.localStorage.getItem("noto-privacy");
-    if (!raw) return false;
+    if (!raw) return true;
 
-    const parsed = JSON.parse(raw) as { state?: { hideMoney?: boolean } };
-    return Boolean(parsed.state?.hideMoney);
+    const parsed = JSON.parse(raw) as {
+      state?: { hideMoney?: boolean; visibleUntil?: number | null };
+    };
+    const state = parsed.state;
+    const visibleUntil = Number(state?.visibleUntil ?? 0);
+
+    if (state?.hideMoney === false && visibleUntil > Date.now()) {
+      return false;
+    }
+
+    return true;
   } catch {
-    return false;
+    return true;
   }
 }
 
