@@ -13,6 +13,7 @@ interface PrivacyState {
   visibleUntil: number | null;
   lockMoney: () => void;
   setPin: (pin: string) => void;
+  resetPin: () => void;
   unlockFor: (minutes: number) => void;
   setHideMoney: (v: boolean) => void;
 }
@@ -36,6 +37,7 @@ export const usePrivacyStore = create<PrivacyState>()(
       visibleUntil: null,
       lockMoney: () => set({ hideMoney: true, visibleUntil: null }),
       setPin: (pin) => set({ pin }),
+      resetPin: () => set({ pin: null, hideMoney: true, visibleUntil: null }),
       unlockFor: (minutes) =>
         set({
           hideMoney: false,
