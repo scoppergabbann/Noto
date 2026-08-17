@@ -124,6 +124,20 @@ export interface TransactionRow {
   updated_at: string;
 }
 
+export interface PrivacySettingsRow {
+  id: string;
+  user_id: string;
+  pin_hash: string | null;
+  pin_salt: string | null;
+  pin_set_at: string | null;
+  visible_until: string | null;
+  reset_hint_key: string;
+  reset_hint_hash: string | null;
+  reset_hint_salt: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AssetTransferRow {
   id: string;
   user_id: string;

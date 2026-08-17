@@ -108,6 +108,33 @@ create table if not exists transactions (
   updated_at  timestamptz default now()
 );
 
+-- ---------- PRIVACY SETTINGS / PIN Mode ----------
+-- PIN tidak disimpan plaintext. Aplikasi menyimpan hash + salt per user.
+create table if not exists privacy_settings (
+  id               uuid primary key default gen_random_uuid(),
+  user_id          uuid not null references auth.users(id) on delete cascade,
+  pin_hash         text,
+  pin_salt         text,
+  pin_set_at       timestamptz,
+  visible_until    timestamptz,
+  reset_hint_key   text not null default 'cat_name',
+  reset_hint_hash  text,
+  reset_hint_salt  text,
+  created_at       timestamptz default now(),
+  updated_at       timestamptz default now(),
+  constraint privacy_settings_user_unique unique (user_id),
+  constraint privacy_settings_pin_pair check (
+    (pin_hash is null and pin_salt is null and pin_set_at is null)
+    or
+    (pin_hash is not null and pin_salt is not null and pin_set_at is not null)
+  ),
+  constraint privacy_settings_reset_pair check (
+    (reset_hint_hash is null and reset_hint_salt is null)
+    or
+    (reset_hint_hash is not null and reset_hint_salt is not null)
+  )
+);
+
 -- =============================================================
 -- Row Level Security
 -- =============================================================
@@ -118,11 +145,12 @@ alter table credit_cards  enable row level security;
 alter table gold_assets   enable row level security;
 alter table other_assets  enable row level security;
 alter table transactions  enable row level security;
+alter table privacy_settings enable row level security;
 
 do $$
 declare t text;
 begin
-  foreach t in array array['goals','receivables','debts','credit_cards','gold_assets','other_assets','transactions']
+  foreach t in array array['goals','receivables','debts','credit_cards','gold_assets','other_assets','transactions','privacy_settings']
   loop
     execute format('drop policy if exists "select own" on %I;', t);
     execute format('drop policy if exists "insert own" on %I;', t);
@@ -143,3 +171,4 @@ create index if not exists idx_cards_user       on credit_cards(user_id);
 create index if not exists idx_gold_user        on gold_assets(user_id);
 create index if not exists idx_other_user       on other_assets(user_id);
 create index if not exists idx_tx_user_date     on transactions(user_id, date desc);
+create index if not exists idx_privacy_user     on privacy_settings(user_id);
