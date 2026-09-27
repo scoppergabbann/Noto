@@ -3,13 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  LockKeyhole,
-  Mail,
-  ShieldCheck,
-  Sparkles,
-  WalletCards,
-} from "lucide-react";
+import { LockKeyhole, Mail, ShieldCheck, Sparkles, WalletCards } from "lucide-react";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthTextInput } from "@/components/auth/AuthTextInput";
@@ -20,17 +14,17 @@ import { createClient } from "@/lib/supabase/client";
 const loginFeatures = [
   {
     icon: WalletCards,
-    title: "Cashflow",
-    desc: "Masuk keluar uang",
+    title: "Arus kas",
+    desc: "Uang masuk dan keluar",
   },
   {
     icon: ShieldCheck,
-    title: "Private",
+    title: "Pribadi",
     desc: "Akun pribadimu",
   },
   {
     icon: LockKeyhole,
-    title: "Secure",
+    title: "Aman",
     desc: "Akses terlindungi",
   },
 ];
@@ -38,9 +32,7 @@ const loginFeatures = [
 function getAuthCallbackUrl() {
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined"
-      ? window.location.origin
-      : "http://localhost:3000");
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
 
   try {
     const url = new URL(raw);
@@ -62,22 +54,18 @@ function LoginForm() {
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState("");
 
-useEffect(() => {
-  const err = searchParams.get("error");
-  const errorCode = searchParams.get("error_code");
+  useEffect(() => {
+    const err = searchParams.get("error");
+    const errorCode = searchParams.get("error_code");
 
-  if (err === "auth_callback_failed") {
-    setError(
-      "Login gagal diproses. Coba ulangi lagi, atau gunakan metode login lain."
-    );
-  }
+    if (err === "auth_callback_failed") {
+      setError("Login gagal diproses. Coba ulangi lagi, atau gunakan metode login lain.");
+    }
 
-  if (errorCode === "otp_expired") {
-    setError(
-      "Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru."
-    );
-  }
-}, [searchParams]);
+    if (errorCode === "otp_expired") {
+      setError("Link konfirmasi sudah kedaluwarsa. Coba daftar ulang atau minta link baru.");
+    }
+  }, [searchParams]);
 
   async function handleGoogleLogin() {
     setLoadingGoogle(true);
@@ -86,12 +74,12 @@ useEffect(() => {
     const supabase = createClient();
     const redirectTo = getAuthCallbackUrl();
 
-const { error } = await supabase.auth.signInWithOAuth({
-  provider: "google",
-  options: {
-    redirectTo,
-  },
-});
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
 
     if (error) {
       setError(error.message);
@@ -143,10 +131,10 @@ const { error } = await supabase.auth.signInWithOAuth({
   return (
     <AuthShell
       badgeIcon={Sparkles}
-      badgeText="Personal finance workspace"
-      title="Noto urip,"
-      accent="noto finansial."
-      description="Catat cashflow, tabungan, aset, utang, saham, emas, dan perjalanan finansialmu dalam satu tempat yang lebih rapi dan tenang."
+      badgeText="Personal finance yang terasa personal"
+      title="Noto,"
+      accent="finansial lebih tenang."
+      description="Catat arus kas, tabungan, aset, utang, dan investasi dalam satu ruang yang rapi, tenang, dan mudah dibaca."
       features={loginFeatures}
     >
       <AuthCard
@@ -198,31 +186,28 @@ const { error } = await supabase.auth.signInWithOAuth({
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 min-h-[50px] w-full touch-manipulation rounded-2xl bg-gradient-to-br from-amber to-amber-deep py-3 text-[15px] font-bold text-white shadow-glow transition hover:-translate-y-px hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber active:translate-y-0 active:brightness-95 disabled:pointer-events-none disabled:opacity-60"
+            className="mt-1 min-h-[52px] w-full touch-manipulation rounded-2xl bg-[#081F4D] py-3 text-[15px] font-bold text-white shadow-[0_10px_24px_rgba(8,31,77,.18)] transition hover:-translate-y-px hover:bg-[#12396D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275E9D] active:translate-y-0 disabled:pointer-events-none disabled:opacity-60"
           >
             {loadingEmail ? "Sedang masuk…" : "Masuk"}
           </button>
 
-          <p className="text-muted text-center text-[14px]">
+          <p className="text-center text-[14px] text-[#858C97]">
             Belum punya akun?{" "}
             <Link
               href="/register"
-              className="font-semibold text-amber-text hover:underline dark:text-amber"
+              className="font-bold text-[#275E9D] hover:underline dark:text-blue-300"
             >
               Daftar gratis
             </Link>
           </p>
         </form>
 
-        <div className="mt-5 rounded-2xl border border-black/[.06] bg-surface-sunken px-4 py-3 dark:border-white/10 dark:bg-white/[.04]">
+        <div className="mt-5 rounded-2xl border border-[#DDE8FA] bg-[#EEF4FF] px-4 py-3 dark:border-white/10 dark:bg-white/[.04]">
           <div className="flex items-start gap-2.5">
-            <ShieldCheck
-              size={17}
-              className="mt-0.5 shrink-0 text-amber-text dark:text-amber"
-            />
-            <p className="text-muted text-[12.5px] leading-5">
-              Data finansialmu tetap berada di akun pribadimu. Gunakan metode
-              login yang paling aman dan nyaman.
+            <ShieldCheck size={17} className="mt-0.5 shrink-0 text-[#275E9D] dark:text-blue-300" />
+            <p className="text-[12.5px] leading-5 text-[#59616D] dark:text-slate-400">
+              Data finansialmu tetap berada di akun pribadimu. Gunakan metode login yang paling aman
+              dan nyaman.
             </p>
           </div>
         </div>

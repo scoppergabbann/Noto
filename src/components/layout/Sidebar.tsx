@@ -33,7 +33,7 @@ export function Sidebar({
   return (
     <aside
       aria-label="Navigasi sidebar"
-      className="fixed inset-y-0 left-0 z-40 hidden w-[232px] flex-col overflow-y-auto border-r border-black/[.06] bg-surface-base/80 px-3 py-5 backdrop-blur dark:border-white/[.06] dark:bg-night-base/80 lg:flex"
+      className="fixed inset-y-0 left-0 z-40 hidden w-[232px] flex-col overflow-y-auto border-r border-[#E8EAEE] bg-white/95 px-3 py-5 backdrop-blur dark:border-white/[.06] dark:bg-night-base/95 lg:flex"
     >
       {/* Logo */}
       <Link
@@ -61,7 +61,7 @@ export function Sidebar({
         {navGroups.map((group) => (
           <div key={group.title}>
             {/* Section label */}
-            <p className="text-subtle mb-1 px-3 text-[10.5px] font-bold tracking-[.12em]">
+            <p className="mb-1 px-3 text-[10.5px] font-bold tracking-[.12em] text-[#858C97]">
               {group.title}
             </p>
 
@@ -78,8 +78,8 @@ export function Sidebar({
                         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-all",
                         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber",
                         isActive
-                          ? "bg-white text-ink shadow-soft dark:bg-white/[.07] dark:text-slate-100"
-                          : "text-ink-dim hover:bg-white/70 hover:text-ink dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+                          ? "bg-[#EEF4FF] text-[#081F4D] dark:bg-white/[.07] dark:text-slate-100"
+                          : "text-[#59616D] hover:bg-[#F0F1F3] hover:text-[#18202B] dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
                       )}
                     >
                       <Icon
@@ -87,7 +87,7 @@ export function Sidebar({
                         strokeWidth={isActive ? 2.3 : 1.9}
                         className={cn(
                           "shrink-0 transition-colors",
-                          isActive ? "text-amber-deep" : "text-ink-faint dark:text-slate-500"
+                          isActive ? "text-[#275E9D]" : "text-[#858C97] dark:text-slate-500"
                         )}
                         aria-hidden="true"
                       />
@@ -103,8 +103,8 @@ export function Sidebar({
 
       {/* User chip + logout */}
       <div className="mt-4 border-t border-black/[.06] pt-4 dark:border-white/[.06]">
-        <div className="flex items-center gap-3 rounded-2xl border border-black/[.07] bg-white p-3 dark:border-white/10 dark:bg-white/5">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-bold text-white">
+        <div className="flex items-center gap-3 rounded-2xl border border-[#E8EAEE] bg-[#F7F7F9] p-3 dark:border-white/10 dark:bg-white/5">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#081F4D] text-sm font-bold text-white">
             {initials}
           </div>
           <div className="min-w-0 flex-1">

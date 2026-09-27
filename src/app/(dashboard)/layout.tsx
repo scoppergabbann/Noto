@@ -18,7 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     : (user.email?.split("@")[0] ?? "Kamu");
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[#F7F7F9] dark:bg-night-base">
       {/* Sidebar — desktop only */}
       <Sidebar userName={displayName} userEmail={user.email ?? ""} userId={user.id} />
 
@@ -29,14 +29,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         <main
           className={[
-            "flex-1 px-4 py-5",
-            "sm:px-6 sm:py-6",
-            "lg:px-8 lg:py-8",
+            "flex-1 px-4 py-6",
+            "sm:px-6 sm:py-8",
+            "lg:px-10 lg:py-10",
             /* Bottom padding agar konten tidak tertutup MobileNav (≈72px) */
             "pb-24 lg:pb-8",
           ].join(" ")}
         >
-          <div className="mx-auto max-w-5xl">
+          <div className="mx-auto w-full max-w-6xl">
             <DataLoader userId={user.id} />
             {children}
           </div>

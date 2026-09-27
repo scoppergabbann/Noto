@@ -32,14 +32,14 @@ export function AuthTextInput({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-heading text-[13.5px] font-semibold">
+      <label htmlFor={id} className="text-[13.5px] font-bold text-[#18202B] dark:text-white">
         {label}
       </label>
 
       <div className="relative">
         <Icon
           size={17}
-          className="text-subtle pointer-events-none absolute left-4 top-1/2 -translate-y-1/2"
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#858C97]"
           aria-hidden="true"
         />
 
@@ -51,7 +51,7 @@ export function AuthTextInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="text-heading placeholder:text-subtle min-h-[50px] w-full touch-manipulation rounded-2xl border border-black/[.08] bg-white px-4 py-3 pl-11 pr-12 text-[15px] outline-none transition focus:border-amber focus:ring-2 focus:ring-amber/20 dark:border-white/10 dark:bg-white/5 dark:text-white"
+          className="min-h-[52px] w-full touch-manipulation rounded-2xl border border-[#E8EAEE] bg-[#F7F7F9] px-4 py-3 pl-11 pr-12 text-[15px] font-medium text-[#18202B] outline-none transition placeholder:text-[#A2A8B1] focus:border-[#275E9D] focus:bg-white focus:ring-2 focus:ring-[#275E9D]/15 dark:border-white/10 dark:bg-white/5 dark:text-white"
         />
 
         {isPassword && (
@@ -59,14 +59,14 @@ export function AuthTextInput({
             type="button"
             onClick={onTogglePassword}
             aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-            className="text-subtle absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl transition hover:bg-black/[.04] hover:text-heading focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber dark:hover:bg-white/10"
+            className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl text-[#858C97] transition hover:bg-black/[.04] hover:text-[#18202B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#275E9D] dark:hover:bg-white/10 dark:hover:text-white"
           >
             {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
           </button>
         )}
       </div>
 
-      {helper && <p className="text-subtle text-[12.5px]">{helper}</p>}
+      {helper && <p className="text-[12.5px] text-[#858C97]">{helper}</p>}
     </div>
   );
 }

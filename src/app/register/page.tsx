@@ -22,17 +22,17 @@ import { createClient } from "@/lib/supabase/client";
 const registerFeatures = [
   {
     icon: WalletCards,
-    title: "Track",
-    desc: "Cashflow & aset",
+    title: "Tercatat",
+    desc: "Arus kas dan aset",
   },
   {
     icon: ShieldCheck,
-    title: "Private",
+    title: "Pribadi",
     desc: "Akun pribadimu",
   },
   {
     icon: LockKeyhole,
-    title: "Secure",
+    title: "Aman",
     desc: "Akses terlindungi",
   },
 ];
@@ -40,9 +40,7 @@ const registerFeatures = [
 function getAuthCallbackUrl() {
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined"
-      ? window.location.origin
-      : "http://localhost:3000");
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
 
   try {
     const url = new URL(raw);
@@ -141,37 +139,31 @@ export default function RegisterPage() {
       <AuthShell
         badgeIcon={CheckCircle2}
         badgeText="Satu langkah lagi"
-        title="Cek emailmu,"
+        title="Sedikit lagi,"
         accent="aktifkan akunmu."
         description="Link konfirmasi sudah dikirim. Setelah akun aktif, kamu bisa mulai menata cashflow, tabungan, aset, utang, dan investasi pribadi."
       >
-        <AuthCard
-          title="Cek emailmu"
-          subtitle="Klik link konfirmasi untuk mengaktifkan akun Noto."
-        >
+        <AuthCard title="Cek emailmu" subtitle="Klik link konfirmasi untuk mengaktifkan akun Noto.">
           <div className="text-center">
-            <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-3xl bg-amber/15 text-amber-text dark:text-amber">
+            <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-3xl bg-[#EEF4FF] text-[#275E9D] dark:bg-white/10 dark:text-blue-300">
               <Mail size={30} />
             </div>
 
-            <p className="text-muted mb-6 text-[15px] leading-7">
+            <p className="mb-6 text-[15px] leading-7 text-[#59616D] dark:text-slate-300">
               Kami mengirim link konfirmasi ke{" "}
-              <strong className="text-heading font-semibold">
-                {email}
-              </strong>
-              . Klik link tersebut untuk mengaktifkan akun Noto.
+              <strong className="font-semibold text-[#18202B] dark:text-white">{email}</strong>.
+              Klik link tersebut untuk mengaktifkan akun Noto.
             </p>
 
             <Link
               href="/login"
-              className="inline-flex min-h-[50px] w-full items-center justify-center rounded-2xl bg-gradient-to-br from-amber to-amber-deep text-[15px] font-bold text-white shadow-glow transition hover:-translate-y-px hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber active:translate-y-0"
+              className="inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#081F4D] text-[15px] font-bold text-white shadow-[0_10px_24px_rgba(8,31,77,.18)] transition hover:-translate-y-px hover:bg-[#12396D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275E9D] active:translate-y-0"
             >
               Ke halaman login
             </Link>
 
-            <p className="text-subtle mt-5 text-[12.5px] leading-5">
-              Tidak menemukan email? Cek folder spam atau coba daftar ulang
-              beberapa saat lagi.
+            <p className="mt-5 text-[12.5px] leading-5 text-[#858C97]">
+              Tidak menemukan email? Cek folder spam atau coba daftar ulang beberapa saat lagi.
             </p>
           </div>
         </AuthCard>
@@ -182,10 +174,10 @@ export default function RegisterPage() {
   return (
     <AuthShell
       badgeIcon={Sparkles}
-      badgeText="Mulai workspace finansialmu"
-      title="Noto urip,"
-      accent="noto finansial."
-      description="Bangun kebiasaan mencatat cashflow, tabungan, aset, utang, dan investasi pribadi dalam satu tempat yang rapi dan tenang."
+      badgeText="Mulai ruang finansial pribadimu"
+      title="Mulai bersama Noto,"
+      accent="satu catatan kecil."
+      description="Bangun kebiasaan mencatat arus kas, tabungan, aset, utang, dan investasi dalam satu ruang yang rapi dan tenang."
       features={registerFeatures}
     >
       <AuthCard
@@ -248,39 +240,35 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 min-h-[50px] w-full touch-manipulation rounded-2xl bg-gradient-to-br from-amber to-amber-deep py-3 text-[15px] font-bold text-white shadow-glow transition hover:-translate-y-px hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber active:translate-y-0 active:brightness-95 disabled:pointer-events-none disabled:opacity-60"
+            className="mt-1 min-h-[52px] w-full touch-manipulation rounded-2xl bg-[#081F4D] py-3 text-[15px] font-bold text-white shadow-[0_10px_24px_rgba(8,31,77,.18)] transition hover:-translate-y-px hover:bg-[#12396D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275E9D] active:translate-y-0 disabled:pointer-events-none disabled:opacity-60"
           >
             {loadingEmail ? "Membuat akun…" : "Daftar sekarang"}
           </button>
 
-          <p className="text-muted text-center text-[14px]">
+          <p className="text-center text-[14px] text-[#858C97]">
             Sudah punya akun?{" "}
             <Link
               href="/login"
-              className="font-semibold text-amber-text hover:underline dark:text-amber"
+              className="font-bold text-[#275E9D] hover:underline dark:text-blue-300"
             >
               Masuk
             </Link>
           </p>
         </form>
 
-        <div className="mt-5 rounded-2xl border border-black/[.06] bg-surface-sunken px-4 py-3 dark:border-white/10 dark:bg-white/[.04]">
+        <div className="mt-5 rounded-2xl border border-[#DDE8FA] bg-[#EEF4FF] px-4 py-3 dark:border-white/10 dark:bg-white/[.04]">
           <div className="flex items-start gap-2.5">
-            <ShieldCheck
-              size={17}
-              className="mt-0.5 shrink-0 text-amber-text dark:text-amber"
-            />
-            <p className="text-muted text-[12.5px] leading-5">
-              Setelah daftar dengan email, kamu perlu konfirmasi email untuk
-              mengaktifkan akun Noto. Kalau daftar dengan Google, kamu bisa
-              langsung masuk.
+            <ShieldCheck size={17} className="mt-0.5 shrink-0 text-[#275E9D] dark:text-blue-300" />
+            <p className="text-[12.5px] leading-5 text-[#59616D] dark:text-slate-400">
+              Setelah daftar dengan email, kamu perlu konfirmasi email untuk mengaktifkan akun Noto.
+              Kalau daftar dengan Google, kamu bisa langsung masuk.
             </p>
           </div>
         </div>
 
         <Link
           href="/login"
-          className="text-muted mx-auto mt-4 inline-flex items-center justify-center gap-1.5 text-[13px] font-semibold transition hover:text-heading"
+          className="mx-auto mt-4 inline-flex items-center justify-center gap-1.5 text-[13px] font-semibold text-[#858C97] transition hover:text-[#18202B] dark:hover:text-white"
         >
           <ArrowLeft size={14} />
           Kembali ke login

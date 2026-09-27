@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Wallet, Landmark, PiggyBank, ArrowUpRight } from "lucide-react";
+import {
+  Plus,
+  Wallet,
+  PiggyBank,
+  ArrowUpRight,
+  ArrowDownLeft,
+  House,
+  ReceiptText,
+} from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { LoadingState } from "@/components/ui/LoadingState";
@@ -12,14 +20,14 @@ import { DonutChart } from "@/components/charts/DonutChart";
 import { HealthGauge } from "@/components/charts/HealthGauge";
 import { TransactionForm, type TxDraft } from "@/components/forms/TransactionForm";
 import { useTransactionsStore } from "@/lib/stores";
-import { progressPct, healthScore, stockMarketValue  } from "@/lib/finance";
+import { progressPct, healthScore, stockMarketValue } from "@/lib/finance";
 import { rpShort } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import {
   generateCurrentMonthNetWorthSnapshot,
   generateNetWorthSnapshotsFromCashMovements,
   getNetWorthSnapshots,
-} from '@/lib/actions/net-worth-snapshot'
+} from "@/lib/actions/net-worth-snapshot";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TABLES = {
@@ -257,23 +265,19 @@ export default function DashboardPage() {
   const [netWorthSeries, setNetWorthSeries] = useState<NetWorthChartPoint[]>([]);
 
   const loadNetWorthSnapshots = useCallback(async () => {
-  try {
-    await generateNetWorthSnapshotsFromCashMovements();
-    await generateCurrentMonthNetWorthSnapshot();
+    try {
+      await generateNetWorthSnapshotsFromCashMovements();
+      await generateCurrentMonthNetWorthSnapshot();
 
-    const snapshots = await getNetWorthSnapshots();
+      const snapshots = await getNetWorthSnapshots();
 
-    setNetWorthSeries(snapshots);
-  } catch (error) {
-    console.error("[dashboard] gagal load net worth snapshots:", error);
-  }
-}, []);
-
-  
+      setNetWorthSeries(snapshots);
+    } catch (error) {
+      console.error("[dashboard] gagal load net worth snapshots:", error);
+    }
+  }, []);
 
   const realtimeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
-
 
   const loadDashboardData = useCallback(
     async (currentUserId?: string) => {
@@ -304,18 +308,20 @@ export default function DashboardPage() {
         ]);
 
         setData({
-        goals: goalsRows.map((row) => mapGoal(row as Record<string, unknown>)),
-        debts: debtsRows.map((row) => mapDebt(row as Record<string, unknown>)),
-        goldAssets: goldRows.map((row) => mapGoldAsset(row as Record<string, unknown>)),
-        otherAssets: otherAssetRows.map((row) => mapOtherAsset(row as Record<string, unknown>)),
-        receivables: receivableRows.map((row) => mapReceivable(row as Record<string, unknown>)),
-        retirementFunds: retirementFundRows.map((row) =>
-          mapRetirementFund(row as Record<string, unknown>)
-        ),
-        creditCards: creditCardRows.map((row) => mapCreditCard(row as Record<string, unknown>)),
-        stocks: stockRows.map((row) => mapStockHolding(row as Record<string, unknown>)),
-        transactions: transactionRows.map((row) => mapTransaction(row as Record<string, unknown>)),
-      });
+          goals: goalsRows.map((row) => mapGoal(row as Record<string, unknown>)),
+          debts: debtsRows.map((row) => mapDebt(row as Record<string, unknown>)),
+          goldAssets: goldRows.map((row) => mapGoldAsset(row as Record<string, unknown>)),
+          otherAssets: otherAssetRows.map((row) => mapOtherAsset(row as Record<string, unknown>)),
+          receivables: receivableRows.map((row) => mapReceivable(row as Record<string, unknown>)),
+          retirementFunds: retirementFundRows.map((row) =>
+            mapRetirementFund(row as Record<string, unknown>)
+          ),
+          creditCards: creditCardRows.map((row) => mapCreditCard(row as Record<string, unknown>)),
+          stocks: stockRows.map((row) => mapStockHolding(row as Record<string, unknown>)),
+          transactions: transactionRows.map((row) =>
+            mapTransaction(row as Record<string, unknown>)
+          ),
+        });
       } catch (error) {
         console.error("[dashboard] gagal load data:", error);
       } finally {
@@ -417,6 +423,39 @@ export default function DashboardPage() {
   const transactions = data.transactions;
   const stocks = data.stocks;
 
+  const now = new Date();
+  const currentMonthTransactions = transactions.filter((transaction) => {
+    const transactionDate = new Date(transaction.date);
+    return (
+      transactionDate.getFullYear() === now.getFullYear() &&
+      transactionDate.getMonth() === now.getMonth()
+    );
+  });
+  const monthlyIncome = currentMonthTransactions
+    .filter((transaction) => transaction.type === "income")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+  const monthlyExpense = currentMonthTransactions
+    .filter((transaction) => transaction.type === "expense")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+  const monthlyRemaining = monthlyIncome - monthlyExpense;
+  const spendingRate = monthlyIncome > 0 ? Math.round((monthlyExpense / monthlyIncome) * 100) : 0;
+  const savingsRate =
+    monthlyIncome > 0 ? Math.round((Math.max(monthlyRemaining, 0) / monthlyIncome) * 100) : 0;
+  const todayTransactions = transactions.filter((transaction) => {
+    const transactionDate = new Date(transaction.date);
+    return (
+      transactionDate.getFullYear() === now.getFullYear() &&
+      transactionDate.getMonth() === now.getMonth() &&
+      transactionDate.getDate() === now.getDate()
+    );
+  });
+  const todayIncome = todayTransactions
+    .filter((transaction) => transaction.type === "income")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+  const todayExpense = todayTransactions
+    .filter((transaction) => transaction.type === "expense")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
   const cashTotal = goals.reduce((s, g) => s + g.usedAmount, 0);
 
   const goldTotal = goldAssets.reduce((s, g) => {
@@ -434,7 +473,7 @@ export default function DashboardPage() {
   const retirementTotal = retirementFunds.reduce((s, r) => s + r.currentValue, 0);
 
   const stockTotal = stocks.reduce(
-  (s, stock) => s + stockMarketValue(stock.lots, stock.currentPrice),
+    (s, stock) => s + stockMarketValue(stock.lots, stock.currentPrice),
     0
   );
 
@@ -447,7 +486,8 @@ export default function DashboardPage() {
     const outstanding = Math.max(c.spent - c.paid, 0);
     return s + outstanding;
   }, 0);
-  const totalAsset = cashTotal + goldTotal + otherTotal + receivableTotal + retirementTotal + stockTotal;
+  const totalAsset =
+    cashTotal + goldTotal + otherTotal + receivableTotal + retirementTotal + stockTotal;
   const totalDebt = debtTotal + creditCardTotal;
   const netWorth = totalAsset - totalDebt;
   const investmentTotal = stockTotal + goldTotal + retirementTotal;
@@ -465,21 +505,17 @@ export default function DashboardPage() {
         ? "Utang masih di area aman. Kamu bisa lanjut memperbesar investasi tanpa mengabaikan cash cadangan."
         : "Utang mulai berat dibanding aset. Prioritaskan pelunasan utang berbunga sebelum menambah risiko investasi.";
 
- useEffect(() => {
-  if (!userId || loading) return;
+  useEffect(() => {
+    if (!userId || loading) return;
 
-  loadNetWorthSnapshots();
-}, [userId, loading, totalAsset, totalDebt, loadNetWorthSnapshots]);
+    loadNetWorthSnapshots();
+  }, [userId, loading, totalAsset, totalDebt, loadNetWorthSnapshots]);
 
   const visibleNetWorthSeries = netWorthSeries.map((point) => ({
     ...point,
     netWorth: point.asset - point.liability,
     month: formatMonthFromKey(point.month),
   }));
-
-  const metricSpark = netWorthSeries.map((point) => point.asset - point.liability);
-  const assetSpark = [cashTotal, liquidInvestmentTotal];
-  const debtSpark = netWorthSeries.map((point) => point.liability);
 
   const composition = [
     { name: "Cash", value: cashTotal, color: "#0f9d6b" },
@@ -509,83 +545,156 @@ export default function DashboardPage() {
 
   return (
     <>
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-3 sm:mb-8">
+      <header className="mb-7 flex items-center justify-between gap-4 sm:mb-9">
         <div>
-          <p className="text-subtle mb-2 text-[12.5px] font-bold uppercase tracking-[.14em]">
-            {todayLabel}
-          </p>
-          <h1 className="text-heading font-serif text-[20px] font-semibold leading-[1.08] tracking-tight sm:text-[28px] sm:text-[36px]">
-            Halo {userName},
-            <br className="hidden sm:block" /> ini ringkasan{" "}
-            <em className="italic text-amber-text dark:text-amber">finansialmu</em>.
+          <p className="mb-1.5 text-[12px] font-bold uppercase text-[#858C97]">{todayLabel}</p>
+          <h1 className="text-[26px] font-extrabold leading-tight text-[#18202B] dark:text-white sm:text-[36px]">
+            Halo, {userName}
           </h1>
+          <p className="mt-1 text-[13px] font-medium text-[#858C97] sm:text-[15px]">
+            Ini ringkasan finansialmu hari ini.
+          </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <Button className="shadow-glow" onClick={() => setTxOpen(true)}>
-            <Plus size={17} strokeWidth={2.5} />
+        <div className="flex shrink-0 items-center gap-2.5">
+          <Button
+            className="h-12 rounded-2xl bg-[#081F4D] px-4 shadow-[0_8px_22px_rgba(8,31,77,.18)] hover:bg-[#12396D] sm:px-5"
+            onClick={() => setTxOpen(true)}
+          >
+            <Plus size={19} strokeWidth={2.5} />
             <span className="hidden sm:inline">Catat transaksi</span>
-            <span className="sm:hidden">Catat</span>
+            <span className="sr-only sm:hidden">Catat transaksi</span>
           </Button>
         </div>
       </header>
 
       <section
-        aria-label="Ringkasan kekayaan"
-        className="stagger mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-3"
+        aria-label="Ringkasan bulan ini"
+        className="stagger mb-5 grid grid-cols-3 gap-2.5 sm:gap-4 lg:grid-cols-5"
       >
         <MetricCard
-          id="nw"
+          id="monthly-balance"
           hero
-          label="Kekayaan Bersih"
-          value={rpShort(netWorth)}
+          className="col-span-3 lg:col-span-2"
+          label="Sisa Uang Bulan Ini"
+          value={rpShort(monthlyRemaining)}
           icon={Wallet}
-          trend="aktual"
-          trendDir={netWorth >= 0 ? "up" : "down"}
-          trendGood={netWorth >= 0}
-          caption={`${netWorthSeries.length || 1} bulan tercatat`}
-          spark={metricSpark.length ? metricSpark : [netWorth]}
-          formula="Total aset - total utang. Total aset mencakup cash, investasi, piutang, dan aset lain."
+          trend={monthlyRemaining >= 0 ? "Tersisa" : "Defisit"}
+          trendDir={monthlyRemaining >= 0 ? "up" : "down"}
+          trendGood={monthlyRemaining >= 0}
+          caption="pemasukan - pengeluaran"
+          formula="Total pemasukan dikurangi total pengeluaran pada bulan berjalan."
         />
 
         <MetricCard
-          id="as"
-          label="Likuid + Investasi"
-          value={rpShort(liquidInvestmentTotal)}
-          icon={PiggyBank}
-          trend="aktual"
+          id="monthly-income"
+          label="Pemasukan"
+          value={rpShort(monthlyIncome)}
+          icon={ArrowDownLeft}
+          tone="blue"
+          trend={`${currentMonthTransactions.filter((transaction) => transaction.type === "income").length} transaksi`}
           trendDir="up"
           trendGood
-          caption="cash, saham, emas, pensiun"
-          spark={assetSpark}
-          sparkColor="#0f9d6b"
-          formula="Cash/tabungan + saham + emas + dana pensiun. Piutang dan aset lain tidak masuk kartu ini."
+          progress={100}
+          formula="Total transaksi pemasukan pada bulan berjalan."
         />
 
         <MetricCard
-          id="db"
-          label="Total Utang"
-          value={rpShort(totalDebt)}
-          icon={Landmark}
-          trend="aktual"
-          trendDir={totalDebt > 0 ? "down" : "up"}
-          trendGood={totalDebt <= totalAsset * 0.35}
-          caption="utang + kartu kredit"
-          spark={debtSpark.length ? debtSpark : [totalDebt]}
-          sparkColor="#d83a3a"
-          formula="Sisa utang/cicilan + tagihan kartu kredit yang belum dibayar."
+          id="monthly-expense"
+          label="Pengeluaran"
+          value={rpShort(monthlyExpense)}
+          icon={ArrowUpRight}
+          tone="cream"
+          trend={`${spendingRate}% pemasukan`}
+          trendDir="up"
+          trendGood={spendingRate <= 70}
+          progress={spendingRate}
+          formula="Total transaksi pengeluaran pada bulan berjalan."
+        />
+
+        <MetricCard
+          id="monthly-saving"
+          label="Tabungan"
+          value={rpShort(cashTotal)}
+          icon={PiggyBank}
+          tone="gray"
+          trend={`${savingsRate}% tersisa`}
+          trendDir={savingsRate > 0 ? "up" : "down"}
+          trendGood={savingsRate > 0}
+          progress={savingsRate}
+          formula="Total saldo pada financial goals. Persentase menunjukkan sisa pemasukan bulan berjalan."
         />
       </section>
 
+      <section aria-label="Kondisi hari ini" className="mb-5">
+        <Card className="rounded-[28px] border-[#E8EAEE] bg-white p-5 shadow-[0_8px_30px_rgba(16,24,40,.06)] sm:p-6">
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#EEF4FF] text-[#275E9D]">
+                <House size={21} strokeWidth={2.2} aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase text-[#858C97]">Kondisi hari ini</p>
+                <h2 className="truncate text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
+                  Aktivitas keuanganmu
+                </h2>
+              </div>
+            </div>
+
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-[#081F4D] px-3 py-2 text-[12px] font-bold text-white sm:text-[13px]">
+              <ReceiptText size={15} aria-hidden="true" />
+              {todayTransactions.length} transaksi
+            </span>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-[1fr_1.35fr] lg:items-end">
+            <div>
+              <div className="text-[30px] font-extrabold tabular-nums text-[#081F4D] dark:text-white sm:text-[38px]">
+                {rpShort(todayExpense)}
+              </div>
+              <p className="mt-1 text-[14px] font-bold text-[#E59A39]">keluar hari ini</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-[18px] border border-[#F5E4C9] bg-[#FFF6E9] p-4 dark:border-white/10 dark:bg-white/5">
+                <p className="text-[10.5px] font-bold uppercase text-[#7B684D] dark:text-slate-400">
+                  Pemasukan
+                </p>
+                <p className="mt-2 text-[17px] font-extrabold tabular-nums text-[#18202B] dark:text-white sm:text-[20px]">
+                  {rpShort(todayIncome)}
+                </p>
+              </div>
+              <div className="rounded-[18px] border border-[#DDE8FA] bg-[#EEF4FF] p-4 dark:border-white/10 dark:bg-white/5">
+                <p className="text-[10.5px] font-bold uppercase text-[#5275A4] dark:text-slate-400">
+                  Sisa bulan
+                </p>
+                <p className="mt-2 text-[17px] font-extrabold tabular-nums text-[#081F4D] dark:text-white sm:text-[20px]">
+                  {rpShort(monthlyRemaining)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between gap-3 text-[12px] font-semibold">
+              <span className="text-[#858C97]">Penggunaan pemasukan bulan ini</span>
+              <span className="text-[#18202B] dark:text-white">{spendingRate}%</span>
+            </div>
+            <ProgressBar value={spendingRate} color="#E59A39" height={7} />
+          </div>
+        </Card>
+      </section>
+
       <section className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.65fr_1fr]">
-        <Card>
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
               <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
                 Pertumbuhan Kekayaan
               </h2>
               <p className="text-muted mt-0.5 text-[13.5px] font-medium">
-                Aset vs kewajiban · {visibleNetWorthSeries.length || 1} bulan tercatat
+                Kekayaan bersih {rpShort(netWorth)} · {visibleNetWorthSeries.length || 1} bulan
+                tercatat
               </p>
             </div>
 
@@ -608,13 +717,11 @@ export default function DashboardPage() {
           <NetWorthChart data={visibleNetWorthSeries} />
         </Card>
 
-        <Card>
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
           <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
             Komposisi Aset
           </h2>
-          <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
-            Sebaran kekayaanmu
-          </p>
+          <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">Sebaran kekayaanmu</p>
 
           <div className="relative mx-auto h-[168px] w-full max-w-[210px]">
             <DonutChart data={composition} formatValue={(v) => rpShort(v)} />
@@ -645,7 +752,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.45fr]">
-        <Card>
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
           <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
             Kesehatan Finansial
           </h2>
@@ -659,8 +766,8 @@ export default function DashboardPage() {
                 {health >= 70 ? "Kondisi Baik" : health >= 45 ? "Cukup" : "Perlu Perhatian"}
               </div>
               <p className="text-body text-[13.5px] leading-relaxed">
-                Rasio utangmu{" "}
-                <strong className="text-heading font-bold">{debtRatio}%</strong> dari total aset.
+                Rasio utangmu <strong className="text-heading font-bold">{debtRatio}%</strong> dari
+                total aset.
                 {debtRatio <= 35 ? (
                   <>
                     {" "}
@@ -678,8 +785,8 @@ export default function DashboardPage() {
                   <>
                     {" "}
                     Likuid + investasimu setara{" "}
-                    <strong className="text-heading font-bold">{liquidCoverageRatio}%</strong>{" "}
-                    dari total utang.
+                    <strong className="text-heading font-bold">{liquidCoverageRatio}%</strong> dari
+                    total utang.
                   </>
                 )}{" "}
                 {healthInsight}
@@ -688,7 +795,7 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
               Financial Goals
@@ -739,10 +846,8 @@ export default function DashboardPage() {
             })}
 
             {topGoals.length === 0 && (
-              <li className="rounded-xl border border-dashed border-border p-4 text-center">
-                <p className="text-heading text-[14px] font-semibold">
-                  Belum ada financial goals
-                </p>
+              <li className="border-border rounded-xl border border-dashed p-4 text-center">
+                <p className="text-heading text-[14px] font-semibold">Belum ada financial goals</p>
                 <p className="text-muted mt-1 text-[13px]">
                   Tambahkan target cash agar muncul di dashboard.
                 </p>

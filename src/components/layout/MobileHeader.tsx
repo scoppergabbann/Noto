@@ -38,7 +38,7 @@ export function MobileHeader() {
     <>
       {/* Top bar */}
       <header
-        className="sticky top-0 z-[70] flex h-14 items-center justify-between border-b border-black/[.06] bg-surface-base/95 px-4 backdrop-blur-xl dark:border-white/[.06] dark:bg-night-base/95 lg:hidden"
+        className="sticky top-0 z-[70] flex h-16 items-center justify-between bg-[#F7F7F9]/95 px-4 backdrop-blur-xl dark:bg-night-base/95 lg:hidden"
         role="banner"
       >
         <Link
@@ -49,11 +49,11 @@ export function MobileHeader() {
           <img
             src="/logo-noto-header-transparent.png"
             alt="Noto"
-            className="h-8 w-auto object-contain"
+            className="h-9 w-auto object-contain"
           />
         </Link>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <PrivacyToggle />
           <ThemeToggle />
 
@@ -64,9 +64,9 @@ export function MobileHeader() {
             aria-expanded={open}
             aria-controls="mobile-drawer"
             className={cn(
-              "grid h-11 w-11 touch-manipulation place-items-center rounded-xl",
-              "text-ink-dim transition hover:bg-black/[.05] active:bg-black/10",
-              "dark:text-slate-400 dark:hover:bg-white/10",
+              "grid h-10 w-10 touch-manipulation place-items-center rounded-xl border border-black/[.08] bg-white",
+              "text-[#18202B] shadow-[0_3px_12px_rgba(16,24,40,.06)] transition hover:shadow-soft active:bg-[#F0F1F3]",
+              "dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber"
             )}
           >
@@ -81,7 +81,7 @@ export function MobileHeader() {
           id="mobile-drawer"
           role="navigation"
           aria-label="Menu navigasi"
-          className="fixed inset-0 z-[60] flex flex-col bg-surface-base pt-14 dark:bg-night-base lg:hidden"
+          className="fixed inset-0 z-[60] flex flex-col bg-surface-base pt-16 dark:bg-night-base lg:hidden"
         >
           <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4 pb-6">
             {navGroups.map((group) => (

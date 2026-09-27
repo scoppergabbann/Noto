@@ -13,7 +13,7 @@ export function AuthCard({
 }) {
   return (
     <>
-      <div className="rounded-[28px] border border-black/[.07] bg-[#fffdf8]/95 p-5 shadow-[0_24px_80px_rgba(15,23,42,.12)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[.06] sm:p-7">
+      <div className="rounded-[30px] border border-[#E8EAEE] bg-white p-5 shadow-[0_18px_60px_rgba(16,24,40,.10)] dark:border-white/10 dark:bg-white/[.06] sm:p-7">
         <div className="mb-6">
           <div className="mb-3 hidden lg:block">
             <img
@@ -23,18 +23,14 @@ export function AuthCard({
             />
           </div>
 
-          <h2 className="text-heading font-serif text-[28px] font-semibold tracking-[-0.03em]">
-            {title}
-          </h2>
-          <p className="text-muted mt-1 text-[14.5px] leading-6">{subtitle}</p>
+          <h2 className="text-[28px] font-extrabold text-[#18202B] dark:text-white">{title}</h2>
+          <p className="mt-1 text-[14.5px] leading-6 text-[#858C97]">{subtitle}</p>
         </div>
 
         {children}
       </div>
 
-      {bottomText && (
-        <p className="text-subtle mt-5 text-center text-[12.5px]">{bottomText}</p>
-      )}
+      {bottomText && <p className="mt-5 text-center text-[12.5px] text-[#858C97]">{bottomText}</p>}
     </>
   );
 }
