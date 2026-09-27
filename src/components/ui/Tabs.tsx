@@ -20,7 +20,7 @@ export function Tabs({
           className={cn(
             "rounded-lg px-3.5 py-1.5 text-[13px] font-semibold transition",
             active === t.value
-              ? "bg-gradient-to-br from-amber to-amber-deep text-white shadow-sm"
+              ? "bg-[#081F4D] text-white shadow-sm"
               : "text-ink-dim hover:text-ink dark:text-slate-400 dark:hover:text-slate-100"
           )}
         >

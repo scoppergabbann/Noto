@@ -28,16 +28,16 @@ export function Input({
         className={cn(
           // Mobile: min 44px height, larger text, proper padding
           "text-heading min-h-[44px] w-full rounded-xl border px-4 py-3 text-[15px]",
-          "bg-white outline-none transition-all",
+          "bg-[#F7F7F9] outline-none transition-all focus:bg-white",
           "placeholder:text-subtle",
           // Border states
           error
             ? "border-neg focus:border-neg focus:ring-2 focus:ring-neg/20"
-            : "border-black/[.10] focus:border-amber focus:ring-2 focus:ring-amber/20",
+            : "border-[#E8EAEE] focus:border-[#275E9D] focus:ring-2 focus:ring-[#275E9D]/15",
           // Dark mode
           "dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-white/30",
           // Active state
-          "active:border-amber",
+          "active:border-[#275E9D]",
           // Prevent zoom on iOS (font-size >= 16px)
           "sm:text-[14.5px]",
           // Touch

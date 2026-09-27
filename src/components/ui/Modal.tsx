@@ -103,7 +103,7 @@ export function Modal({
 
         <div className="mb-5 flex items-center justify-between gap-3">
           {title && (
-            <h2 className="text-heading font-serif text-[18px] font-semibold sm:text-[19px]">
+            <h2 className="text-[18px] font-bold text-[#18202B] dark:text-white sm:text-[19px]">
               {title}
             </h2>
           )}
@@ -116,7 +116,7 @@ export function Modal({
               "h-11 w-11 text-ink-dim",
               "transition hover:bg-black/[.05] active:bg-black/10",
               "dark:hover:bg-white/10 dark:active:bg-white/15",
-              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#275E9D]",
             ].join(" ")}
           >
             <X size={20} />

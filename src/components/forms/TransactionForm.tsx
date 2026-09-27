@@ -110,7 +110,12 @@ export function TransactionForm({
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>
-          <Button onClick={submit}>{initial ? "Simpan" : "Tambah"}</Button>
+          <Button
+            onClick={submit}
+            className="bg-[#081F4D] shadow-[0_8px_22px_rgba(8,31,77,.18)] hover:bg-[#12396D]"
+          >
+            {initial ? "Simpan" : "Tambah"}
+          </Button>
         </>
       }
     >

@@ -65,11 +65,11 @@ export function CurrencyInput({
           className={cn(
             "min-h-[44px] w-full rounded-xl border py-3 pl-11 pr-4",
             "text-heading text-[15px] font-semibold tabular-nums",
-            "bg-white outline-none transition-all",
+            "bg-[#F7F7F9] outline-none transition-all focus:bg-white",
             "placeholder:text-subtle placeholder:font-normal",
             error
               ? "border-neg focus:border-neg focus:ring-2 focus:ring-neg/20"
-              : "border-black/[.08] focus:border-amber focus:ring-2 focus:ring-amber/20",
+              : "border-[#E8EAEE] focus:border-[#275E9D] focus:ring-2 focus:ring-[#275E9D]/15",
             "dark:border-white/10 dark:bg-white/5 dark:text-white",
             "touch-manipulation",
             "sm:text-[14.5px]"

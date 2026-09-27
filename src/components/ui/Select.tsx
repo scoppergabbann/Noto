@@ -28,10 +28,10 @@ export function Select({
         id={id}
         className={cn(
           "text-heading min-h-[44px] w-full appearance-none rounded-xl border px-4 py-3 text-[15px]",
-          "bg-white outline-none transition-all",
+          "bg-[#F7F7F9] outline-none transition-all focus:bg-white",
           error
             ? "border-neg focus:border-neg focus:ring-2 focus:ring-neg/20"
-            : "border-black/[.10] focus:border-amber focus:ring-2 focus:ring-amber/20",
+            : "border-[#E8EAEE] focus:border-[#275E9D] focus:ring-2 focus:ring-[#275E9D]/15",
           "dark:border-white/10 dark:bg-[#1b1f28] dark:text-white",
           "touch-manipulation sm:text-[14.5px]",
           // Custom arrow

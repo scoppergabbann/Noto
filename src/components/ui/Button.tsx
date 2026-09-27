@@ -5,7 +5,7 @@ type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-gradient-to-br from-amber to-amber-deep text-white shadow-[0_8px_20px_rgba(240,125,16,.28)] hover:-translate-y-px active:translate-y-0 active:brightness-95",
+    "bg-[#081F4D] text-white shadow-[0_8px_20px_rgba(8,31,77,.18)] hover:-translate-y-px hover:bg-[#12396D] active:translate-y-0 active:brightness-95",
   secondary:
     "border border-black/[.08] bg-white text-ink hover:shadow-soft active:bg-black/[.03] dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:active:bg-white/10",
   ghost:
@@ -33,7 +33,7 @@ export function Button({
     <button
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all",
-        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
+        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#275E9D]",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "touch-manipulation", // prevents 300ms tap delay on mobile
         variants[variant],

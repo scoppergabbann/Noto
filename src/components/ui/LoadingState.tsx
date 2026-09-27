@@ -7,7 +7,7 @@ export function LoadingState({ label = "Memuat data…" }: { label?: string }) {
       aria-label={label}
     >
       <div
-        className="mb-4 h-10 w-10 animate-spin rounded-full border-[3px] border-black/10 border-t-amber dark:border-white/10 dark:border-t-amber"
+        className="mb-4 h-10 w-10 animate-spin rounded-full border-[3px] border-black/10 border-t-[#275E9D] dark:border-white/10 dark:border-t-blue-300"
         aria-hidden="true"
       />
       <div className="text-muted text-[14px] font-medium">{label}</div>
@@ -24,14 +24,14 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
       <div className="mb-3 text-[44px]" aria-hidden="true">
         ⚠️
       </div>
-      <div className="text-heading mb-2 font-serif text-[18px] font-semibold">
+      <div className="mb-2 text-[18px] font-bold text-[#18202B] dark:text-white">
         Gagal memuat data
       </div>
       <div className="text-muted mb-6 max-w-xs px-4 text-[14px] leading-relaxed">{message}</div>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="min-h-[44px] touch-manipulation rounded-xl bg-gradient-to-br from-amber to-amber-deep px-6 py-3 text-[14px] font-bold text-white shadow-glow transition hover:brightness-105 active:brightness-95"
+          className="min-h-[44px] touch-manipulation rounded-xl bg-[#081F4D] px-6 py-3 text-[14px] font-bold text-white shadow-glow transition hover:bg-[#12396D] active:brightness-95"
         >
           Coba lagi
         </button>

@@ -521,7 +521,7 @@ export default function DashboardPage() {
     { name: "Cash", value: cashTotal, color: "#0f9d6b" },
     { name: "Investasi", value: investmentTotal, color: "#a855f7" },
     { name: "Piutang", value: receivableTotal, color: "#38bdf8" },
-    { name: "Aset Lain", value: otherTotal, color: "#f59425" },
+    { name: "Aset Lain", value: otherTotal, color: "#E59A39" },
   ]
     .filter((c) => c.value > 0)
     .sort((a, b) => b.value - a.value);

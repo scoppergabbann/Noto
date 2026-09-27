@@ -17,7 +17,6 @@ import {
   Info,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -194,18 +193,27 @@ function TransactionMetricCard({
 }) {
   const toneClass =
     tone === "green"
-      ? "text-pos-strong dark:text-pos-dark"
+      ? "text-[#275E9D] dark:text-blue-300"
       : tone === "red"
-        ? "text-neg-strong dark:text-neg-dark"
-        : "text-heading";
+        ? "text-[#C77716] dark:text-orange-300"
+        : "text-[#18202B] dark:text-white";
+  const surfaceClass =
+    tone === "green"
+      ? "border-[#DDE8FA] bg-[#EEF4FF]"
+      : tone === "red"
+        ? "border-[#F5E4C9] bg-[#FFF6E9]"
+        : "border-[#E4E6EA] bg-white";
 
   return (
-    <Card hoverable>
+    <Card
+      hoverable
+      className={`rounded-[22px] p-4 shadow-[0_8px_24px_rgba(16,24,40,.05)] dark:border-white/10 dark:bg-night-raised sm:p-5 ${surfaceClass}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-muted text-[13px] font-semibold">{label}</div>
+          <div className="text-[12px] font-bold text-[#59616D] dark:text-slate-400">{label}</div>
           <div
-            className={`mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px] ${toneClass}`}
+            className={`mt-3 font-sans text-[22px] font-extrabold tabular-nums sm:text-[28px] ${toneClass}`}
           >
             {value}
           </div>
@@ -243,8 +251,8 @@ function TransactionItem({
   return (
     <li
       className={[
-        "rounded-2xl border border-black/[.06] bg-surface-sunken/70 p-3.5",
-        "transition hover:bg-white/80 dark:border-white/[.06] dark:bg-white/[.035] dark:hover:bg-white/[.055]",
+        "rounded-[18px] border border-[#E8EAEE] bg-[#F7F7F9] p-3.5",
+        "transition hover:bg-[#F0F1F3] dark:border-white/[.06] dark:bg-white/[.035] dark:hover:bg-white/[.055]",
       ].join(" ")}
     >
       <div className="flex items-start gap-3">
@@ -281,10 +289,8 @@ function TransactionItem({
             <div className="shrink-0 text-right">
               <div
                 className={[
-                  "font-serif text-[16.5px] font-bold leading-5 tabular-nums sm:text-[18px]",
-                  inc
-                    ? "text-pos-strong dark:text-pos-dark"
-                    : "text-neg-strong dark:text-neg-dark",
+                  "font-sans text-[16.5px] font-extrabold tabular-nums leading-5 sm:text-[18px]",
+                  inc ? "text-pos-strong dark:text-pos-dark" : "text-neg-strong dark:text-neg-dark",
                 ].join(" ")}
               >
                 {inc ? "+" : "−"}
@@ -305,7 +311,7 @@ function TransactionItem({
               onClick={() => onEdit(tx)}
               className={[
                 "inline-flex min-h-[34px] items-center gap-1.5 rounded-xl px-2.5 text-[12px] font-bold",
-                "text-muted transition hover:bg-white hover:text-heading",
+                "text-muted hover:text-heading transition hover:bg-white",
                 "dark:hover:bg-white/10",
               ].join(" ")}
             >
@@ -421,7 +427,10 @@ export default function TransactionsPage() {
   const totalOut = sumByType(monthTx, "expense");
   const net = totalIn - totalOut;
   const transactionCount = monthTx.length;
-  const averageExpense = totalOut > 0 ? Math.round(totalOut / Math.max(1, monthTx.filter((t) => t.type === "expense").length)) : 0;
+  const averageExpense =
+    totalOut > 0
+      ? Math.round(totalOut / Math.max(1, monthTx.filter((t) => t.type === "expense").length))
+      : 0;
   const formDefaultDate = defaultDateForMonth(activeMonth);
 
   function openNew() {
@@ -443,29 +452,37 @@ export default function TransactionsPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow={`Transaksi · ${activeMonth ? monthLabel(activeMonth) : "Semua"}`}
-        title={
-          <>
-            Semua keluar <em className="italic text-amber-text dark:text-amber">masuk</em>{" "}
-            uangmu.
-          </>
-        }
-        action={
-          <Button onClick={openNew}>
-            <Plus size={17} strokeWidth={2.5} /> Catat transaksi
-          </Button>
-        }
-      />
+      <header className="mb-7 flex items-end justify-between gap-4 sm:mb-8">
+        <div>
+          <p className="mb-1.5 text-[12px] font-bold uppercase text-[#858C97]">
+            {activeMonth ? monthLabel(activeMonth) : "Semua periode"}
+          </p>
+          <h1 className="text-[28px] font-extrabold leading-tight text-[#18202B] dark:text-white sm:text-[38px]">
+            Transaksi
+          </h1>
+          <p className="mt-1 text-[13px] font-medium text-[#858C97] sm:text-[15px]">
+            Semua uang masuk dan keluar dalam satu tempat.
+          </p>
+        </div>
+
+        <Button
+          onClick={openNew}
+          className="h-12 shrink-0 rounded-2xl bg-[#081F4D] px-4 shadow-[0_8px_22px_rgba(8,31,77,.18)] hover:bg-[#12396D] sm:px-5"
+        >
+          <Plus size={18} strokeWidth={2.5} />
+          <span className="hidden sm:inline">Catat transaksi</span>
+          <span className="sr-only sm:hidden">Catat transaksi</span>
+        </Button>
+      </header>
 
       {months.length > 0 && (
-        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap">
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap [&::-webkit-scrollbar]:hidden">
           <button
             onClick={() => setMonth("all")}
             className={`shrink-0 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
               month === "all"
-                ? "bg-gradient-to-br from-amber to-amber-deep text-white shadow-glow"
-                : "card text-muted hover:text-heading"
+                ? "bg-[#081F4D] text-white shadow-[0_6px_18px_rgba(8,31,77,.15)]"
+                : "border border-[#E8EAEE] bg-white text-[#59616D] shadow-[0_3px_12px_rgba(16,24,40,.04)] hover:bg-[#F0F1F3] dark:border-white/10 dark:bg-white/5 dark:text-slate-400"
             }`}
           >
             Semua
@@ -476,8 +493,8 @@ export default function TransactionsPage() {
               onClick={() => setMonth(m)}
               className={`shrink-0 rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
                 m === activeMonth
-                  ? "bg-gradient-to-br from-amber to-amber-deep text-white shadow-glow"
-                  : "card text-muted hover:text-heading"
+                  ? "bg-[#081F4D] text-white shadow-[0_6px_18px_rgba(8,31,77,.15)]"
+                  : "border border-[#E8EAEE] bg-white text-[#59616D] shadow-[0_3px_12px_rgba(16,24,40,.04)] hover:bg-[#F0F1F3] dark:border-white/10 dark:bg-white/5 dark:text-slate-400"
               }`}
             >
               {monthLabel(m)}
@@ -503,11 +520,7 @@ export default function TransactionsPage() {
           {insight.expenseChange !== null && (
             <div className="mt-2">
               <Badge tone={insight.expenseChange <= 0 ? "green" : "red"}>
-                {insight.expenseChange <= 0 ? (
-                  <TrendingDown size={12} />
-                ) : (
-                  <TrendingUp size={12} />
-                )}
+                {insight.expenseChange <= 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
                 {Math.abs(insight.expenseChange)}% vs lalu
               </Badge>
             </div>
@@ -532,11 +545,7 @@ export default function TransactionsPage() {
                 insight.savingsRate >= 20 ? "green" : insight.savingsRate >= 10 ? "amber" : "red"
               }
             >
-              {insight.savingsRate >= 20
-                ? "sehat"
-                : insight.savingsRate >= 10
-                  ? "cukup"
-                  : "tipis"}
+              {insight.savingsRate >= 20 ? "sehat" : insight.savingsRate >= 10 ? "cukup" : "tipis"}
             </Badge>
           </div>
         </TransactionMetricCard>
@@ -557,19 +566,16 @@ export default function TransactionsPage() {
       </section>
 
       {insight.topCategory && (
-        <Card className="mb-5 flex items-start gap-3.5 !bg-amber-soft/60 dark:!bg-amber/[0.07]">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber/15 text-amber-text dark:text-amber">
+        <Card className="mb-5 flex items-start gap-3.5 rounded-[24px] border-[#F5E4C9] !bg-[#FFF6E9] shadow-[0_8px_24px_rgba(16,24,40,.04)] dark:!bg-amber/[0.07]">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#E59A39] shadow-[0_3px_12px_rgba(16,24,40,.06)] dark:bg-white/10 dark:text-orange-300">
             <Lightbulb size={20} />
           </span>
 
           <div className="text-body text-[13.5px] leading-relaxed">
             Bulan ini pengeluaran terbesarmu di{" "}
             <strong className="text-heading font-bold">{insight.topCategory.name}</strong> sebesar{" "}
-            <strong className="text-heading font-bold">
-              {rpShort(insight.topCategory.value)}
-            </strong>
+            <strong className="text-heading font-bold">{rpShort(insight.topCategory.value)}</strong>
             .
-
             {insight.expenseChange !== null && insight.expenseChange > 10 && (
               <>
                 {" "}
@@ -580,7 +586,6 @@ export default function TransactionsPage() {
                 dari bulan lalu.
               </>
             )}
-
             {insight.savingsRate >= 20 && (
               <>
                 {" "}
@@ -595,10 +600,10 @@ export default function TransactionsPage() {
         </Card>
       )}
 
-      <Card className="mb-5">
+      <Card className="mb-5 rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
               Apa yang berubah bulan ini?
             </h2>
             <p className="text-muted mt-0.5 text-[13.5px]">
@@ -674,7 +679,7 @@ export default function TransactionsPage() {
 
                     <p className="text-body text-[13.5px] leading-relaxed">{item.message}</p>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[12.5px] font-semibold tabular-nums text-muted">
+                    <div className="text-muted mt-2 flex flex-wrap items-center gap-2 text-[12.5px] font-semibold tabular-nums">
                       <span>{rpShort(item.previous)}</span>
                       <ArrowRight size={13} />
                       <span className="text-heading">{rpShort(item.current)}</span>
@@ -700,8 +705,8 @@ export default function TransactionsPage() {
       </Card>
 
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.5fr]">
-        <Card>
-          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
+          <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
             Pengeluaran per Kategori
           </h2>
           <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
@@ -717,10 +722,7 @@ export default function TransactionsPage() {
               <ul className="mt-4 space-y-2">
                 {expenseCats.slice(0, 5).map((c) => (
                   <li key={c.name} className="flex items-center gap-2.5 text-[13.5px]">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ background: c.color }}
-                    />
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.color }} />
                     <span className="text-body font-medium">
                       {catEmoji(c.name)} {c.name}
                     </span>
@@ -738,8 +740,8 @@ export default function TransactionsPage() {
           )}
         </Card>
 
-        <Card>
-          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
+          <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
             Arus Kas Bulanan
           </h2>
           <p className="text-muted mb-4 mt-0.5 text-[13.5px] font-medium">
@@ -761,17 +763,17 @@ export default function TransactionsPage() {
         </Card>
       </section>
 
-      <Card className="mb-5">
+      <Card className="mb-5 rounded-[24px] border-[#E8EAEE] bg-white shadow-[0_8px_24px_rgba(16,24,40,.05)]">
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-1.5 rounded-xl bg-surface-sunken p-1 dark:bg-white/[.04]">
+          <div className="flex items-center gap-1.5 rounded-2xl bg-[#F0F1F3] p-1 dark:bg-white/[.04]">
             {(["all", "income", "expense"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTypeFilter(t)}
                 className={`min-h-[38px] flex-1 rounded-lg px-3 py-1.5 text-[12.5px] font-bold transition ${
                   typeFilter === t
-                    ? "bg-white text-heading shadow-sm dark:bg-white/[.10] dark:text-white"
-                    : "text-muted hover:text-heading"
+                    ? "bg-[#081F4D] text-white shadow-sm dark:bg-white/[.12] dark:text-white"
+                    : "text-[#59616D] hover:text-[#18202B] dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
                 {t === "all" ? "Semua" : t === "income" ? "Masuk" : "Keluar"}
@@ -780,32 +782,27 @@ export default function TransactionsPage() {
           </div>
 
           <div className="relative">
-            <Search
-              size={15}
-              className="text-subtle absolute left-3.5 top-1/2 -translate-y-1/2"
-            />
+            <Search size={15} className="text-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari kategori atau catatan…"
-              className="text-heading min-h-[44px] w-full rounded-xl border border-black/[.07] bg-surface-sunken py-2.5 pl-9 pr-4 text-[14px] outline-none transition focus:border-amber focus:ring-2 focus:ring-amber/20 dark:border-white/10 dark:bg-white/5"
+              className="min-h-[46px] w-full rounded-2xl border border-[#E8EAEE] bg-[#F7F7F9] py-2.5 pl-9 pr-4 text-[14px] font-medium text-[#18202B] outline-none transition placeholder:text-[#A2A8B1] focus:border-[#275E9D] focus:bg-white focus:ring-2 focus:ring-[#275E9D]/15 dark:border-white/10 dark:bg-white/5 dark:text-white"
             />
           </div>
         </div>
       </Card>
 
-      <Card>
+      <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-heading font-serif text-[18px] font-semibold">
+            <h2 className="text-[18px] font-bold text-[#18202B] dark:text-white">
               {activeMonth ? monthLabel(activeMonth) : "Semua"}
             </h2>
-            <p className="text-muted mt-0.5 text-[12.5px]">
-              Riwayat transaksi yang kamu catat.
-            </p>
+            <p className="text-muted mt-0.5 text-[12.5px]">Riwayat transaksi yang kamu catat.</p>
           </div>
 
-          <span className="shrink-0 rounded-full bg-surface-sunken px-3 py-1.5 text-[12px] font-bold text-muted dark:bg-white/[.05]">
+          <span className="text-muted shrink-0 rounded-full bg-surface-sunken px-3 py-1.5 text-[12px] font-bold dark:bg-white/[.05]">
             {filtered.length} transaksi
           </span>
         </div>
@@ -813,13 +810,16 @@ export default function TransactionsPage() {
         {filtered.length === 0 ? (
           <div className="py-14 text-center">
             <div className="mb-3 text-[34px]">🧾</div>
-            <div className="text-heading mb-1 font-serif text-[17px] font-semibold">
+            <div className="mb-1 text-[17px] font-bold text-[#18202B] dark:text-white">
               Belum ada transaksi
             </div>
             <div className="text-muted mb-5 text-[13.5px]">
               Mulai catat pemasukan & pengeluaranmu.
             </div>
-            <Button onClick={openNew} className="mx-auto">
+            <Button
+              onClick={openNew}
+              className="mx-auto bg-[#081F4D] shadow-[0_8px_22px_rgba(8,31,77,.18)] hover:bg-[#12396D]"
+            >
               <Plus size={16} /> Catat sekarang
             </Button>
           </div>

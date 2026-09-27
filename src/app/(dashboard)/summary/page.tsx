@@ -18,7 +18,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Select } from "@/components/ui/Select";
 import { DonutChart } from "@/components/charts/DonutChart";
@@ -82,38 +81,68 @@ function AuditMetricCard({
   formula,
   icon: Icon,
   tone = "neutral",
+  hero = false,
 }: {
   label: string;
   value: string;
   formula: string;
   icon: LucideIcon;
   tone?: "neutral" | "green" | "red" | "amber" | "purple";
+  hero?: boolean;
 }) {
-  const toneClass =
-    tone === "green"
-      ? "text-pos-strong dark:text-pos-dark"
+  const toneClass = hero
+    ? "text-white"
+    : tone === "green"
+      ? "text-[#275E9D] dark:text-blue-300"
       : tone === "red"
-        ? "text-neg-strong dark:text-neg-dark"
+        ? "text-[#C44949] dark:text-red-300"
         : tone === "amber"
-          ? "text-amber-text dark:text-amber"
+          ? "text-[#C77716] dark:text-orange-300"
           : tone === "purple"
-            ? "text-purple-500 dark:text-purple-300"
-            : "text-heading";
+            ? "text-[#5E6570] dark:text-slate-300"
+            : "text-[#18202B] dark:text-white";
+  const surfaceClass =
+    tone === "green"
+      ? "border-[#DDE8FA] bg-[#EEF4FF]"
+      : tone === "red"
+        ? "border-[#F4DADA] bg-[#FFF1F1]"
+        : tone === "amber"
+          ? "border-[#F5E4C9] bg-[#FFF6E9]"
+          : "border-[#E4E6EA] bg-white";
 
   return (
-    <Card hoverable>
-      <div className="flex items-start justify-between gap-3">
+    <Card
+      hoverable
+      className={`rounded-[24px] p-4 shadow-[0_8px_24px_rgba(16,24,40,.05)] sm:p-5 ${
+        hero
+          ? "col-span-3 border-white/10 !bg-[#081F4D] text-white shadow-[0_18px_44px_rgba(8,31,77,.18)] lg:col-span-2"
+          : `${surfaceClass} dark:border-white/10 dark:bg-night-raised`
+      }`}
+    >
+      <div
+        className={`flex items-start justify-between gap-3 ${hero ? "" : "flex-col sm:flex-row"}`}
+      >
         <div>
-          <div className="text-muted text-[13px] font-semibold">{label}</div>
           <div
-            className={`mt-2 font-serif text-[22px] font-semibold tabular-nums sm:text-[28px] ${toneClass}`}
+            className={`text-[12px] font-bold ${hero ? "text-white/70" : "text-[#59616D] dark:text-slate-400"}`}
+          >
+            {label}
+          </div>
+          <div
+            className={`mt-3 font-sans text-[22px] font-extrabold tabular-nums sm:text-[28px] ${toneClass}`}
           >
             {value}
           </div>
         </div>
         <div className="flex items-center gap-2">
           <FormulaHint formula={formula} />
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-soft text-amber-text dark:bg-amber/15 dark:text-amber">
+          <span
+            className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${
+              hero
+                ? "bg-white/10 text-white"
+                : "bg-white text-[#18202B] shadow-[0_3px_12px_rgba(16,24,40,.07)] dark:bg-white/10 dark:text-white"
+            }`}
+          >
             <Icon size={17} strokeWidth={2.3} />
           </span>
         </div>
@@ -234,10 +263,7 @@ export default function SummaryPage() {
       0
     );
 
-    const otherAssetValue = assetsStore.items.reduce(
-      (s, a) => s + safeNumber(a.currentValue),
-      0
-    );
+    const otherAssetValue = assetsStore.items.reduce((s, a) => s + safeNumber(a.currentValue), 0);
 
     const pensionValue = retirementFundsStore.items.reduce(
       (s, f) => s + safeNumber(f.currentValue),
@@ -245,12 +271,7 @@ export default function SummaryPage() {
     );
 
     const totalAssets =
-      cashValue +
-      receivableValue +
-      goldValue +
-      stockValue +
-      pensionValue +
-      otherAssetValue;
+      cashValue + receivableValue + goldValue + stockValue + pensionValue + otherAssetValue;
 
     const totalLiabilities = debtValue + creditCardValue;
     const netWorth = totalAssets - totalLiabilities;
@@ -259,8 +280,7 @@ export default function SummaryPage() {
     const debtRatio = totalAssets > 0 ? Math.round((totalLiabilities / totalAssets) * 100) : 0;
     const productiveAssetRatio =
       totalAssets > 0 ? Math.round((investmentValue / totalAssets) * 100) : 0;
-    const receivableRatio =
-      totalAssets > 0 ? Math.round((receivableValue / totalAssets) * 100) : 0;
+    const receivableRatio = totalAssets > 0 ? Math.round((receivableValue / totalAssets) * 100) : 0;
 
     const assetBreakdown = [
       { name: "Cash", value: cashValue, color: COLORS.cash },
@@ -445,22 +465,24 @@ export default function SummaryPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Financial Overview"
-        title={
-          <>
-            Peta besar <em className="italic text-amber-text dark:text-amber">finansialmu</em>.
-          </>
-        }
-      />
+      <header className="mb-7 sm:mb-8">
+        <p className="mb-1.5 text-[12px] font-bold uppercase text-[#858C97]">Financial overview</p>
+        <h1 className="text-[28px] font-extrabold leading-tight text-[#18202B] dark:text-white sm:text-[38px]">
+          Ringkasan finansial
+        </h1>
+        <p className="mt-1 text-[13px] font-medium text-[#858C97] sm:text-[15px]">
+          Lihat aset, kewajiban, dan arus kas dalam satu pandangan.
+        </p>
+      </header>
 
       {/* Top summary */}
-      <section className="stagger mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="stagger mb-4 grid grid-cols-3 gap-2.5 sm:gap-4 lg:grid-cols-5">
         <AuditMetricCard
           label="Kekayaan Bersih"
           value={`${summary.netWorth >= 0 ? "" : "-"}${rpShort(Math.abs(summary.netWorth))}`}
           icon={Wallet}
           tone={summary.netWorth >= 0 ? "green" : "red"}
+          hero
           formula="Total aset - total kewajiban."
         />
 
@@ -515,7 +537,7 @@ export default function SummaryPage() {
 
       {/* Insight banner */}
       <Card
-        className={`mb-5 flex items-start gap-3.5 ${
+        className={`mb-5 flex items-start gap-3.5 rounded-[24px] border-[#E8EAEE] shadow-[0_8px_24px_rgba(16,24,40,.05)] ${
           health.tone === "green"
             ? "!bg-pos-soft/60 dark:!bg-pos/[0.07]"
             : health.tone === "amber"
@@ -542,8 +564,8 @@ export default function SummaryPage() {
 
       {/* Charts */}
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_.8fr]">
-        <Card>
-          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
+          <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
             Komposisi Aset
           </h2>
           <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
@@ -579,8 +601,8 @@ export default function SummaryPage() {
           )}
         </Card>
 
-        <Card>
-          <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
+          <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
             Komposisi Kewajiban
           </h2>
           <p className="text-muted mb-3 mt-0.5 text-[13.5px] font-medium">
@@ -619,10 +641,10 @@ export default function SummaryPage() {
       </section>
 
       {/* Alur Cashflow */}
-      <Card className="mb-5">
+      <Card className="mb-5 rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
               Alur Cash Flow
             </h2>
             <p className="text-muted mt-0.5 text-[13.5px]">
@@ -632,7 +654,7 @@ export default function SummaryPage() {
           {availableCashflowMonths.length > 0 && (
             <Select
               aria-label="Pilih bulan cashflow"
-              className="min-h-10 w-[150px] py-2 text-[13.5px]"
+              className="min-h-10 w-[150px] border-[#E8EAEE] bg-[#F7F7F9] py-2 text-[13.5px] focus:border-[#275E9D] focus:ring-[#275E9D]/15"
               value={cashflow.activeMonth}
               onChange={(event) => setSelectedMonth(event.target.value)}
             >
@@ -650,9 +672,9 @@ export default function SummaryPage() {
 
       {/* Detail cards */}
       <section className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
               Detail Aset
             </h2>
             <Badge tone="green">{assetRows.filter((a) => a.value > 0).length} kategori</Badge>
@@ -682,7 +704,7 @@ export default function SummaryPage() {
                   </div>
 
                   <div className="text-right">
-                    <div className="text-heading font-serif text-[15px] font-bold tabular-nums">
+                    <div className="text-[15px] font-extrabold tabular-nums text-[#18202B] dark:text-white">
                       {rpShort(row.value)}
                     </div>
                     {summary.totalAssets > 0 && (
@@ -697,9 +719,9 @@ export default function SummaryPage() {
           </ul>
         </Card>
 
-        <Card>
+        <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
               Detail Kewajiban
             </h2>
             <Badge tone={summary.totalLiabilities > 0 ? "red" : "green"}>
@@ -731,7 +753,7 @@ export default function SummaryPage() {
                   </div>
 
                   <div className="text-right">
-                    <div className="font-serif text-[15px] font-bold tabular-nums text-neg-strong dark:text-neg-dark">
+                    <div className="text-[15px] font-extrabold tabular-nums text-neg-strong dark:text-neg-dark">
                       {rpShort(row.value)}
                     </div>
                     {summary.totalLiabilities > 0 && (
@@ -748,10 +770,10 @@ export default function SummaryPage() {
       </section>
 
       {/* Cashflow snapshot */}
-      <Card>
+      <Card className="rounded-[26px] border-[#E8EAEE] bg-white shadow-[0_8px_30px_rgba(16,24,40,.06)]">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-heading font-serif text-[17px] font-semibold sm:text-[20px]">
+            <h2 className="text-[17px] font-bold text-[#18202B] dark:text-white sm:text-[20px]">
               Snapshot Cashflow
             </h2>
             <p className="text-muted mt-0.5 text-[13.5px]">
@@ -776,9 +798,7 @@ export default function SummaryPage() {
           ].map(([label, value, cls]) => (
             <div key={label} className="rounded-xl bg-surface-sunken p-3 dark:bg-white/5">
               <div className="text-subtle text-[12px] font-semibold">{label}</div>
-              <div className={`mt-1 font-serif text-[17px] font-bold tabular-nums ${cls}`}>
-                {value}
-              </div>
+              <div className={`mt-1 text-[17px] font-extrabold tabular-nums ${cls}`}>{value}</div>
             </div>
           ))}
         </div>

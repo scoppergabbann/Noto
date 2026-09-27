@@ -236,7 +236,9 @@ function aggregateStockHoldings(
     const quote = marketQuotes[ticker];
     const quotePrice = quote?.price;
     const currentPrice =
-      typeof quotePrice === "number" && quotePrice > 0 ? quotePrice : Number(item.currentPrice || 0);
+      typeof quotePrice === "number" && quotePrice > 0
+        ? quotePrice
+        : Number(item.currentPrice || 0);
     const marketSource = typeof quotePrice === "number" && quotePrice > 0 ? "yahoo" : "manual";
 
     const itemLots = Number(item.lots || 0);
@@ -247,28 +249,28 @@ function aggregateStockHoldings(
 
     if (!existing) {
       map.set(key, {
-      ...item,
-      id: item.id,
-      ticker,
-      exchange,
-      lots: itemLots,
-      avgPrice: Number(item.avgPrice || 0),
-      currentPrice,
-      broker: item.broker || "",
-      dividendReceived: Number(item.dividendReceived || 0),
-      targetPrice: Number(item.targetPrice || 0),
-      conviction: Number(item.conviction || 0),
-      recordCount: 1,
-      sourceIds: [item.id],
-      sourcePositions: [item],
-      marketSource,
-      marketTime: quote?.marketTime ?? null,
-      quoteChangePercent:
-        typeof quote?.changePercent === "number" ? round1(quote.changePercent) : null,
-      _brokerList: item.broker ? [item.broker] : [],
-      _weightedConvictionTotal: Number(item.conviction || 0) * itemLots,
-      _convictionLots: itemLots,
-    });
+        ...item,
+        id: item.id,
+        ticker,
+        exchange,
+        lots: itemLots,
+        avgPrice: Number(item.avgPrice || 0),
+        currentPrice,
+        broker: item.broker || "",
+        dividendReceived: Number(item.dividendReceived || 0),
+        targetPrice: Number(item.targetPrice || 0),
+        conviction: Number(item.conviction || 0),
+        recordCount: 1,
+        sourceIds: [item.id],
+        sourcePositions: [item],
+        marketSource,
+        marketTime: quote?.marketTime ?? null,
+        quoteChangePercent:
+          typeof quote?.changePercent === "number" ? round1(quote.changePercent) : null,
+        _brokerList: item.broker ? [item.broker] : [],
+        _weightedConvictionTotal: Number(item.conviction || 0) * itemLots,
+        _convictionLots: itemLots,
+      });
 
       continue;
     }
@@ -295,18 +297,20 @@ function aggregateStockHoldings(
       lots: totalLots,
       avgPrice: totalShares > 0 ? Math.round(totalCost / totalShares) : 0,
       currentPrice,
-      dividendReceived:
-        Number(existing.dividendReceived || 0) + Number(item.dividendReceived || 0),
+      dividendReceived: Number(existing.dividendReceived || 0) + Number(item.dividendReceived || 0),
       targetPrice: existing.targetPrice || item.targetPrice || 0,
       buyReason: existing.buyReason || item.buyReason,
       exitPlan: existing.exitPlan || item.exitPlan,
       conviction:
-        convictionLots > 0 ? Math.round(weightedConvictionTotal / convictionLots) : existing.conviction,
+        convictionLots > 0
+          ? Math.round(weightedConvictionTotal / convictionLots)
+          : existing.conviction,
       notes: existing.notes || item.notes,
       recordCount: existing.recordCount + 1,
       sourceIds: [...existing.sourceIds, item.id],
       sourcePositions: [...existing.sourcePositions, item],
-      marketSource: existing.marketSource === "yahoo" || marketSource === "yahoo" ? "yahoo" : "manual",
+      marketSource:
+        existing.marketSource === "yahoo" || marketSource === "yahoo" ? "yahoo" : "manual",
       marketTime: quote?.marketTime ?? existing.marketTime ?? null,
       quoteChangePercent:
         typeof quote?.changePercent === "number"
@@ -439,9 +443,7 @@ function AverageDownSimulator({
         <Calculator size={15} className="text-amber-text dark:text-amber" />
         <div>
           <div className="text-heading text-[13px] font-bold">Average Down Simulator</div>
-          <div className="text-subtle text-[11.5px]">
-            Simulasi avg baru kalau tambah posisi.
-          </div>
+          <div className="text-subtle text-[11.5px]">Simulasi avg baru kalau tambah posisi.</div>
         </div>
       </div>
 
@@ -534,12 +536,10 @@ function PositionHistory({
               <div className="flex items-start gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-heading text-[13px] font-bold">
-                      {position.ticker}
-                    </span>
+                    <span className="text-heading text-[13px] font-bold">{position.ticker}</span>
 
                     {position.broker && (
-                      <span className="rounded-md bg-surface-sunken px-2 py-0.5 text-[11px] font-semibold text-subtle dark:bg-white/5">
+                      <span className="text-subtle rounded-md bg-surface-sunken px-2 py-0.5 text-[11px] font-semibold dark:bg-white/5">
                         {position.broker}
                       </span>
                     )}
@@ -596,13 +596,7 @@ function PositionHistory({
   );
 }
 
-function StockProfitLossCalculatorModal({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+function StockProfitLossCalculatorModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [draft, setDraft] = useState<ProfitLossCalculatorDraft>(DEFAULT_CALCULATOR);
   const result = calculateStockTradePL(draft);
   const isProfit = result.profitLoss >= 0;
@@ -677,8 +671,7 @@ function StockProfitLossCalculatorModal({
             Rumus
           </div>
           <p className="text-body text-[13.5px] leading-relaxed">
-            P/L = [(Harga Jual x Lot x 100) - Fee Jual] - [(Harga Beli x Lot x
-            100) + Fee Beli].
+            P/L = [(Harga Jual x Lot x 100) - Fee Jual] - [(Harga Beli x Lot x 100) + Fee Beli].
           </p>
         </div>
 
@@ -736,15 +729,7 @@ function StockProfitLossCalculatorModal({
 }
 
 export default function StocksPage() {
-  const {
-  items,
-  loading,
-  error,
-  fetch: fetchStocks,
-  add,
-  update,
-  remove,
-} = useStocksStore();
+  const { items, loading, error, fetch: fetchStocks, add, update, remove } = useStocksStore();
 
   const [formOpen, setFormOpen] = useState(false);
   const [calculatorOpen, setCalculatorOpen] = useState(false);
@@ -779,9 +764,7 @@ export default function StocksPage() {
   }
 
   const tickers = useMemo(() => {
-    return Array.from(
-      new Set(items.map((item) => normalizeTicker(item.ticker)).filter(Boolean))
-    );
+    return Array.from(new Set(items.map((item) => normalizeTicker(item.ticker)).filter(Boolean)));
   }, [items]);
 
   async function fetchQuotes() {
@@ -791,12 +774,9 @@ export default function StocksPage() {
       setQuotesLoading(true);
       setQuotesError("");
 
-      const res = await globalThis.fetch(
-  `/api/market/quotes?symbols=${tickers.join(",")}`,
-  {
-    cache: "no-store",
-  }
-);
+      const res = await globalThis.fetch(`/api/market/quotes?symbols=${tickers.join(",")}`, {
+        cache: "no-store",
+      });
 
       const json = await res.json();
 
@@ -950,8 +930,7 @@ export default function StocksPage() {
           break;
         case "value":
           diff =
-            stockMarketValue(b.lots, b.currentPrice) -
-            stockMarketValue(a.lots, a.currentPrice);
+            stockMarketValue(b.lots, b.currentPrice) - stockMarketValue(a.lots, a.currentPrice);
           break;
         case "loss":
           diff =
@@ -960,8 +939,7 @@ export default function StocksPage() {
           break;
         case "weight":
           diff =
-            stockMarketValue(b.lots, b.currentPrice) -
-            stockMarketValue(a.lots, a.currentPrice);
+            stockMarketValue(b.lots, b.currentPrice) - stockMarketValue(a.lots, a.currentPrice);
           break;
       }
 
@@ -972,7 +950,7 @@ export default function StocksPage() {
   }, [aggregatedItems, search, filterBroker, sortKey, sortAsc]);
 
   if (loading) return <LoadingState label="Memuat portofolio saham…" />;
-if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
+  if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
   return (
     <>
       <PageHeader
@@ -1192,8 +1170,8 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                         <stop offset="100%" stopColor="#0f9d6b" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="costGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f59425" stopOpacity={0.2} />
-                        <stop offset="100%" stopColor="#f59425" stopOpacity={0} />
+                        <stop offset="0%" stopColor="#E59A39" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="#E59A39" stopOpacity={0} />
                       </linearGradient>
                     </defs>
 
@@ -1223,7 +1201,7 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                     />
                     <Tooltip
                       content={<ChartTooltip />}
-                      cursor={{ stroke: "#f59425", strokeWidth: 1, strokeDasharray: "4 4" }}
+                      cursor={{ stroke: "#E59A39", strokeWidth: 1, strokeDasharray: "4 4" }}
                     />
                     <Area
                       type="monotone"
@@ -1239,7 +1217,7 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                       type="monotone"
                       dataKey="cost"
                       name="cost"
-                      stroke="#f59425"
+                      stroke="#E59A39"
                       strokeWidth={2}
                       strokeDasharray="5 5"
                       fill="url(#costGrad)"
@@ -1560,7 +1538,7 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                         <button
                           type="button"
                           onClick={() => setExpandedCard(expanded ? null : h.id)}
-                          className="rounded-xl border border-black/[.06] px-3 py-2 text-[12px] font-bold text-muted transition hover:bg-surface-sunken hover:text-heading dark:border-white/10 dark:hover:bg-white/5"
+                          className="text-muted hover:text-heading rounded-xl border border-black/[.06] px-3 py-2 text-[12px] font-bold transition hover:bg-surface-sunken dark:border-white/10 dark:hover:bg-white/5"
                         >
                           Detail
                         </button>
@@ -1681,7 +1659,7 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                         </div>
                         <ProgressBar
                           value={targetProgress}
-                          color={targetProgress >= 100 ? "#0f9d6b" : "#f59425"}
+                          color={targetProgress >= 100 ? "#0f9d6b" : "#E59A39"}
                           height={7}
                           label={`Target harga ${targetProgress}% tercapai`}
                         />
@@ -1712,7 +1690,7 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                     {expanded && (
                       <div className="mt-3 space-y-3 rounded-xl border border-black/[.05] p-4 dark:border-white/5">
                         {h.recordCount > 1 && (
-                          <div className="rounded-xl border border-amber/20 bg-amber-soft/40 p-3 text-[12.5px] text-muted dark:bg-amber/10">
+                          <div className="text-muted rounded-xl border border-amber/20 bg-amber-soft/40 p-3 text-[12.5px] dark:bg-amber/10">
                             Data ini adalah hasil gabungan dari {h.recordCount} posisi dengan ticker{" "}
                             <strong className="text-heading">{h.ticker}</strong>. Avg Buy dihitung
                             dari total modal dibagi total lembar.
@@ -1755,14 +1733,12 @@ if (error) return <ErrorState message={error} onRetry={fetchStocks} />;
                                 <div className="text-subtle mb-1 text-[11.5px] font-bold uppercase tracking-wide">
                                   Catatan
                                 </div>
-                                <p className="text-body text-[13.5px] leading-relaxed">
-                                  {h.notes}
-                                </p>
+                                <p className="text-body text-[13.5px] leading-relaxed">{h.notes}</p>
                               </div>
                             )}
                           </>
                         ) : (
-                          <div className="rounded-xl bg-surface-sunken p-3 text-[13px] text-muted dark:bg-white/5">
+                          <div className="text-muted rounded-xl bg-surface-sunken p-3 text-[13px] dark:bg-white/5">
                             Belum ada catatan investasi. Tambahkan alasan beli, exit plan, atau
                             catatan saat edit saham.
                           </div>
